@@ -1,0 +1,3 @@
+/* Von macOS angezeigte Berechtigungsabfragen. Mit Info.plist abgleichen. */
+"NSMicrophoneUsageDescription" = "Voicebox braucht Zugriff auf das Mikrofon, um Stimm-Samples und Diktate aufzunehmen.";
+"NSScreenCaptureUsageDescription" = "Voicebox braucht die Berechtigung zur Bildschirmaufnahme, um Systemaudio für Stimm-Samples aufzunehmen.";

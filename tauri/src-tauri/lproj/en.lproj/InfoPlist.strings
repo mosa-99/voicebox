@@ -1,0 +1,3 @@
+/* Permission prompts shown by macOS. Keep in sync with Info.plist. */
+"NSMicrophoneUsageDescription" = "Voicebox needs microphone access to record voice samples and dictation.";
+"NSScreenCaptureUsageDescription" = "Voicebox needs screen capture access to record system audio for voice samples.";

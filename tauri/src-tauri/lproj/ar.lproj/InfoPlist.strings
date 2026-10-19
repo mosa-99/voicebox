@@ -1,0 +1,3 @@
+/* رسائل طلب الأذونات التي يعرضها macOS. يجب أن تطابق Info.plist. */
+"NSMicrophoneUsageDescription" = "يحتاج Voicebox إلى الوصول إلى الميكروفون لتسجيل عينات الصوت والإملاء.";
+"NSScreenCaptureUsageDescription" = "يحتاج Voicebox إلى إذن تسجيل الشاشة لالتقاط صوت النظام لعينات الصوت.";
