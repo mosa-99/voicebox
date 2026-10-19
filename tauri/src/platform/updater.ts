@@ -17,6 +17,9 @@ class TauriUpdater implements PlatformUpdater {
   };
 
   private update: Update | null = null;
+  // True once the new bundle has replaced the old one on disk; a relaunch
+  // (or the next normal start) then runs the new version.
+  private installed = false;
   private subscribers: Set<(status: UpdateStatus) => void> = new Set();
 
   private notifySubscribers() {
@@ -37,6 +40,17 @@ class TauriUpdater implements PlatformUpdater {
   }
 
   async checkForUpdates(): Promise<void> {
+    // An update is already being fetched or waits for a restart; a periodic
+    // re-check must not reset that state.
+    if (
+      this.status.checking ||
+      this.status.downloading ||
+      this.status.installing ||
+      this.status.readyToInstall
+    ) {
+      return;
+    }
+
     try {
       this.status = { ...this.status, checking: true, error: undefined };
       this.notifySubscribers();
@@ -53,6 +67,10 @@ class TauriUpdater implements PlatformUpdater {
           installing: false,
           readyToInstall: false,
         };
+        this.notifySubscribers();
+        // Fetch and install in the background so nobody has to click through it.
+        void this.downloadAndInstall();
+        return;
       } else {
         this.status = {
           checking: false,
@@ -82,6 +100,7 @@ class TauriUpdater implements PlatformUpdater {
 
   async downloadAndInstall(): Promise<void> {
     if (!this.update) return;
+    if (this.status.downloading || this.status.installing || this.status.readyToInstall) return;
 
     try {
       this.status = { ...this.status, downloading: true, error: undefined };
@@ -120,13 +139,32 @@ class TauriUpdater implements PlatformUpdater {
             this.status = {
               ...this.status,
               downloading: false,
-              readyToInstall: true,
               downloadProgress: 100,
             };
             this.notifySubscribers();
             break;
         }
       });
+
+      // On macOS/Linux, installing only swaps the bundle on disk, so do it right
+      // away: the new version then starts on the next launch even if nobody
+      // presses "Restart". On Windows the NSIS installer quits the app, so that
+      // step waits for the restart button.
+      if (!isWindows()) {
+        this.status = { ...this.status, downloading: false, installing: true };
+        this.notifySubscribers();
+        await this.update.install();
+        this.installed = true;
+      }
+
+      this.status = {
+        ...this.status,
+        downloading: false,
+        installing: false,
+        readyToInstall: true,
+        downloadProgress: 100,
+      };
+      this.notifySubscribers();
     } catch (error) {
       this.status = {
         ...this.status,
@@ -136,7 +174,7 @@ class TauriUpdater implements PlatformUpdater {
         downloadProgress: undefined,
         downloadedBytes: undefined,
         totalBytes: undefined,
-        error: error instanceof Error ? error.message : 'Failed to download update',
+        error: error instanceof Error ? error.message : 'Failed to download or install update',
       };
       this.notifySubscribers();
     }
@@ -149,7 +187,9 @@ class TauriUpdater implements PlatformUpdater {
       this.status = { ...this.status, installing: true, error: undefined };
       this.notifySubscribers();
 
-      await this.update.install();
+      if (!this.installed) {
+        await this.update.install();
+      }
 
       // On Windows with NSIS, the installer handles the restart automatically.
       // On macOS/Linux, we need to manually relaunch.

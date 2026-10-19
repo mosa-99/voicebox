@@ -383,6 +383,21 @@ build-web:
 build-web:
     Set-Location "{{ web_dir }}"; bun run build
 
+# Build Voicebox.app + .dmg for this Mac in one step (pass --install to also copy it to /Applications)
+[macos]
+dmg *ARGS:
+    ./scripts/build-dmg.sh {{ ARGS }}
+
+# Publish a new version (patch|minor|major) to GitHub; installed apps update themselves
+[macos]
+release PART="patch":
+    ./scripts/release.sh {{ PART }}
+
+# One-time: save the update signing key's password in the macOS Keychain for `just release`
+[macos]
+release-setup:
+    ./scripts/setup-release-signing.sh
+
 # ─── Code Quality ────────────────────────────────────────────────────
 
 # Run all checks (JS + Python lint + format)

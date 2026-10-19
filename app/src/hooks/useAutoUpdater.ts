@@ -5,6 +5,8 @@ import type { UpdateStatus } from '@/platform/types';
 // Re-export UpdateStatus for backwards compatibility
 export type { UpdateStatus };
 
+const UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
+
 interface UseAutoUpdaterOptions {
   checkOnMount?: boolean;
   showToast?: boolean;
@@ -50,6 +52,18 @@ export function useAutoUpdater(options: boolean | UseAutoUpdaterOptions = false)
         console.error('Auto update check failed:', error);
       });
     }
+  }, [checkOnMount, checkForUpdates, platform.metadata.isTauri]);
+
+  // Re-check while the app stays open, so long-running sessions pick up new
+  // releases too. The updater ignores checks while an update is in flight.
+  useEffect(() => {
+    if (!checkOnMount || !platform.metadata.isTauri) return;
+    const id = setInterval(() => {
+      checkForUpdates().catch((error) => {
+        console.error('Periodic update check failed:', error);
+      });
+    }, UPDATE_CHECK_INTERVAL_MS);
+    return () => clearInterval(id);
   }, [checkOnMount, checkForUpdates, platform.metadata.isTauri]);
 
   return {
