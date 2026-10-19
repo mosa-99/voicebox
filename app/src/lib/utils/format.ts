@@ -1,5 +1,5 @@
 import { formatDistance } from 'date-fns';
-import { es, fr, ja, zhCN, zhTW } from 'date-fns/locale';
+import { ar, de, es, fr, ja, zhCN, zhTW } from 'date-fns/locale';
 import i18n from '@/i18n';
 
 export function formatDuration(seconds: number): string {
@@ -10,6 +10,10 @@ export function formatDuration(seconds: number): string {
 
 function getDateLocale() {
   switch (i18n.language) {
+    case 'de':
+      return de;
+    case 'ar':
+      return ar;
     case 'es':
       return es;
     case 'ja':

@@ -1,6 +1,8 @@
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
+import ar from './locales/ar/translation.json';
+import de from './locales/de/translation.json';
 import en from './locales/en/translation.json';
 import es from './locales/es/translation.json';
 import fr from './locales/fr/translation.json';
@@ -13,6 +15,8 @@ import zhTW from './locales/zh-TW/translation.json';
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'ar', label: 'العربية' },
   { code: 'es', label: 'Español' },
   { code: 'pt-BR', label: 'Português (Brasil)' },
   { code: 'ja', label: '日本語' },
@@ -31,6 +35,8 @@ i18n
   .init({
     resources: {
       en: { translation: en },
+      de: { translation: de },
+      ar: { translation: ar },
       es: { translation: es },
       'pt-BR': { translation: ptBR },
       ja: { translation: ja },
@@ -51,5 +57,18 @@ i18n
       caches: ['localStorage'],
     },
   });
+
+// Arabic reads right-to-left; flip the whole document so layout and text
+// alignment follow. `lang` also lets the browser pick proper fonts and hyphenation.
+const RTL_LANGUAGES = new Set(['ar']);
+
+function applyDocumentLanguage(lng: string) {
+  if (!lng || typeof document === 'undefined') return;
+  document.documentElement.lang = lng;
+  document.documentElement.dir = RTL_LANGUAGES.has(lng) ? 'rtl' : 'ltr';
+}
+
+applyDocumentLanguage(i18n.language);
+i18n.on('languageChanged', applyDocumentLanguage);
 
 export default i18n;
