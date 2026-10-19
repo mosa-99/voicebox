@@ -52,6 +52,24 @@ class TauriLifecycle implements PlatformLifecycle {
     }
   }
 
+  async setRunInBackground(enabled: boolean): Promise<void> {
+    try {
+      await invoke('set_run_in_background', { enabled });
+    } catch (error) {
+      console.error('Failed to set run in background setting:', error);
+    }
+  }
+
+  async getLaunchAtLogin(): Promise<boolean> {
+    const { isEnabled } = await import('@tauri-apps/plugin-autostart');
+    return isEnabled();
+  }
+
+  async setLaunchAtLogin(enabled: boolean): Promise<void> {
+    const { enable, disable } = await import('@tauri-apps/plugin-autostart');
+    await (enabled ? enable() : disable());
+  }
+
   async setBackendOverride(backend?: string | null): Promise<void> {
     try {
       await invoke('set_backend_override', { backend: backend ?? undefined });

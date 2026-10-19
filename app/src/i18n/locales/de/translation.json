@@ -929,6 +929,15 @@
           "profiles": "Stimmen auflisten",
           "history": "Bisherige Generierungen"
         }
+      },
+      "runInBackground": {
+        "title": "Beim Schließen in der Menüleiste weiterlaufen",
+        "description": "Beim Schließen des Fensters läuft Voicebox mit seinem Symbol in der Menüleiste weiter. Diktat und Tastenkürzel funktionieren weiterhin. Beenden über das Menüleisten-Symbol oder mit ⌘Q."
+      },
+      "launchAtLogin": {
+        "title": "Bei der Anmeldung starten",
+        "description": "Startet Voicebox beim Anmelden am Mac in der Menüleiste, ohne das Fenster zu öffnen.",
+        "failedTitle": "Anmeldeobjekt konnte nicht geändert werden"
       }
     },
     "generation": {

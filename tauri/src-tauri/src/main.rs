@@ -3,6 +3,7 @@
 
 mod accessibility;
 mod app_menu;
+mod background;
 mod audio_capture;
 mod audio_output;
 mod clipboard;
@@ -1417,6 +1418,19 @@ pub fn run() {
             {
                 app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
                 app.handle().plugin(tauri_plugin_process::init())?;
+                app.handle().plugin(tauri_plugin_autostart::init(
+                    tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+                    Some(vec![background::HIDDEN_ARG]),
+                ))?;
+
+                // Menu bar icon, then show the main window (it is created
+                // hidden) unless the login item started us in the background.
+                background::create_tray(app.handle())?;
+                if background::started_hidden() {
+                    background::hide_main_window(app.handle());
+                } else {
+                    background::show_main_window(app.handle());
+                }
 
                 // Resolve the active keyboard layout's V keycode now, on
                 // the main thread, and register an observer for layout
@@ -1549,12 +1563,23 @@ pub fn run() {
             enable_hotkey,
             disable_hotkey,
             update_chord_bindings,
-            app_menu::set_menu_language
+            app_menu::set_menu_language,
+            background::set_run_in_background
         ])
         .on_window_event({
             let closing = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
             move |window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
+                // Run in background: closing the main window only hides it, so
+                // the server and the dictation shortcut keep working.
+                if window.label() == background::MAIN_WINDOW_LABEL
+                    && background::runs_in_background()
+                {
+                    api.prevent_close();
+                    background::hide_main_window(window.app_handle());
+                    return;
+                }
+
                 // If we're already in the close flow, let it proceed
                 if closing.load(std::sync::atomic::Ordering::SeqCst) {
                     return;
@@ -1663,6 +1688,12 @@ pub fn run() {
                             }
                         }
                     }
+                }
+                // Opening the app again (Finder, Spotlight, Dock) while it runs
+                // in the background brings the window back.
+                #[cfg(target_os = "macos")]
+                RunEvent::Reopen { .. } => {
+                    background::show_main_window(app);
                 }
                 RunEvent::ExitRequested { api, .. } => {
                     println!("RunEvent::ExitRequested received");

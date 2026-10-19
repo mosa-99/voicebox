@@ -115,9 +115,12 @@ function MainApp() {
   // Sync stored setting to Rust on startup
   useEffect(() => {
     if (platform.metadata.isTauri) {
-      const keepRunning = useServerStore.getState().keepServerRunningOnClose;
-      platform.lifecycle.setKeepServerRunning(keepRunning).catch((error) => {
+      const { keepServerRunningOnClose, runInBackground } = useServerStore.getState();
+      platform.lifecycle.setKeepServerRunning(keepServerRunningOnClose).catch((error) => {
         console.error('Failed to sync initial setting to Rust:', error);
+      });
+      platform.lifecycle.setRunInBackground(runInBackground).catch((error) => {
+        console.error('Failed to sync run-in-background to Rust:', error);
       });
     }
     // Empty dependency array - platform is stable from context, only run once

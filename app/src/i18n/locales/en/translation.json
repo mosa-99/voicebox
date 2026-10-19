@@ -929,6 +929,15 @@
           "profiles": "List voices",
           "history": "Past generations"
         }
+      },
+      "runInBackground": {
+        "title": "Run in the menu bar when the window closes",
+        "description": "Closing the window keeps Voicebox running with its icon in the menu bar, so dictation and the shortcut keep working. Quit from the menu bar icon or with ⌘Q."
+      },
+      "launchAtLogin": {
+        "title": "Start at login",
+        "description": "Starts Voicebox in the menu bar, without opening the window, when you log in to your Mac.",
+        "failedTitle": "Could not change the login item"
       }
     },
     "generation": {

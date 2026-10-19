@@ -34,6 +34,10 @@ export function GeneralPage() {
   const setServerUrl = useServerStore((state) => state.setServerUrl);
   const keepServerRunningOnClose = useServerStore((state) => state.keepServerRunningOnClose);
   const setKeepServerRunningOnClose = useServerStore((state) => state.setKeepServerRunningOnClose);
+  const runInBackground = useServerStore((state) => state.runInBackground);
+  const setRunInBackground = useServerStore((state) => state.setRunInBackground);
+  // null until the OS reports the current login item state.
+  const [launchAtLogin, setLaunchAtLogin] = useState<boolean | null>(null);
   const mode = useServerStore((state) => state.mode);
   const setMode = useServerStore((state) => state.setMode);
   const { toast } = useToast();
@@ -51,6 +55,14 @@ export function GeneralPage() {
   useEffect(() => {
     form.reset({ serverUrl });
   }, [serverUrl, form]);
+
+  useEffect(() => {
+    if (!platform.metadata.isTauri) return;
+    platform.lifecycle
+      .getLaunchAtLogin()
+      .then(setLaunchAtLogin)
+      .catch((error) => console.error('Failed to read launch-at-login state:', error));
+  }, [platform]);
 
   // Re-run validation when the locale changes so existing error messages retranslate.
   useEffect(() => {
@@ -171,6 +183,51 @@ export function GeneralPage() {
             />
           }
         />
+
+        {platform.metadata.isTauri && (
+          <SettingRow
+            title={t('settings.general.runInBackground.title')}
+            description={t('settings.general.runInBackground.description')}
+            htmlFor="runInBackground"
+            action={
+              <Toggle
+                id="runInBackground"
+                checked={runInBackground}
+                onCheckedChange={(checked: boolean) => {
+                  setRunInBackground(checked);
+                  void platform.lifecycle.setRunInBackground(checked);
+                }}
+              />
+            }
+          />
+        )}
+
+        {platform.metadata.isTauri && (
+          <SettingRow
+            title={t('settings.general.launchAtLogin.title')}
+            description={t('settings.general.launchAtLogin.description')}
+            htmlFor="launchAtLogin"
+            action={
+              <Toggle
+                id="launchAtLogin"
+                checked={launchAtLogin ?? false}
+                disabled={launchAtLogin === null}
+                onCheckedChange={(checked: boolean) => {
+                  setLaunchAtLogin(checked);
+                  platform.lifecycle.setLaunchAtLogin(checked).catch((error) => {
+                    console.error('Failed to change launch at login:', error);
+                    setLaunchAtLogin(!checked);
+                    toast({
+                      title: t('settings.general.launchAtLogin.failedTitle'),
+                      description: String(error),
+                      variant: 'destructive',
+                    });
+                  });
+                }}
+              />
+            }
+          />
+        )}
 
         {platform.metadata.isTauri && (
           <SettingRow

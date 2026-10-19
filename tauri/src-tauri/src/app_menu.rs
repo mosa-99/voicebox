@@ -17,27 +17,29 @@ use tauri::menu::{
 };
 use tauri::{AppHandle, Runtime};
 
-struct Labels {
-    about: &'static str,
-    services: &'static str,
-    hide: &'static str,
-    hide_others: &'static str,
-    quit: &'static str,
-    file: &'static str,
-    close_window: &'static str,
-    edit: &'static str,
-    undo: &'static str,
-    redo: &'static str,
-    cut: &'static str,
-    copy: &'static str,
-    paste: &'static str,
-    select_all: &'static str,
-    view: &'static str,
-    fullscreen: &'static str,
-    window: &'static str,
-    minimize: &'static str,
-    zoom: &'static str,
-    help: &'static str,
+pub(crate) struct Labels {
+    pub(crate) about: &'static str,
+    pub(crate) services: &'static str,
+    pub(crate) hide: &'static str,
+    pub(crate) hide_others: &'static str,
+    pub(crate) quit: &'static str,
+    pub(crate) file: &'static str,
+    pub(crate) close_window: &'static str,
+    pub(crate) edit: &'static str,
+    pub(crate) undo: &'static str,
+    pub(crate) redo: &'static str,
+    pub(crate) cut: &'static str,
+    pub(crate) copy: &'static str,
+    pub(crate) paste: &'static str,
+    pub(crate) select_all: &'static str,
+    pub(crate) view: &'static str,
+    pub(crate) fullscreen: &'static str,
+    pub(crate) window: &'static str,
+    pub(crate) minimize: &'static str,
+    pub(crate) zoom: &'static str,
+    pub(crate) help: &'static str,
+    /// Menu bar icon: bring the main window back.
+    pub(crate) tray_open: &'static str,
 }
 
 // Wording follows each language's standard macOS menu titles.
@@ -62,6 +64,7 @@ const EN: Labels = Labels {
     minimize: "Minimize",
     zoom: "Zoom",
     help: "Help",
+    tray_open: "Open Voicebox",
 };
 
 const DE: Labels = Labels {
@@ -85,6 +88,7 @@ const DE: Labels = Labels {
     minimize: "Im Dock ablegen",
     zoom: "Zoomen",
     help: "Hilfe",
+    tray_open: "Voicebox öffnen",
 };
 
 const AR: Labels = Labels {
@@ -108,9 +112,10 @@ const AR: Labels = Labels {
     minimize: "تصغير",
     zoom: "تكبير/تصغير",
     help: "مساعدة",
+    tray_open: "فتح Voicebox",
 };
 
-fn labels(lang: &str) -> &'static Labels {
+pub(crate) fn labels(lang: &str) -> &'static Labels {
     // "de", "de-AT", "ar-EG", … all map to their base language.
     match lang.split(['-', '_']).next().unwrap_or("") {
         "de" => &DE,
@@ -203,10 +208,11 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, lang: &str) -> tauri::Result<Menu<R
     )
 }
 
-/// Rebuild the menu bar in `lang`. Called by the frontend on startup and
+/// Rebuild the menu bar (and the menu bar icon's menu) in `lang`. Called by the frontend on startup and
 /// whenever the user switches the display language.
 #[tauri::command]
 pub fn set_menu_language<R: Runtime>(app: AppHandle<R>, lang: String) -> Result<(), String> {
+    crate::background::relabel_tray(&app, &lang);
     if !cfg!(target_os = "macos") {
         return Ok(());
     }
