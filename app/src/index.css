@@ -118,6 +118,13 @@
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+  /* Paths, URLs and code stay left-to-right inside right-to-left (Arabic) layouts. */
+  [dir='rtl'] code,
+  [dir='rtl'] kbd,
+  [dir='rtl'] pre {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
 }
 
 @layer utilities {
