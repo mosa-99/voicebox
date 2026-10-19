@@ -144,7 +144,10 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, lang: &str) -> tauri::Result<Menu<R
         app,
         l.file,
         true,
-        &[&PredefinedMenuItem::close_window(app, Some(l.close_window))?],
+        &[&PredefinedMenuItem::close_window(
+            app,
+            Some(l.close_window),
+        )?],
     )?;
     let edit_menu = Submenu::with_items(
         app,
@@ -183,7 +186,14 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, lang: &str) -> tauri::Result<Menu<R
 
     Menu::with_items(
         app,
-        &[&app_menu, &file_menu, &edit_menu, &view_menu, &window_menu, &help_menu],
+        &[
+            &app_menu,
+            &file_menu,
+            &edit_menu,
+            &view_menu,
+            &window_menu,
+            &help_menu,
+        ],
     )
 }
 
