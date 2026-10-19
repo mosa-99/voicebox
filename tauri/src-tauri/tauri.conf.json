@@ -53,7 +53,8 @@
         "fullscreen": false,
         "devtools": true,
         "userAgent": null,
-        "titleBarStyle": "Overlay"
+        "titleBarStyle": "Overlay",
+        "visible": false
       }
     ],
     "withGlobalTauri": true

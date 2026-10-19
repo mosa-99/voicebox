@@ -60,6 +60,11 @@ export interface PlatformLifecycle {
   stopServer(): Promise<void>;
   restartServer(modelsDir?: string | null): Promise<string>;
   setKeepServerRunning(keep: boolean): Promise<void>;
+  /** Closing the main window keeps Voicebox running in the menu bar. */
+  setRunInBackground(enabled: boolean): Promise<void>;
+  /** Start Voicebox hidden in the menu bar when the user logs in. */
+  getLaunchAtLogin(): Promise<boolean>;
+  setLaunchAtLogin(enabled: boolean): Promise<void>;
   setBackendOverride(backend?: string | null): Promise<void>;
   setupWindowCloseHandler(): Promise<void>;
   subscribeToServerLogs(callback: (entry: ServerLogEntry) => void): () => void;

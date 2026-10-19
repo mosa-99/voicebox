@@ -24,6 +24,18 @@ class WebLifecycle implements PlatformLifecycle {
     // No-op for web
   }
 
+  async setRunInBackground(_enabled: boolean): Promise<void> {
+    // No-op for web
+  }
+
+  async getLaunchAtLogin(): Promise<boolean> {
+    return false;
+  }
+
+  async setLaunchAtLogin(_enabled: boolean): Promise<void> {
+    // No-op for web
+  }
+
   async setBackendOverride(_backend?: string | null): Promise<void> {
     // No-op for web - backend variant is managed externally
   }

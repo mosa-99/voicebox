@@ -15,6 +15,9 @@ interface ServerStore {
   keepServerRunningOnClose: boolean;
   setKeepServerRunningOnClose: (keepRunning: boolean) => void;
 
+  runInBackground: boolean;
+  setRunInBackground: (enabled: boolean) => void;
+
   customModelsDir: string | null;
   setCustomModelsDir: (dir: string | null) => void;
 }
@@ -81,6 +84,9 @@ export const useServerStore = create<ServerStore>()(
 
       keepServerRunningOnClose: false,
       setKeepServerRunningOnClose: (keepRunning) => set({ keepServerRunningOnClose: keepRunning }),
+
+      runInBackground: true,
+      setRunInBackground: (enabled) => set({ runInBackground: enabled }),
 
       customModelsDir: null,
       setCustomModelsDir: (dir) => set({ customModelsDir: dir }),
