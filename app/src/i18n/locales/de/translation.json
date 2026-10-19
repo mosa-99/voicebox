@@ -163,6 +163,17 @@
         "rechecking": "Wird geprüft…",
         "stillMissing": "Immer noch nicht erkannt. macOS verlangt meist, Voicebox nach dem Umschalten der Berechtigung zu beenden und neu zu öffnen."
       }
+    },
+    "markdown": {
+      "heading": "Mitschnitt {{id}}",
+      "source": "Quelle",
+      "created": "Erstellt",
+      "duration": "Dauer",
+      "language": "Sprache",
+      "sttModel": "Spracherkennungsmodell",
+      "llmModel": "LLM-Modell",
+      "refined": "Überarbeitetes Transkript",
+      "raw": "Roh-Transkript"
     }
   },
   "voicesTab": {
@@ -463,7 +474,8 @@
       "label": "Vorschau",
       "button": "Vorschau",
       "processing": "Wird verarbeitet…",
-      "hint": "Die Vorschau wendet die Effekte auf die unbearbeitete Version an, ohne zu speichern."
+      "hint": "Die Vorschau wendet die Effekte auf die unbearbeitete Version an, ohne zu speichern.",
+      "playerTitle": "Effekt-Vorschau"
     },
     "saveAs": {
       "title": "Als eigenes Preset speichern",
@@ -698,7 +710,52 @@
       "sourcePlaceholder": "Quellversion auswählen",
       "apply": "Anwenden",
       "applying": "Wird angewendet…"
-    }
+    },
+    "toast": {
+      "cancelling": "Generierung wird abgebrochen",
+      "cancelFailed": "Abbrechen fehlgeschlagen",
+      "cancelFailedFallback": "Generierung konnte nicht abgebrochen werden",
+      "downloadFailed": "Audio konnte nicht heruntergeladen werden",
+      "exportFailed": "Generierung konnte nicht exportiert werden",
+      "retryFailed": "Erneuter Versuch fehlgeschlagen",
+      "retryFailedFallback": "Generierung konnte nicht erneut versucht werden",
+      "regenerateFailed": "Neu generieren fehlgeschlagen",
+      "regenerateFailedFallback": "Konnte nicht neu generiert werden",
+      "favoriteFailed": "Favorit konnte nicht aktualisiert werden",
+      "effectsApplied": "Effekte angewendet",
+      "effectsAppliedDescription": "Eine neue Version wurde erstellt.",
+      "effectsFailed": "Effekte konnten nicht angewendet werden",
+      "switchVersionFailed": "Version konnte nicht gewechselt werden",
+      "imported": "Generierung importiert",
+      "importedFallback": "Generierung erfolgreich importiert",
+      "importFailed": "Generierung konnte nicht importiert werden",
+      "clearedFailed": "Fehlgeschlagene Generierungen entfernt",
+      "clearedFailedDescription_one": "{{count}} fehlgeschlagene Generierung entfernt.",
+      "clearedFailedDescription_other": "{{count}} fehlgeschlagene Generierungen entfernt.",
+      "clearFailed": "Entfernen fehlgeschlagen"
+    },
+    "clearFailedButton": "Fehlgeschlagene entfernen",
+    "row": {
+      "generatingAria": "Sprache für {{name}} wird generiert…",
+      "failedAria": "Generierung für {{name}} fehlgeschlagen",
+      "playingAria": "Aufnahme von {{name}}, {{duration}}, {{date}}. Wird abgespielt. Drücke Enter, um neu zu starten.",
+      "playAria": "Aufnahme von {{name}}, {{duration}}, {{date}}. Drücke Enter zum Abspielen.",
+      "failed": "Fehlgeschlagen",
+      "loadingModel": "Modell wird geladen…",
+      "generating": "Wird generiert…",
+      "transcriptAria": "Transkript der Aufnahme von {{name}}, {{duration}}",
+      "toggleVersions": "Versionen ein-/ausblenden",
+      "retry": "Generierung erneut versuchen",
+      "delete": "Generierung löschen",
+      "cancel": "Generierung abbrechen",
+      "favorite": "Als Favorit markieren",
+      "unfavorite": "Aus Favoriten entfernen"
+    },
+    "versions": {
+      "from": "aus {{label}}",
+      "active": "aktiv"
+    },
+    "end": "Du bist am Ende angekommen"
   },
   "generation": {
     "placeholder": {
@@ -738,6 +795,26 @@
       "tooltipInactive": "Im Charakter sprechen",
       "ariaLabelActive": "Spricht im Charakter",
       "ariaLabelInactive": "Im Charakter sprechen"
+    },
+    "engine": {
+      "omnivoice": "OmniVoice (nicht kommerziell)"
+    },
+    "toast": {
+      "noProfile": "Kein Profil ausgewählt",
+      "noProfileDescription": "Bitte wähle oben ein Stimmprofil aus.",
+      "failed": "Generierung fehlgeschlagen",
+      "failedFallback": "Audio konnte nicht generiert werden",
+      "notFound": "Generierung nicht gefunden",
+      "errorFallback": "Bei der Generierung ist ein Fehler aufgetreten",
+      "truncated": "({{count}} weitere Zeichen – kopiere den vollständigen Fehler oder sieh unter Einstellungen → Protokolle nach)",
+      "copyFullError": "Vollständigen Fehlertext kopieren",
+      "copyFailed": "Kopieren fehlgeschlagen",
+      "copyFailedDescription": "Zwischenablage nicht verfügbar. Der vollständige Fehler steht unter Einstellungen → Protokolle.",
+      "addedToStory": "Zur Geschichte hinzugefügt",
+      "addedToStoryWithDuration": "Audio generiert ({{seconds}} s) und zur Geschichte hinzugefügt",
+      "addedToStoryDescription": "Audio generiert und zur Geschichte hinzugefügt",
+      "complete": "Generierung abgeschlossen",
+      "storyAddFailed": "Audio generiert, konnte aber nicht zur Geschichte hinzugefügt werden"
     }
   },
   "main": {
@@ -1215,7 +1292,8 @@
     "changelog": {
       "devBadge": "Entwicklung",
       "showLess": "Weniger anzeigen",
-      "showMore": "Mehr anzeigen"
+      "showMore": "Mehr anzeigen",
+      "unreleased": "Unveröffentlicht"
     },
     "about": {
       "tagline": "Das Open-Source-Studio für Sprachsynthese. Stimmen klonen, Sprache generieren, Effekte anwenden und sprachgesteuerte Apps bauen – alles lokal auf deinem Computer.",
@@ -1310,6 +1388,213 @@
       "migrationFailed": "Verschieben fehlgeschlagen",
       "migrationFailedGeneric": "Modelle konnten nicht verschoben werden",
       "migrationConnectionLost": "Verbindung während des Verschiebens verloren"
+    },
+    "descriptions": {
+      "qwenTts17b": "Hochwertige mehrsprachige Sprachsynthese von Alibaba. Unterstützt 10 Sprachen mit natürlicher Sprachmelodie und Stimmklonen aus kurzem Referenz-Audio.",
+      "qwenTts06b": "Leichtgewichtige Version von Qwen TTS. Gleiche Sprachunterstützung bei schnellerer Inferenz, ideal für schwächere Hardware.",
+      "luxtts": "Leichtgewichtige Sprachsynthese auf ZipVoice-Basis für hochwertiges Stimmklonen und Sprachausgabe mit 48 kHz bei mehr als 150-facher Echtzeitgeschwindigkeit.",
+      "chatterboxTts": "Produktionsreife Open-Source-Sprachsynthese von Resemble AI. Unterstützt 23 Sprachen mit Stimmklonen und regelbarer Emotionsverstärkung.",
+      "chatterboxTurbo": "Schlanke Sprachsynthese mit 350 Mio. Parametern von Resemble AI. Hochwertige englische Sprache mit weniger Rechenleistung und VRAM als größere Modelle.",
+      "tada1b": "HumeAI TADA 1B – englisches Sprach-Sprachmodell auf Basis von Llama 3.2 1B. Erzeugt über 700 Sekunden zusammenhängendes Audio mit synchroner Text-Akustik-Ausrichtung.",
+      "tada3bMl": "HumeAI TADA 3B Multilingual – auf Basis von Llama 3.2 3B. Unterstützt 10 Sprachen mit originalgetreuem Stimmklonen dank doppelter Text-Akustik-Ausrichtung.",
+      "kokoro": "Kokoro 82M von hexgrad. Winzige Sprachsynthese mit 82 Mio. Parametern, die auf der CPU in Echtzeit läuft. Unterstützt 8 Sprachen mit vorgefertigten Stimmstilen. Lizenz: Apache 2.0.",
+      "omnivoice": "OmniVoice von k2-fsa. Stimmklonen ohne Training über ein Diffusions-Sprachmodell, dazu Stimmdesign über Merkmale (Geschlecht, Alter, Tonhöhe, Akzent). Das Modell deckt über 600 Sprachen ab; Voicebox bietet die 23 aus seiner eigenen Sprachliste an. Ausgabe mit 24 kHz. NICHT KOMMERZIELL: Die Gewichte stehen unter CC-BY-NC (der Code unter Apache 2.0, der mitgelieferte Higgs-Audio-V2-Codec unter der Boson-Community-Lizenz), daher die Ausgabe nicht kommerziell nutzen.",
+      "qwenCustomVoice17b": "Qwen3-TTS CustomVoice 1.7B von Alibaba. 9 hochwertige vorgefertigte Stimmen mit anweisungsbasierter Stilsteuerung für Ton, Emotion und Sprachmelodie. Unterstützt 10 Sprachen.",
+      "qwenCustomVoice06b": "Qwen3-TTS CustomVoice 0.6B von Alibaba. Leichtgewichtige Version mit denselben 9 vorgefertigten Stimmen und Anweisungssteuerung. Schnellere Inferenz für schwächere Hardware.",
+      "qwenVoiceDesign17b": "Qwen3-TTS VoiceDesign 1.7B von Alibaba. Erzeugt eine Stimme aus einer schriftlichen Beschreibung statt aus Referenz-Audio oder einer Vorlage. Unterstützt dieselben 10 Sprachen.",
+      "whisperBase": "Kleinstes Whisper-Modell (74 Mio. Parameter). Schnelle Transkription mit mittlerer Genauigkeit.",
+      "whisperSmall": "Whisper Small (244 Mio. Parameter). Gute Balance aus Geschwindigkeit und Genauigkeit bei der Transkription.",
+      "whisperMedium": "Whisper Medium (769 Mio. Parameter). Genauere Transkription bei mittlerer Geschwindigkeit.",
+      "whisperLarge": "Whisper Large (1,5 Mrd. Parameter). Beste Genauigkeit bei der Spracherkennung in vielen Sprachen.",
+      "whisperTurbo": "Whisper Large v3 Turbo. Ausgedünnt für deutlich schnellere Inferenz bei nahezu gleicher Genauigkeit wie Large.",
+      "qwen3_06b": "Qwen3 0.6B – das kleinste Modell der Qwen3-Instruct-Familie. Sehr schnell auf der CPU, braucht quantisiert auf Apple Silicon etwa 400 MB. Gut für die Überarbeitung von Diktaten und kurze Texte.",
+      "qwen3_17b": "Qwen3 1.7B – ausgewogen zwischen Größe und Qualität. Kommt mit feinen Selbstkorrekturen und Fachbegriffen besser zurecht als das 0.6B. Braucht quantisiert auf Apple Silicon etwa 1,1 GB.",
+      "qwen3_4b": "Qwen3 4B – höchste Qualität bei lokaler Überarbeitung und längeren Schlussfolgerungen. Quantisiert etwa 2,5 GB auf Apple Silicon, etwa 8 GB in voller Präzision mit PyTorch."
     }
+  },
+  "app": {
+    "loading": {
+      "tensors": "Tensoren werden aufgewärmt…",
+      "synthesizer": "Synthesizer wird kalibriert…",
+      "voiceModels": "Stimmmodelle werden initialisiert…",
+      "neuralNetworks": "Neuronale Netze werden geladen…",
+      "audioPipelines": "Audio-Pipelines werden vorbereitet…",
+      "waveformGenerators": "Wellenform-Generatoren werden optimiert…",
+      "frequencyAnalyzers": "Frequenzanalysatoren werden abgestimmt…",
+      "voiceEmbeddings": "Stimm-Embeddings werden erstellt…",
+      "ttsCores": "Sprachsynthese-Kerne werden konfiguriert…",
+      "audioBuffers": "Audiopuffer werden synchronisiert…",
+      "modelConnections": "Modellverbindungen werden hergestellt…",
+      "trainingData": "Trainingsdaten werden vorverarbeitet…",
+      "voiceSamples": "Stimm-Samples werden geprüft…",
+      "inferenceEngines": "Inferenz-Engines werden kompiliert…",
+      "phonemes": "Phonemfolgen werden zugeordnet…",
+      "prosody": "Prosodie-Parameter werden ausgerichtet…",
+      "speechSynthesis": "Sprachsynthese wird aktiviert…",
+      "acousticModels": "Akustische Modelle werden feinjustiert…",
+      "cloningMatrices": "Matrizen fürs Stimmklonen werden vorbereitet…",
+      "qwenFramework": "Qwen-TTS-Framework wird initialisiert…"
+    },
+    "startup": {
+      "failed": "Server konnte nicht gestartet werden",
+      "timeout": "Innerhalb von 2 Minuten konnte keine Verbindung zu einem Voicebox-Server hergestellt werden. Bitte prüfe, ob der Server läuft, und versuche es erneut.",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "player": {
+    "play": "Abspielen",
+    "pause": "Pause",
+    "notLoaded": "Audio nicht geladen",
+    "position": "Wiedergabeposition",
+    "toggleLoop": "Wiederholung umschalten",
+    "loop": "Wiederholen",
+    "stopLoop": "Wiederholung beenden",
+    "volume": "Lautstärke",
+    "volumeLevel": "Lautstärke: {{percent}} %",
+    "mute": "Stummschalten",
+    "unmute": "Ton einschalten",
+    "close": "Player schließen",
+    "errors": {
+      "audio": "Audiofehler: {{message}}",
+      "waveform": "Wellenform konnte nicht initialisiert werden: {{message}}",
+      "load": "Audio konnte nicht geladen werden: {{message}}",
+      "playback": "Wiedergabefehler: {{message}}",
+      "notLoadedWait": "Audio noch nicht geladen. Bitte warten…",
+      "playbackTitle": "Wiedergabefehler",
+      "playFileFailed": "Audiodatei konnte nicht abgespielt werden",
+      "invalidDuration": "Die Audiodatei hat ungültige Längenangaben",
+      "loadFile": "Audiodatei konnte nicht geladen werden"
+    }
+  },
+  "storyEditor": {
+    "volumeTitle": "Lautstärke – {{percent}} %",
+    "adjustVolume": "Clip-Lautstärke anpassen",
+    "clipVolume": "Clip-Lautstärke",
+    "resize": "Größe des Spur-Editors ändern",
+    "playPause": "Abspielen/Pause (Leertaste)",
+    "split": "Am Abspielkopf teilen",
+    "splitShortcut": "Am Abspielkopf teilen (S)",
+    "duplicate": "Clip duplizieren",
+    "duplicateShortcut": "Duplizieren (Cmd/Strg+D)",
+    "delete": "Clip löschen",
+    "deleteShortcut": "Löschen (Entf/Rücktaste)",
+    "regenerate": "Clip neu generieren",
+    "changeVersion": "Version/Take wechseln",
+    "defaultVersion": "Standard",
+    "fxCount": "{{count}} FX",
+    "zoomOut": "Verkleinern",
+    "zoomIn": "Vergrößern",
+    "seek": "In der Zeitleiste springen",
+    "addTrackAbove": "Spur darüber hinzufügen",
+    "addTrackBelow": "Spur darunter hinzufügen",
+    "trimStart": "Anfang kürzen",
+    "trimEnd": "Ende kürzen",
+    "zoomLeft": "Vom linken Rand zoomen",
+    "zoomRight": "Vom rechten Rand zoomen",
+    "toast": {
+      "setVersionFailed": "Version konnte nicht gesetzt werden",
+      "trimFailed": "Clip konnte nicht gekürzt werden",
+      "invalidSplit": "Ungültiger Teilungspunkt",
+      "invalidSplitDescription": "Der Abspielkopf muss innerhalb des ausgewählten Clips liegen",
+      "splitFailed": "Clip konnte nicht geteilt werden",
+      "duplicateFailed": "Clip konnte nicht dupliziert werden",
+      "deleteFailed": "Clip konnte nicht gelöscht werden",
+      "moveFailed": "Eintrag konnte nicht verschoben werden",
+      "volumeFailed": "Lautstärke konnte nicht aktualisiert werden"
+    },
+    "zoomLabel": "Zoom:"
+  },
+  "sampleUpload": {
+    "title": "Audio-Sample hinzufügen",
+    "description": "Lade eine Audiodatei hoch und gib den Referenztext an, der zum Audio passt.",
+    "uploading": "Wird hochgeladen…",
+    "validation": {
+      "fileRequired": "Bitte wähle eine Audiodatei aus",
+      "referenceTooLong": "Der Referenztext muss kürzer als 1000 Zeichen sein"
+    },
+    "toast": {
+      "added": "Sample hinzugefügt",
+      "addedDescription": "Das Audio-Sample wurde erfolgreich hinzugefügt."
+    }
+  },
+  "cloud": {
+    "title": "Voicebox Cloud",
+    "description": "Ende-zu-Ende-verschlüsselte Sicherung & Synchronisierung über alle deine Geräte.",
+    "connected": "Verbunden",
+    "account": "Konto",
+    "thisDevice": "dieses Gerät",
+    "linkedAs": "Verknüpft als {{device}}",
+    "loginHint": "Melde dich an, um deine Mitschnitte und Generierungen zu sichern und zu synchronisieren.",
+    "disconnect": "Trennen",
+    "disconnecting": "Wird getrennt…",
+    "waitingForBrowser": "Warte auf den Browser…",
+    "opening": "Wird geöffnet…",
+    "login": "Mit Browser anmelden",
+    "manage": "Verwalten",
+    "manageDescription": "Widerrufe dieses Gerät, füge API-Schlüssel hinzu oder verwalte die Abrechnung in deinem Konto.",
+    "openDashboard": "Konto-Übersicht öffnen",
+    "toast": {
+      "connected": "Mit Voicebox Cloud verbunden",
+      "linkedAs": "Verknüpft als {{device}}.",
+      "timedOut": "Anmeldung abgelaufen",
+      "timedOutDescription": "Die Anmeldung im Browser wurde nicht abgeschlossen. Versuche es erneut.",
+      "continueInBrowser": "Weiter im Browser",
+      "continueInBrowserDescription": "Autorisiere dieses Gerät und kehre dann hierher zurück.",
+      "startFailed": "Anmeldung konnte nicht gestartet werden",
+      "disconnected": "Getrennt",
+      "disconnectedDescription": "Dieses Gerät ist nicht mehr verknüpft. Der Schlüssel bleibt gültig, bis du ihn in deinem Konto widerrufst.",
+      "disconnectFailed": "Trennen fehlgeschlagen"
+    }
+  },
+  "generationPicker": {
+    "placeholder": "Generierung auswählen…",
+    "search": "Nach Stimme oder Text suchen…",
+    "empty": "Keine Generierungen gefunden"
+  },
+  "modelDownload": {
+    "connecting": "Verbinde mit dem Download…",
+    "processing": "Wird verarbeitet…",
+    "complete": "Download abgeschlossen",
+    "failed": "Download fehlgeschlagen. Details im Bereich „Probleme“.",
+    "downloading": "Wird heruntergeladen…",
+    "extracting": "Wird entpackt…",
+    "trackFailed": "Download-Fortschritt konnte nicht verfolgt werden"
+  },
+  "recording": {
+    "errors": {
+      "noNavigator": "Die Navigator-API ist nicht verfügbar. Das könnte an der Tauri-Konfiguration liegen.",
+      "noMicrophoneApp": "Kein Zugriff auf das Mikrofon. Bitte stelle sicher:\n1. Die App hat die Mikrofon-Berechtigung in den Systemeinstellungen (macOS: Systemeinstellungen > Datenschutz & Sicherheit > Mikrofon)\n2. Du hast die App nach dem Erteilen der Berechtigung neu gestartet\n3. Du nutzt Tauri v2 mit einer Webview, die getUserMedia unterstützt",
+      "noMicrophoneBrowser": "Kein Zugriff auf das Mikrofon. Bitte stelle sicher, dass du eine sichere Verbindung (HTTPS oder localhost) nutzt und dein Browser die Mikrofon-Berechtigung hat.",
+      "generic": "Bei der Aufnahme ist ein Fehler aufgetreten",
+      "microphoneDenied": "Zugriff auf das Mikrofon fehlgeschlagen. Bitte prüfe die Berechtigungen.",
+      "systemDesktopOnly": "Systemaudio kann nur in der Desktop-App erfasst werden.",
+      "systemUnsupported": "Das Erfassen von Systemaudio wird auf dieser Plattform nicht unterstützt.",
+      "systemStartFailed": "Erfassung des Systemaudios konnte nicht gestartet werden. Bitte prüfe die Berechtigungen.",
+      "systemStopFailed": "Erfassung des Systemaudios konnte nicht gestoppt werden."
+    },
+    "tooShort": "Aufnahme zu kurz, abgebrochen",
+    "refinementFailed": "Überarbeitung fehlgeschlagen",
+    "uploadFailed": "Hochladen fehlgeschlagen"
+  },
+  "files": {
+    "audio": "Audiodatei",
+    "generation": "Voicebox-Generierung",
+    "profile": "Voicebox-Profil",
+    "text": "Text"
+  },
+  "versions": {
+    "original": "Original",
+    "clean": "unbearbeitet",
+    "take": "Take {{n}}",
+    "version": "Version {{n}}"
+  },
+  "toast": {
+    "label": "Benachrichtigung",
+    "viewportLabel": "Benachrichtigungen ({hotkey})"
+  },
+  "keys": {
+    "space": "Leertaste",
+    "ctrl": "Strg",
+    "shift": "Umschalt"
   }
 }

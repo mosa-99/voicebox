@@ -84,7 +84,7 @@ export function GeneralPage() {
             <div className="text-sm font-medium">{t('settings.general.docs.title')}</div>
             <div className="text-xs text-muted-foreground">docs.voicebox.sh</div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+          <ArrowUpRight className="rtl-mirror h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
         </a>
         <a
           href="https://discord.gg/StkzQasqPS"
@@ -106,7 +106,7 @@ export function GeneralPage() {
               {t('settings.general.discord.subtitle')}
             </div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+          <ArrowUpRight className="rtl-mirror h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
         </a>
       </div>
 
@@ -309,7 +309,7 @@ function UpdatesSection() {
                 size="sm"
               >
                 <RefreshCw
-                  className={`h-3.5 w-3.5 mr-1.5 ${status.checking ? 'animate-spin' : ''}`}
+                  className={`h-3.5 w-3.5 me-1.5 ${status.checking ? 'animate-spin' : ''}`}
                 />
                 {t('settings.general.updates.check.button')}
               </Button>
@@ -331,7 +331,7 @@ function UpdatesSection() {
               description={t('settings.general.updates.download.description')}
               action={
                 <Button onClick={downloadAndInstall} size="sm">
-                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  <Download className="h-3.5 w-3.5 me-1.5" />
                   {t('settings.general.updates.download.button')}
                 </Button>
               }
@@ -367,7 +367,7 @@ function UpdatesSection() {
               })}
               action={
                 <Button onClick={restartAndInstall} size="sm">
-                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  <RefreshCw className="h-3.5 w-3.5 me-1.5" />
                   {t('settings.general.updates.ready.button')}
                 </Button>
               }
@@ -413,7 +413,7 @@ function ApiReferenceCard({ serverUrl }: { serverUrl: string }) {
               {ep.method}
             </span>
             <code className="text-xs font-mono text-muted-foreground">{ep.path}</code>
-            <span className="text-xs text-muted-foreground/50 ml-auto">{ep.label}</span>
+            <span className="text-xs text-muted-foreground/50 ms-auto">{ep.label}</span>
           </div>
         ))}
       </div>

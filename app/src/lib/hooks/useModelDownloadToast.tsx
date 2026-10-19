@@ -2,6 +2,7 @@ import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
+import i18n from '@/i18n';
 import type { ModelProgress } from '@/lib/api/types';
 import { useServerStore } from '@/stores/serverStore';
 
@@ -60,7 +61,7 @@ export function useModelDownloadToast({
       description: (
         <div className="flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Connecting to download...</span>
+          <span>{i18n.t('modelDownload.connecting')}</span>
         </div>
       ),
       duration: Infinity, // Don't auto-dismiss, we'll handle it manually
@@ -92,24 +93,24 @@ export function useModelDownloadToast({
 
           // Determine status icon and text
           let statusIcon: React.ReactNode = null;
-          let statusText = 'Processing...';
+          let statusText = i18n.t('modelDownload.processing');
 
           switch (progress.status) {
             case 'complete':
               statusIcon = <CheckCircle2 className="h-4 w-4 text-green-500" />;
-              statusText = 'Download complete';
+              statusText = i18n.t('modelDownload.complete');
               break;
             case 'error':
               statusIcon = <XCircle className="h-4 w-4 text-destructive" />;
-              statusText = 'Download failed. See Problems panel for details.';
+              statusText = i18n.t('modelDownload.failed');
               break;
             case 'downloading':
               statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-              statusText = progress.filename || 'Downloading...';
+              statusText = progress.filename || i18n.t('modelDownload.downloading');
               break;
             case 'extracting':
               statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-              statusText = 'Extracting...';
+              statusText = i18n.t('modelDownload.extracting');
               break;
           }
 
@@ -158,7 +159,7 @@ export function useModelDownloadToast({
                     <span>{displayName}</span>
                   </div>
                 ),
-                description: 'Download complete',
+                description: i18n.t('modelDownload.complete'),
                 duration: 3000,
               });
             }
@@ -169,7 +170,7 @@ export function useModelDownloadToast({
               onComplete();
             } else if (isError && onError) {
               console.log('[useModelDownloadToast] Download error, calling onError callback');
-              onError(progress.error || 'Unknown error');
+              onError(progress.error || i18n.t('common.unknownError'));
             }
           }
         }
@@ -188,7 +189,7 @@ export function useModelDownloadToast({
       if (toastIdRef.current && toastUpdateRef.current) {
         toastUpdateRef.current({
           title: displayName,
-          description: 'Failed to track download progress',
+          description: i18n.t('modelDownload.trackFailed'),
           variant: 'destructive',
           duration: 5000,
         });

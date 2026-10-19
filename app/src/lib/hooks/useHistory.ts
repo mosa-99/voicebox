@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type { GenerationExportFormat, HistoryQuery } from '@/lib/api/types';
 import { usePlatform } from '@/platform/PlatformContext';
@@ -58,7 +59,7 @@ export function useExportGeneration() {
 
       await platform.filesystem.saveFile(filename, blob, [
         {
-          name: 'Voicebox Generation',
+          name: i18n.t('files.generation'),
           extensions: ['zip'],
         },
       ]);
@@ -94,7 +95,7 @@ export function useExportGenerationAudio() {
 
       await platform.filesystem.saveFile(filename, blob, [
         {
-          name: 'Audio File',
+          name: i18n.t('files.audio'),
           extensions: [format],
         },
       ]);

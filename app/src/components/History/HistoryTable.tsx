@@ -59,7 +59,13 @@ import {
   useImportGeneration,
 } from '@/lib/hooks/useHistory';
 import { cn } from '@/lib/utils/cn';
-import { formatDate, formatDuration, formatEngineName } from '@/lib/utils/format';
+import {
+  formatDate,
+  formatDuration,
+  formatEffectChain,
+  formatEngineName,
+  formatVersionLabel,
+} from '@/lib/utils/format';
 import { useGenerationStore } from '@/stores/generationStore';
 import { usePlayerStore } from '@/stores/playerStore';
 
@@ -111,14 +117,15 @@ export function HistoryTable() {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ['history'] });
       toast({
-        title: 'Cancelling generation',
+        title: t('history.toast.cancelling'),
         description: data.message,
       });
     },
     onError: (error) => {
       toast({
-        title: 'Cancel failed',
-        description: error instanceof Error ? error.message : 'Could not cancel generation',
+        title: t('history.toast.cancelFailed'),
+        description:
+          error instanceof Error ? error.message : t('history.toast.cancelFailedFallback'),
         variant: 'destructive',
       });
     },
@@ -229,7 +236,7 @@ export function HistoryTable() {
       {
         onError: (error) => {
           toast({
-            title: 'Failed to download audio',
+            title: t('history.toast.downloadFailed'),
             description: error.message,
             variant: 'destructive',
           });
@@ -244,7 +251,7 @@ export function HistoryTable() {
       {
         onError: (error) => {
           toast({
-            title: 'Failed to export generation',
+            title: t('history.toast.exportFailed'),
             description: error.message,
             variant: 'destructive',
           });
@@ -273,8 +280,9 @@ export function HistoryTable() {
       queryClient.invalidateQueries({ queryKey: ['history'] });
     } catch (error) {
       toast({
-        title: 'Retry failed',
-        description: error instanceof Error ? error.message : 'Could not retry generation',
+        title: t('history.toast.retryFailed'),
+        description:
+          error instanceof Error ? error.message : t('history.toast.retryFailedFallback'),
         variant: 'destructive',
       });
     }
@@ -287,8 +295,9 @@ export function HistoryTable() {
       queryClient.invalidateQueries({ queryKey: ['history'] });
     } catch (error) {
       toast({
-        title: 'Regenerate failed',
-        description: error instanceof Error ? error.message : 'Could not regenerate',
+        title: t('history.toast.regenerateFailed'),
+        description:
+          error instanceof Error ? error.message : t('history.toast.regenerateFailedFallback'),
         variant: 'destructive',
       });
     }
@@ -300,8 +309,8 @@ export function HistoryTable() {
       queryClient.invalidateQueries({ queryKey: ['history'] });
     } catch (error) {
       toast({
-        title: 'Failed to update favorite',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        title: t('history.toast.favoriteFailed'),
+        description: error instanceof Error ? error.message : t('common.unknownError'),
         variant: 'destructive',
       });
     }
@@ -345,11 +354,14 @@ export function HistoryTable() {
       }
 
       setEffectsDialogOpen(false);
-      toast({ title: 'Effects applied', description: 'A new version has been created.' });
+      toast({
+        title: t('history.toast.effectsApplied'),
+        description: t('history.toast.effectsAppliedDescription'),
+      });
     } catch (error) {
       toast({
-        title: 'Failed to apply effects',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        title: t('history.toast.effectsFailed'),
+        description: error instanceof Error ? error.message : t('common.unknownError'),
         variant: 'destructive',
       });
     } finally {
@@ -363,8 +375,8 @@ export function HistoryTable() {
       queryClient.invalidateQueries({ queryKey: ['history'] });
     } catch (error) {
       toast({
-        title: 'Failed to switch version',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        title: t('history.toast.switchVersionFailed'),
+        description: error instanceof Error ? error.message : t('common.unknownError'),
         variant: 'destructive',
       });
     }
@@ -390,13 +402,13 @@ export function HistoryTable() {
             fileInputRef.current.value = '';
           }
           toast({
-            title: 'Generation imported',
-            description: data.message || 'Generation imported successfully',
+            title: t('history.toast.imported'),
+            description: data.message || t('history.toast.importedFallback'),
           });
         },
         onError: (error) => {
           toast({
-            title: 'Failed to import generation',
+            title: t('history.toast.importFailed'),
             description: error.message,
             variant: 'destructive',
           });
@@ -422,15 +434,15 @@ export function HistoryTable() {
       onSuccess: (data) => {
         setClearFailedDialogOpen(false);
         toast({
-          title: 'Cleared failed generations',
-          description: `${data.deleted} failed ${data.deleted === 1 ? 'generation' : 'generations'} removed.`,
+          title: t('history.toast.clearedFailed'),
+          description: t('history.toast.clearedFailedDescription', { count: data.deleted }),
         });
       },
       onError: (error) => {
         setClearFailedDialogOpen(false);
         toast({
-          title: 'Failed to clear',
-          description: error instanceof Error ? error.message : 'Unknown error',
+          title: t('history.toast.clearFailed'),
+          description: error instanceof Error ? error.message : t('common.unknownError'),
           variant: 'destructive',
         });
       },
@@ -457,13 +469,15 @@ export function HistoryTable() {
                 onClick={() => setClearFailedDialogOpen(true)}
                 disabled={clearFailed.isPending}
               >
-                <Trash2 className="h-3 w-3 mr-1.5" />
-                {clearFailed.isPending ? 'Clearing...' : 'Clear failed'}
+                <Trash2 className="h-3 w-3 me-1.5" />
+                {clearFailed.isPending
+                  ? t('history.clearFailedDialog.clearing')
+                  : t('history.clearFailedButton')}
               </Button>
             </div>
           )}
           {isScrolled && (
-            <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+            <div className="absolute top-0 start-0 end-0 h-16 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
           )}
           <div
             ref={scrollRef}
@@ -486,7 +500,7 @@ export function HistoryTable() {
                 <div
                   key={gen.id}
                   className={cn(
-                    'border rounded-md bg-card transition-colors text-left w-full',
+                    'border rounded-md bg-card transition-colors text-start w-full',
                     isCurrentlyPlaying && 'bg-muted/70',
                   )}
                 >
@@ -501,12 +515,19 @@ export function HistoryTable() {
                     )}
                     aria-label={
                       isGenerating
-                        ? `Generating speech for ${gen.profile_name}...`
+                        ? t('history.row.generatingAria', { name: gen.profile_name })
                         : isFailed
-                          ? `Generation failed for ${gen.profile_name}`
-                          : isCurrentlyPlaying
-                            ? `Sample from ${gen.profile_name}, ${formatDuration(gen.duration ?? 0)}, ${formatDate(gen.created_at)}. Playing. Press Enter to restart.`
-                            : `Sample from ${gen.profile_name}, ${formatDuration(gen.duration ?? 0)}, ${formatDate(gen.created_at)}. Press Enter to play.`
+                          ? t('history.row.failedAria', { name: gen.profile_name })
+                          : t(
+                              isCurrentlyPlaying
+                                ? 'history.row.playingAria'
+                                : 'history.row.playAria',
+                              {
+                                name: gen.profile_name,
+                                duration: formatDuration(gen.duration ?? 0),
+                                date: formatDate(gen.created_at),
+                              },
+                            )
                     }
                     onMouseDown={(e) => {
                       if (!isPlayable) return;
@@ -544,7 +565,9 @@ export function HistoryTable() {
                           {formatEngineName(gen.engine, gen.model_size)}
                         </span>
                         {isFailed ? (
-                          <span className="text-xs text-destructive">Failed</span>
+                          <span className="text-xs text-destructive">
+                            {t('history.row.failed')}
+                          </span>
                         ) : !isGenerating ? (
                           <span className="text-xs text-muted-foreground">
                             {formatDuration(gen.duration ?? 0)}
@@ -554,7 +577,9 @@ export function HistoryTable() {
                       <div className="text-xs text-muted-foreground">
                         {isInProgress ? (
                           <span className="text-accent">
-                            {gen.status === 'loading_model' ? 'Loading model...' : 'Generating...'}
+                            {gen.status === 'loading_model'
+                              ? t('history.row.loadingModel')
+                              : t('history.row.generating')}
                           </span>
                         ) : (
                           formatDate(gen.created_at)
@@ -568,7 +593,10 @@ export function HistoryTable() {
                         value={gen.text}
                         className="flex-1 resize-none text-sm text-muted-foreground select-text"
                         readOnly
-                        aria-label={`Transcript for sample from ${gen.profile_name}, ${formatDuration(gen.duration ?? 0)}`}
+                        aria-label={t('history.row.transcriptAria', {
+                          name: gen.profile_name,
+                          duration: formatDuration(gen.duration ?? 0),
+                        })}
                       />
                     </div>
 
@@ -585,7 +613,9 @@ export function HistoryTable() {
                           'h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground',
                           gen.is_favorited && 'text-accent hover:text-accent',
                         )}
-                        aria-label={gen.is_favorited ? 'Unfavorite' : 'Favorite'}
+                        aria-label={
+                          gen.is_favorited ? t('history.row.unfavorite') : t('history.row.favorite')
+                        }
                         onClick={() => handleToggleFavorite(gen.id)}
                       >
                         <Star
@@ -601,7 +631,7 @@ export function HistoryTable() {
                             'h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground',
                             isVersionsExpanded && 'text-accent hover:text-accent',
                           )}
-                          aria-label="Toggle versions"
+                          aria-label={t('history.row.toggleVersions')}
                           onClick={() => setExpandedVersionsId(isVersionsExpanded ? null : gen.id)}
                         >
                           <AudioLines className="h-2 w-2" />
@@ -614,7 +644,7 @@ export function HistoryTable() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
-                            aria-label="Retry generation"
+                            aria-label={t('history.row.retry')}
                             onClick={() => handleRetry(gen.id)}
                           >
                             <RotateCcw className="h-2 w-2" />
@@ -623,7 +653,7 @@ export function HistoryTable() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
-                            aria-label="Delete generation"
+                            aria-label={t('history.row.delete')}
                             disabled={deleteGeneration.isPending}
                             onClick={() => handleDeleteClick(gen.id, gen.profile_name)}
                           >
@@ -635,7 +665,7 @@ export function HistoryTable() {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
-                          aria-label="Cancel generation"
+                          aria-label={t('history.row.cancel')}
                           disabled={isCancelling}
                           onClick={() => cancelGeneration.mutate(gen.id)}
                         >
@@ -662,43 +692,43 @@ export function HistoryTable() {
                             <DropdownMenuItem
                               onClick={() => handlePlay(gen.id, gen.text, gen.profile_id)}
                             >
-                              <Play className="mr-2 h-4 w-4" />
+                              <Play className="me-2 h-4 w-4" />
                               {t('history.actions.play')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDownloadAudio(gen.id, gen.text)}
                               disabled={exportGenerationAudio.isPending}
                             >
-                              <Download className="mr-2 h-4 w-4" />
+                              <Download className="me-2 h-4 w-4" />
                               {t('history.actions.exportAudio')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDownloadAudio(gen.id, gen.text, 'mp3')}
                               disabled={exportGenerationAudio.isPending}
                             >
-                              <Download className="mr-2 h-4 w-4" />
+                              <Download className="me-2 h-4 w-4" />
                               {t('history.actions.exportAudioMp3')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleExportPackage(gen.id, gen.text)}
                               disabled={exportGeneration.isPending}
                             >
-                              <FileArchive className="mr-2 h-4 w-4" />
+                              <FileArchive className="me-2 h-4 w-4" />
                               {t('history.actions.exportPackage')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleApplyEffects(gen.id)}>
-                              <Wand2 className="mr-2 h-4 w-4" />
+                              <Wand2 className="me-2 h-4 w-4" />
                               {t('history.actions.applyEffects')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRegenerate(gen.id)}>
-                              <RotateCcw className="mr-2 h-4 w-4" />
+                              <RotateCcw className="me-2 h-4 w-4" />
                               {t('history.actions.regenerate')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDeleteClick(gen.id, gen.profile_name)}
                               disabled={deleteGeneration.isPending}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash2 className="me-2 h-4 w-4" />
                               {t('common.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -733,7 +763,7 @@ export function HistoryTable() {
                                 <button
                                   key={v.id}
                                   type="button"
-                                  className="flex items-center gap-2 w-full h-9 px-3 text-left hover:bg-muted/50 transition-colors"
+                                  className="flex items-center gap-2 w-full h-9 px-3 text-start hover:bg-muted/50 transition-colors"
                                   onClick={() => {
                                     handlePlayVersion(gen.id, v.id, gen.text, gen.profile_id);
                                     if (!v.is_default) {
@@ -742,21 +772,25 @@ export function HistoryTable() {
                                   }}
                                 >
                                   <AudioLines className="h-3 w-3 shrink-0 text-muted-foreground" />
-                                  <span className="truncate text-xs font-medium">{v.label}</span>
+                                  <span className="truncate text-xs font-medium">
+                                    {formatVersionLabel(v.label)}
+                                  </span>
                                   {v.effects_chain && v.effects_chain.length > 0 && (
                                     <span className="text-[10px] text-muted-foreground truncate">
-                                      {v.effects_chain.map((e) => e.type).join(' → ')}
+                                      {formatEffectChain(v.effects_chain)}
                                     </span>
                                   )}
                                   {showSource && (
                                     <span className="text-[10px] text-muted-foreground/60 truncate">
-                                      from {sourceVersion.label}
+                                      {t('history.versions.from', {
+                                        label: formatVersionLabel(sourceVersion.label),
+                                      })}
                                     </span>
                                   )}
                                   <span className="flex-1" />
                                   {v.is_default && (
                                     <span className="text-[10px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full">
-                                      active
+                                      {t('history.versions.active')}
                                     </span>
                                   )}
                                 </button>
@@ -781,7 +815,7 @@ export function HistoryTable() {
             {/* End of list indicator */}
             {!hasMore && history.length > 0 && (
               <div className="text-center py-4 text-xs text-muted-foreground">
-                You've reached the end
+                {t('history.end')}
               </div>
             )}
           </div>
@@ -896,10 +930,10 @@ export function HistoryTable() {
                 <SelectContent>
                   {effectsTargetVersions.map((v) => (
                     <SelectItem key={v.id} value={v.id} className="text-xs">
-                      {v.label}
+                      {formatVersionLabel(v.label)}
                       {v.effects_chain && v.effects_chain.length > 0 && (
-                        <span className="text-muted-foreground ml-1.5">
-                          ({v.effects_chain.map((e) => e.type).join(' + ')})
+                        <span className="text-muted-foreground ms-1.5">
+                          ({formatEffectChain(v.effects_chain, ' + ')})
                         </span>
                       )}
                     </SelectItem>

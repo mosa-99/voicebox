@@ -52,47 +52,29 @@ async function fetchHuggingFaceModelInfo(repoId: string): Promise<HuggingFaceMod
   return response.json();
 }
 
-const MODEL_DESCRIPTIONS: Record<string, string> = {
-  'qwen-tts-1.7B':
-    'High-quality multilingual TTS by Alibaba. Supports 10 languages with natural prosody and voice cloning from short reference audio.',
-  'qwen-tts-0.6B':
-    'Lightweight version of Qwen TTS. Same language support with faster inference, ideal for lower-end hardware.',
-  luxtts:
-    'Lightweight ZipVoice-based TTS designed for high quality voice cloning and 48kHz speech generation at speeds exceeding 150x realtime.',
-  'chatterbox-tts':
-    'Production-grade open source TTS by Resemble AI. Supports 23 languages with voice cloning and emotion exaggeration control.',
-  'chatterbox-turbo':
-    'Streamlined 350M parameter TTS by Resemble AI. High-quality English speech with less compute and VRAM than larger models.',
-  'tada-1b':
-    'HumeAI TADA 1B — English speech-language model built on Llama 3.2 1B. Generates 700s+ of coherent audio with synchronized text-acoustic alignment.',
-  'tada-3b-ml':
-    'HumeAI TADA 3B Multilingual — built on Llama 3.2 3B. Supports 10 languages with high-fidelity voice cloning via text-acoustic dual alignment.',
-  kokoro:
-    'Kokoro 82M by hexgrad. Tiny 82M-parameter TTS that runs at CPU realtime. Supports 8 languages with pre-built voice styles. Apache 2.0 licensed.',
-  omnivoice:
-    'OmniVoice by k2-fsa. Zero-shot voice cloning via a diffusion language model, plus attribute-based voice design (gender, age, pitch, accent). The model covers 600+ languages; Voicebox exposes the 23 in its own language list. 24kHz output. NON-COMMERCIAL: the weights are CC-BY-NC (code is Apache 2.0; the bundled Higgs Audio V2 codec is under the Boson community licence), so do not use output commercially.',
-  'qwen-custom-voice-1.7B':
-    'Qwen3-TTS CustomVoice 1.7B by Alibaba. 9 premium preset voices with instruct-based style control for tone, emotion, and prosody. Supports 10 languages.',
-  'qwen-custom-voice-0.6B':
-    'Qwen3-TTS CustomVoice 0.6B by Alibaba. Lightweight version with the same 9 preset voices and instruct control. Faster inference for lower-end hardware.',
-  'qwen-voice-design-1.7B':
-    'Qwen3-TTS VoiceDesign 1.7B by Alibaba. Builds a voice from a written description instead of reference audio or a preset. Supports the same 10 languages.',
-  'whisper-base':
-    'Smallest Whisper model (74M parameters). Fast transcription with moderate accuracy.',
-  'whisper-small':
-    'Whisper Small (244M parameters). Good balance of speed and accuracy for transcription.',
-  'whisper-medium':
-    'Whisper Medium (769M parameters). Higher accuracy transcription at moderate speed.',
-  'whisper-large':
-    'Whisper Large (1.5B parameters). Best accuracy for speech-to-text across multiple languages.',
-  'whisper-turbo':
-    'Whisper Large v3 Turbo. Pruned for significantly faster inference while maintaining near-large accuracy.',
-  'qwen3-0.6b':
-    'Qwen3 0.6B — smallest of the Qwen3 instruct family. Very fast on CPU, runs at ~400 MB quantized on Apple Silicon. Good for dictation refinement and short completions.',
-  'qwen3-1.7b':
-    'Qwen3 1.7B — balanced size and quality. Handles subtle self-corrections and technical vocabulary better than the 0.6B. Runs at ~1.1 GB quantized on Apple Silicon.',
-  'qwen3-4b':
-    'Qwen3 4B — highest quality local refinement and longer-form reasoning. ~2.5 GB quantized on Apple Silicon, ~8 GB at full precision on PyTorch.',
+// Translation keys under models.descriptions. Model names contain dots, which
+// i18next would read as key separators, so they map to plain keys here.
+const MODEL_DESCRIPTION_KEYS: Record<string, string> = {
+  'qwen-tts-1.7B': 'qwenTts17b',
+  'qwen-tts-0.6B': 'qwenTts06b',
+  luxtts: 'luxtts',
+  'chatterbox-tts': 'chatterboxTts',
+  'chatterbox-turbo': 'chatterboxTurbo',
+  'tada-1b': 'tada1b',
+  'tada-3b-ml': 'tada3bMl',
+  kokoro: 'kokoro',
+  omnivoice: 'omnivoice',
+  'qwen-custom-voice-1.7B': 'qwenCustomVoice17b',
+  'qwen-custom-voice-0.6B': 'qwenCustomVoice06b',
+  'qwen-voice-design-1.7B': 'qwenVoiceDesign17b',
+  'whisper-base': 'whisperBase',
+  'whisper-small': 'whisperSmall',
+  'whisper-medium': 'whisperMedium',
+  'whisper-large': 'whisperLarge',
+  'whisper-turbo': 'whisperTurbo',
+  'qwen3-0.6b': 'qwen3_06b',
+  'qwen3-1.7b': 'qwen3_17b',
+  'qwen3-4b': 'qwen3_4b',
 };
 
 function formatDownloads(n: number): string {
@@ -550,7 +532,7 @@ export function ModelManagement() {
                       key={model.model_name}
                       type="button"
                       onClick={() => openModelDetail(model)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors group"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-start hover:bg-muted/50 transition-colors group"
                     >
                       {/* Status indicator */}
                       <div className="shrink-0">
@@ -606,7 +588,7 @@ export function ModelManagement() {
                           </span>
                         )}
 
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                        <ChevronRight className="rtl-mirror h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
                       </div>
                     </button>
                   );
@@ -641,7 +623,7 @@ export function ModelManagement() {
                   onClick={() => clearAllMutation.mutate()}
                   disabled={clearAllMutation.isPending}
                 >
-                  <RotateCcw className="h-3 w-3 mr-1" />
+                  <RotateCcw className="h-3 w-3 me-1" />
                   {t('models.problems.clearAll')}
                 </Button>
               </div>
@@ -694,7 +676,7 @@ export function ModelManagement() {
                       className="inline-flex items-center gap-1 hover:underline"
                     >
                       {freshSelectedModel.hf_repo_id}
-                      <ExternalLink className="h-3 w-3" />
+                      <ExternalLink className="rtl-mirror h-3 w-3" />
                     </a>
                   ) : (
                     freshSelectedModel.model_name
@@ -707,13 +689,13 @@ export function ModelManagement() {
                 <div className="flex items-center gap-2 flex-wrap">
                   {freshSelectedModel.loaded && (
                     <Badge className="text-xs bg-accent/15 text-accent border-accent/30 hover:bg-accent/15">
-                      <CircleCheck className="h-3 w-3 mr-1" />
+                      <CircleCheck className="h-3 w-3 me-1" />
                       {t('models.status.loaded')}
                     </Badge>
                   )}
                   {selectedState?.hasError && (
                     <Badge variant="destructive" className="text-xs">
-                      <CircleX className="h-3 w-3 mr-1" />
+                      <CircleX className="h-3 w-3 me-1" />
                       {t('common.error')}
                     </Badge>
                   )}
@@ -728,9 +710,11 @@ export function ModelManagement() {
                 )}
 
                 {/* Description */}
-                {MODEL_DESCRIPTIONS[freshSelectedModel.model_name] && (
+                {MODEL_DESCRIPTION_KEYS[freshSelectedModel.model_name] && (
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {MODEL_DESCRIPTIONS[freshSelectedModel.model_name]}
+                    {t(
+                      `models.descriptions.${MODEL_DESCRIPTION_KEYS[freshSelectedModel.model_name]}`,
+                    )}
                   </p>
                 )}
 
@@ -823,7 +807,7 @@ export function ModelManagement() {
                         variant="outline"
                         className="flex-1"
                       >
-                        <Download className="h-4 w-4 mr-2" />
+                        <Download className="h-4 w-4 me-2" />
                         {t('models.actions.retry')}
                       </Button>
                       <Button
@@ -882,9 +866,9 @@ export function ModelManagement() {
                           className="flex-1"
                         >
                           {unloadMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            <Loader2 className="h-4 w-4 me-2 animate-spin" />
                           ) : (
-                            <Unplug className="h-4 w-4 mr-2" />
+                            <Unplug className="h-4 w-4 me-2" />
                           )}
                           {unloadMutation.isPending
                             ? t('models.actions.unloading')
@@ -910,7 +894,7 @@ export function ModelManagement() {
                         }
                         className="flex-1"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-4 w-4 me-2" />
                         {t('models.actions.deleteModel')}
                       </Button>
                     </div>
@@ -920,7 +904,7 @@ export function ModelManagement() {
                       onClick={() => handleDownload(freshSelectedModel.model_name)}
                       className="flex-1"
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-4 w-4 me-2" />
                       {t('models.actions.download')}
                     </Button>
                   )}
@@ -963,7 +947,7 @@ export function ModelManagement() {
             >
               {deleteMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   {t('models.deleteDialog.deleting')}
                 </>
               ) : (

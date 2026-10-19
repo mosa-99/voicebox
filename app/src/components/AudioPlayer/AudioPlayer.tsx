@@ -1,9 +1,12 @@
+import { DirectionProvider } from '@radix-ui/react-direction';
 import { useQuery } from '@tanstack/react-query';
 import { Pause, Play, Repeat, Volume2, VolumeX, X } from 'lucide-react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import WaveSurfer from 'wavesurfer.js';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import { formatAudioDuration } from '@/lib/utils/audio';
 import { debug } from '@/lib/utils/debug';
@@ -11,6 +14,7 @@ import { usePlatform } from '@/platform/PlatformContext';
 import { usePlayerStore } from '@/stores/playerStore';
 
 export function AudioPlayer() {
+  const { t } = useTranslation();
   const platform = usePlatform();
   const volumeLabelId = useId();
   const {
@@ -208,7 +212,11 @@ export function AudioPlayer() {
         wavesurfer.on('error', (err) => {
           debug.error('WaveSurfer error:', err);
           setIsLoading(false);
-          setError(`Audio error: ${err instanceof Error ? err.message : String(err)}`);
+          setError(
+            i18n.t('player.errors.audio', {
+              message: err instanceof Error ? err.message : String(err),
+            }),
+          );
         });
 
         wavesurfer.on('loading', (percent) => {
@@ -222,7 +230,9 @@ export function AudioPlayer() {
       } catch (err) {
         debug.error('Failed to create WaveSurfer:', err);
         setError(
-          `Failed to initialize waveform: ${err instanceof Error ? err.message : String(err)}`,
+          i18n.t('player.errors.waveform', {
+            message: err instanceof Error ? err.message : String(err),
+          }),
         );
       }
     };
@@ -308,7 +318,11 @@ export function AudioPlayer() {
         debug.error('Failed to load audio:', err);
         loadingRef.current = false;
         setIsLoading(false);
-        setError(`Failed to load audio: ${err instanceof Error ? err.message : String(err)}`);
+        setError(
+          i18n.t('player.errors.load', {
+            message: err instanceof Error ? err.message : String(err),
+          }),
+        );
       });
   }, [audioUrl, wsReady, setCurrentTime, setDuration]);
 
@@ -321,7 +335,11 @@ export function AudioPlayer() {
       wavesurferRef.current.play().catch((error) => {
         debug.error('Failed to play:', error);
         setIsPlaying(false);
-        setError(`Playback error: ${error instanceof Error ? error.message : String(error)}`);
+        setError(
+          i18n.t('player.errors.playback', {
+            message: error instanceof Error ? error.message : String(error),
+          }),
+        );
       });
     } else if (!isPlaying && wavesurferRef.current.isPlaying()) {
       wavesurferRef.current.pause();
@@ -361,7 +379,11 @@ export function AudioPlayer() {
     wavesurfer.play().catch((error) => {
       debug.error('Failed to play after restart:', error);
       setIsPlaying(false);
-      setError(`Playback error: ${error instanceof Error ? error.message : String(error)}`);
+      setError(
+        i18n.t('player.errors.playback', {
+          message: error instanceof Error ? error.message : String(error),
+        }),
+      );
     });
 
     clearRestartFlag();
@@ -405,7 +427,7 @@ export function AudioPlayer() {
     // Check if audio is loaded
     if (duration === 0 && !isLoading) {
       debug.error('Audio not loaded yet');
-      setError('Audio not loaded. Please wait...');
+      setError(i18n.t('player.errors.notLoadedWait'));
       return;
     }
 
@@ -458,7 +480,11 @@ export function AudioPlayer() {
           wavesurferRef.current.play().catch((error) => {
             debug.error('Failed to start WaveSurfer visualization:', error);
             setIsPlaying(false);
-            setError(`Playback error: ${error instanceof Error ? error.message : String(error)}`);
+            setError(
+              i18n.t('player.errors.playback', {
+                message: error instanceof Error ? error.message : String(error),
+              }),
+            );
           });
 
           return;
@@ -483,7 +509,11 @@ export function AudioPlayer() {
       wavesurferRef.current.play().catch((error) => {
         debug.error('Failed to play:', error);
         setIsPlaying(false);
-        setError(`Playback error: ${error instanceof Error ? error.message : String(error)}`);
+        setError(
+          i18n.t('player.errors.playback', {
+            message: error instanceof Error ? error.message : String(error),
+          }),
+        );
       });
     }
   };
@@ -522,105 +552,119 @@ export function AudioPlayer() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
-      <div className="container mx-auto px-4 py-3 max-w-7xl">
-        <div className="flex items-center gap-4">
-          {/* Play/Pause Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePlayPause}
-            disabled={isLoading || duration === 0}
-            className={`shrink-0 -mt-2 ${isPlaying ? 'bg-accent text-accent-foreground' : ''}`}
-            title={duration === 0 && !isLoading ? 'Audio not loaded' : ''}
-            aria-label={
-              duration === 0 && !isLoading ? 'Audio not loaded' : isPlaying ? 'Pause' : 'Play'
-            }
-          >
-            {isPlaying ? (
-              <Pause className="h-5 w-5 fill-current" />
-            ) : (
-              <Play className="h-5 w-5 fill-current" />
-            )}
-          </Button>
-
-          {/* Waveform */}
-          <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <div ref={waveformRef} className="w-full min-h-[80px] select-none" />
-            <Slider
-              value={duration > 0 ? [(currentTime / duration) * 100] : [0]}
-              onValueChange={handleSeek}
-              max={100}
-              step={0.1}
-              className="w-full"
-              aria-label="Playback position"
-              aria-valuetext={`${formatAudioDuration(currentTime)} of ${formatAudioDuration(duration)}`}
-            />
-
-            {error && <div className="text-xs text-destructive text-center py-2">{error}</div>}
-          </div>
-
-          {/* Time Display */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0 min-w-[100px]">
-            <span className="font-mono">{formatAudioDuration(currentTime)}</span>
-            <span>/</span>
-            <span className="font-mono">{formatAudioDuration(duration)}</span>
-          </div>
-
-          {/* Loop Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleLoop}
-            className={isLooping ? 'bg-accent text-accent-foreground' : ''}
-            title="Toggle loop"
-            aria-label={isLooping ? 'Stop looping' : 'Loop'}
-          >
-            <Repeat className="h-4 w-4" />
-          </Button>
-
-          {/* Volume Control */}
-          <div
-            className="flex items-center gap-2 shrink-0 w-[120px]"
-            role="group"
-            aria-label="Volume"
-          >
+    // Waveforms and timelines run left-to-right in every UI language, for both
+    // the DOM (dir) and Radix sliders (DirectionProvider).
+    <DirectionProvider dir="ltr">
+      <div
+        dir="ltr"
+        className="fixed bottom-0 start-0 end-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50"
+      >
+        <div className="container mx-auto px-4 py-3 max-w-7xl">
+          <div className="flex items-center gap-4">
+            {/* Play/Pause Button */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setVolume(volume > 0 ? 0 : 1)}
-              className="h-8 w-8"
-              aria-label={volume > 0 ? 'Mute' : 'Unmute'}
+              onClick={handlePlayPause}
+              disabled={isLoading || duration === 0}
+              className={`shrink-0 -mt-2 ${isPlaying ? 'bg-accent text-accent-foreground' : ''}`}
+              title={duration === 0 && !isLoading ? t('player.notLoaded') : ''}
+              aria-label={
+                duration === 0 && !isLoading
+                  ? t('player.notLoaded')
+                  : isPlaying
+                    ? t('player.pause')
+                    : t('player.play')
+              }
             >
-              {volume > 0 ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {isPlaying ? (
+                <Pause className="h-5 w-5 fill-current" />
+              ) : (
+                <Play className="h-5 w-5 fill-current" />
+              )}
             </Button>
-            <span id={volumeLabelId} className="sr-only">
-              Volume level, {Math.round(volume * 100)}%
-            </span>
-            <Slider
-              value={[volume * 100]}
-              onValueChange={handleVolumeChange}
-              max={100}
-              step={1}
-              className="flex-1"
-              aria-labelledby={volumeLabelId}
-              aria-valuetext={`${Math.round(volume * 100)}%`}
-            />
-          </div>
 
-          {/* Close Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleClose}
-            className="shrink-0"
-            title="Close player"
-            aria-label="Close player"
-          >
-            <X className="h-5 w-5" />
-          </Button>
+            {/* Waveform */}
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <div ref={waveformRef} className="w-full min-h-[80px] select-none" />
+              <Slider
+                value={duration > 0 ? [(currentTime / duration) * 100] : [0]}
+                onValueChange={handleSeek}
+                max={100}
+                step={0.1}
+                className="w-full"
+                aria-label={t('player.position')}
+                aria-valuetext={t('sampleList.player.positionValue', {
+                  current: formatAudioDuration(currentTime),
+                  total: formatAudioDuration(duration),
+                })}
+              />
+
+              {error && <div className="text-xs text-destructive text-center py-2">{error}</div>}
+            </div>
+
+            {/* Time Display */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0 min-w-[100px]">
+              <span className="font-mono">{formatAudioDuration(currentTime)}</span>
+              <span>/</span>
+              <span className="font-mono">{formatAudioDuration(duration)}</span>
+            </div>
+
+            {/* Loop Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLoop}
+              className={isLooping ? 'bg-accent text-accent-foreground' : ''}
+              title={t('player.toggleLoop')}
+              aria-label={isLooping ? t('player.stopLoop') : t('player.loop')}
+            >
+              <Repeat className="h-4 w-4" />
+            </Button>
+
+            {/* Volume Control */}
+            <div
+              className="flex items-center gap-2 shrink-0 w-[120px]"
+              role="group"
+              aria-label={t('player.volume')}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setVolume(volume > 0 ? 0 : 1)}
+                className="h-8 w-8"
+                aria-label={volume > 0 ? t('player.mute') : t('player.unmute')}
+              >
+                {volume > 0 ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              </Button>
+              <span id={volumeLabelId} className="sr-only">
+                {t('player.volumeLevel', { percent: Math.round(volume * 100) })}
+              </span>
+              <Slider
+                value={[volume * 100]}
+                onValueChange={handleVolumeChange}
+                max={100}
+                step={1}
+                className="flex-1"
+                aria-labelledby={volumeLabelId}
+                aria-valuetext={`${Math.round(volume * 100)}%`}
+              />
+            </div>
+
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleClose}
+              className="shrink-0"
+              title={t('player.close')}
+              aria-label={t('player.close')}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </DirectionProvider>
   );
 }

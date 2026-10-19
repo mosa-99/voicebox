@@ -1,5 +1,6 @@
 import { Loader2, Pause, Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import WaveSurfer from 'wavesurfer.js';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
@@ -22,6 +23,7 @@ export function CaptureInlinePlayer({
   fallbackDurationMs?: number | null;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -130,21 +132,22 @@ export function CaptureInlinePlayer({
       : (fallbackDurationMs ?? 0);
 
   return (
-    <div className={cn('flex items-center gap-4', className)}>
+    // The waveform runs left-to-right in every UI language.
+    <div dir="ltr" className={cn('flex items-center gap-4', className)}>
       <Button
         size="icon"
         variant="outline"
         className="h-10 w-10 rounded-full shrink-0"
         onClick={handlePlayPause}
         disabled={isLoading || !!error}
-        aria-label={isPlaying ? 'Pause' : 'Play'}
+        aria-label={isPlaying ? t('player.pause') : t('player.play')}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : isPlaying ? (
           <Pause className="h-4 w-4 fill-current" />
         ) : (
-          <Play className="h-4 w-4 ml-0.5 fill-current" />
+          <Play className="h-4 w-4 ms-0.5 fill-current" />
         )}
       </Button>
       <div ref={waveformRef} className="flex-1 min-w-0 h-10 select-none" />

@@ -460,7 +460,7 @@ export function GpuPage() {
                     description={t('settings.gpu.download.description')}
                     action={
                       <Button onClick={handleDownloadCuda} size="sm">
-                        <Download className="h-3.5 w-3.5 mr-1.5" />
+                        <Download className="h-3.5 w-3.5 me-1.5" />
                         {t('settings.gpu.download.button')}
                       </Button>
                     }
@@ -473,7 +473,7 @@ export function GpuPage() {
                     description={t('settings.gpu.switchToCuda.description')}
                     action={
                       <Button onClick={handleSwitchToCuda} size="sm">
-                        <RotateCw className="h-3.5 w-3.5 mr-1.5" />
+                        <RotateCw className="h-3.5 w-3.5 me-1.5" />
                         {t('settings.gpu.switchToCuda.button')}
                       </Button>
                     }
@@ -491,7 +491,7 @@ export function GpuPage() {
                         size="sm"
                         className="text-muted-foreground hover:text-destructive"
                       >
-                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        <Trash2 className="h-3.5 w-3.5 me-1.5" />
                         {t('settings.gpu.remove.button')}
                       </Button>
                     }
@@ -535,7 +535,7 @@ export function GpuPage() {
                     description={t('settings.gpu.downloadRocm.description')}
                     action={
                       <Button onClick={handleDownloadRocm} size="sm">
-                        <Download className="h-3.5 w-3.5 mr-1.5" />
+                        <Download className="h-3.5 w-3.5 me-1.5" />
                         {t('settings.gpu.downloadRocm.button')}
                       </Button>
                     }
@@ -548,7 +548,7 @@ export function GpuPage() {
                     description={t('settings.gpu.switchToRocm.description')}
                     action={
                       <Button onClick={handleSwitchToRocm} size="sm">
-                        <RotateCw className="h-3.5 w-3.5 mr-1.5" />
+                        <RotateCw className="h-3.5 w-3.5 me-1.5" />
                         {t('settings.gpu.switchToRocm.button')}
                       </Button>
                     }
@@ -566,7 +566,7 @@ export function GpuPage() {
                         size="sm"
                         className="text-muted-foreground hover:text-destructive"
                       >
-                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        <Trash2 className="h-3.5 w-3.5 me-1.5" />
                         {t('settings.gpu.removeRocm.button')}
                       </Button>
                     }
@@ -601,7 +601,7 @@ export function GpuPage() {
               description={t('settings.gpu.switchToCpu.description')}
               action={
                 <Button onClick={handleSwitchToCpu} variant="outline" size="sm">
-                  <RotateCw className="h-3.5 w-3.5 mr-1.5" />
+                  <RotateCw className="h-3.5 w-3.5 me-1.5" />
                   {t('settings.gpu.switchToCpu.button')}
                 </Button>
               }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import i18n from '@/i18n';
 import { usePlatform } from '@/platform/PlatformContext';
 
 interface UseSystemAudioCaptureOptions {
@@ -48,13 +49,13 @@ export function useSystemAudioCapture({
 
   const startRecording = useCallback(async () => {
     if (!platform.metadata.isTauri) {
-      const errorMsg = 'System audio capture is only available in the desktop app.';
+      const errorMsg = i18n.t('recording.errors.systemDesktopOnly');
       setError(errorMsg);
       return;
     }
 
     if (!isSupported) {
-      const errorMsg = 'System audio capture is not supported on this platform.';
+      const errorMsg = i18n.t('recording.errors.systemUnsupported');
       setError(errorMsg);
       return;
     }
@@ -84,9 +85,7 @@ export function useSystemAudioCapture({
       }, 100);
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to start system audio capture. Please check permissions.';
+        err instanceof Error ? err.message : i18n.t('recording.errors.systemStartFailed');
       setError(errorMessage);
       setIsRecording(false);
     }
@@ -116,7 +115,7 @@ export function useSystemAudioCapture({
       onRecordingComplete?.(blob, recordedDuration);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to stop system audio capture.';
+        err instanceof Error ? err.message : i18n.t('recording.errors.systemStopFailed');
       setError(errorMessage);
     }
   }, [isRecording, onRecordingComplete, platform]);

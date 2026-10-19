@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { emit as tauriEmit } from '@tauri-apps/api/event';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PillState } from '@/components/CapturePill/CapturePill';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type {
   CaptureListResponse,
@@ -49,7 +50,7 @@ const BRIEF_NOTICE_MS = 2000;
 // nor ffmpeg will accept. Caught client-side and surfaced as a friendly
 // "Recording too short, canceled" pill instead of bubbling up a 400.
 const MIN_RECORDING_DURATION_S = 0.5;
-const SHORT_RECORDING_MESSAGE = 'Recording too short, canceled';
+const shortRecordingMessage = () => i18n.t('recording.tooShort');
 
 export type CapturePillState = PillState | 'hidden';
 
@@ -160,7 +161,7 @@ export function useCaptureRecordingSession(
     (message: string, durationMs: number = ERROR_PILL_VISIBLE_MS) => {
       clearRestTimer();
       clearErrorTimer();
-      setErrorMessage(message || 'Something went wrong');
+      setErrorMessage(message || i18n.t('captures.pill.errorFallback'));
       setPillState('error');
       errorTimerRef.current = window.setTimeout(() => {
         setPillState('hidden');
@@ -198,7 +199,7 @@ export function useCaptureRecordingSession(
       }
     },
     onError: (err: Error) => {
-      showError(err.message || 'Refinement failed');
+      showError(err.message || i18n.t('recording.refinementFailed'));
     },
   });
 
@@ -236,9 +237,9 @@ export function useCaptureRecordingSession(
       // consistent cause, not an opaque decode error.
       const msg = err.message || '';
       if (/could not decode/i.test(msg) || /empty or corrupt/i.test(msg)) {
-        showError(SHORT_RECORDING_MESSAGE, BRIEF_NOTICE_MS);
+        showError(shortRecordingMessage(), BRIEF_NOTICE_MS);
       } else {
-        showError(msg || 'Upload failed');
+        showError(msg || i18n.t('recording.uploadFailed'));
       }
     },
   });
@@ -255,7 +256,7 @@ export function useCaptureRecordingSession(
       // so the blob is empty or unparseable. Surface it as a transient pill
       // so the user sees their recording was recognised and canceled.
       if (!blob.size || (recordedDuration ?? 0) < MIN_RECORDING_DURATION_S) {
-        showError(SHORT_RECORDING_MESSAGE, BRIEF_NOTICE_MS);
+        showError(shortRecordingMessage(), BRIEF_NOTICE_MS);
         return;
       }
       setFrozenElapsedMs(Math.round((recordedDuration ?? 0) * 1000));

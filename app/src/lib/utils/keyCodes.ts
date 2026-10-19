@@ -11,6 +11,8 @@
  *   - human display labels ("⌘", "⌥", "A", …)
  */
 
+import i18n from '@/i18n';
+
 /**
  * Map a `KeyboardEvent` to the canonical key name we persist. Returns
  * `null` for keys we don't support in chords (dead keys, IME composition,
@@ -94,16 +96,16 @@ export function displayLabelForKey(name: string): string {
       return PLATFORM_IS_MAC ? '⌥' : 'AltGr';
     case 'ControlLeft':
     case 'ControlRight':
-      return PLATFORM_IS_MAC ? '⌃' : 'Ctrl';
+      return PLATFORM_IS_MAC ? '⌃' : i18n.t('keys.ctrl');
     case 'ShiftLeft':
     case 'ShiftRight':
-      return PLATFORM_IS_MAC ? '⇧' : 'Shift';
+      return PLATFORM_IS_MAC ? '⇧' : i18n.t('keys.shift');
     case 'CapsLock':
       return '⇪';
     case 'Function':
       return 'fn';
     case 'Space':
-      return 'Space';
+      return i18n.t('keys.space');
     case 'Tab':
       return '⇥';
     case 'Return':

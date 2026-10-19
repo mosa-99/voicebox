@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import i18n from '@/i18n';
 import { usePlatform } from '@/platform/PlatformContext';
 import { convertToWav } from '@/lib/utils/audio';
 
@@ -32,8 +33,7 @@ export function useAudioRecording({
       // Check if getUserMedia is available
       // In Tauri, navigator.mediaDevices might not be available immediately
       if (typeof navigator === 'undefined') {
-        const errorMsg =
-          'Navigator API is not available. This might be a Tauri configuration issue.';
+        const errorMsg = i18n.t('recording.errors.noNavigator');
         setError(errorMsg);
         throw new Error(errorMsg);
       }
@@ -51,8 +51,8 @@ export function useAudioRecording({
           });
 
           const errorMsg = platform.metadata.isTauri
-            ? 'Microphone access is not available. Please ensure:\n1. The app has microphone permissions in System Settings (macOS: System Settings > Privacy & Security > Microphone)\n2. You restart the app after granting permissions\n3. You are using Tauri v2 with a webview that supports getUserMedia'
-            : 'Microphone access is not available. Please ensure you are using a secure context (HTTPS or localhost) and that your browser has microphone permissions enabled.';
+            ? i18n.t('recording.errors.noMicrophoneApp')
+            : i18n.t('recording.errors.noMicrophoneBrowser');
           setError(errorMsg);
           throw new Error(errorMsg);
         }
@@ -120,7 +120,7 @@ export function useAudioRecording({
       };
 
       mediaRecorder.onerror = (event) => {
-        setError('Recording error occurred');
+        setError(i18n.t('recording.errors.generic'));
         console.error('MediaRecorder error:', event);
       };
 
@@ -156,9 +156,7 @@ export function useAudioRecording({
       }, 100);
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to access microphone. Please check permissions.';
+        err instanceof Error ? err.message : i18n.t('recording.errors.microphoneDenied');
       setError(errorMessage);
       setIsRecording(false);
     }

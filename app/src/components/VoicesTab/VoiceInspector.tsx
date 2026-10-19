@@ -27,7 +27,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { SampleList } from '@/components/VoiceProfiles/SampleList';
 import { apiClient } from '@/lib/api/client';
 import type { EffectConfig } from '@/lib/api/types';
-import { LANGUAGE_CODES, LANGUAGE_OPTIONS, type LanguageCode } from '@/lib/constants/languages';
+import { getLanguageOptions, LANGUAGE_CODES, type LanguageCode } from '@/lib/constants/languages';
 import { BOTTOM_SAFE_AREA_PADDING } from '@/lib/constants/ui';
 import {
   useDeleteAvatar,
@@ -247,7 +247,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                     type="button"
                     onClick={handleRemoveAvatar}
                     disabled={deleteAvatar.isPending}
-                    className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground flex items-center justify-center hover:bg-background/80 hover:text-foreground transition-colors shadow-sm border border-border/50"
+                    className="absolute bottom-0 end-0 h-5 w-5 rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground flex items-center justify-center hover:bg-background/80 hover:text-foreground transition-colors shadow-sm border border-border/50"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -309,7 +309,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {LANGUAGE_OPTIONS.map((lang) => (
+                        {getLanguageOptions().map((lang) => (
                           <SelectItem key={lang.value} value={lang.value}>
                             {lang.label}
                           </SelectItem>

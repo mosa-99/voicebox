@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type { VoiceProfileCreate } from '@/lib/api/types';
 import { usePlatform } from '@/platform/PlatformContext';
@@ -134,7 +135,7 @@ export function useExportProfile() {
 
       await platform.filesystem.saveFile(filename, blob, [
         {
-          name: 'Voicebox Profile',
+          name: i18n.t('files.profile'),
           extensions: ['zip'],
         },
       ]);
