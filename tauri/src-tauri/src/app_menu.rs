@@ -5,6 +5,12 @@
 //! through `set_menu_language`, so the menu bar matches the rest of the UI.
 //! Languages without a table here fall back to English. Other platforms keep
 //! whatever they had, since Tauri only installs a default menu on macOS.
+//!
+//! The same command also records the language as the app's AppleLanguages
+//! preference (what System Settings' per-app language does), so the items
+//! macOS adds itself, open/save panels and permission prompts follow it from
+//! the next launch on. Info.plist lists en/de/ar in CFBundleLocalizations so
+//! AppKit accepts those.
 
 use tauri::menu::{
     AboutMetadata, Menu, PredefinedMenuItem, Submenu, HELP_SUBMENU_ID, WINDOW_SUBMENU_ID,
@@ -204,6 +210,39 @@ pub fn set_menu_language<R: Runtime>(app: AppHandle<R>, lang: String) -> Result<
     if !cfg!(target_os = "macos") {
         return Ok(());
     }
+    persist_app_language(&app, &lang);
     let menu = build(&app, &lang).map_err(|e| e.to_string())?;
     app.set_menu(menu).map(|_| ()).map_err(|e| e.to_string())
+}
+
+/// Store `lang` as this app's AppleLanguages preference. AppKit reads it at
+/// launch, so it applies to its own UI from the next start. Runs off the
+/// calling thread because it shells out to `defaults`.
+fn persist_app_language<R: Runtime>(app: &AppHandle<R>, lang: &str) {
+    let base = lang.split(['-', '_']).next().unwrap_or("en").to_string();
+    if !matches!(base.as_str(), "en" | "de" | "ar") {
+        return;
+    }
+    let bundle_id = app.config().identifier.clone();
+    std::thread::spawn(move || {
+        let current = std::process::Command::new("defaults")
+            .args(["read", &bundle_id, "AppleLanguages"])
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default();
+        // `defaults read` prints the array as `(\n    de\n)`.
+        let already_set = current
+            .trim_matches(|c: char| c == '(' || c == ')' || c.is_whitespace())
+            .trim_matches('"')
+            == base;
+        if already_set {
+            return;
+        }
+        if let Err(e) = std::process::Command::new("defaults")
+            .args(["write", &bundle_id, "AppleLanguages", "-array", &base])
+            .status()
+        {
+            eprintln!("Could not store AppleLanguages={base}: {e}");
+        }
+    });
 }

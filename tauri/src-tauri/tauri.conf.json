@@ -30,7 +30,10 @@
     "resources": {
       "gen/Assets.car": "./",
       "gen/voicebox.icns": "./",
-      "gen/partial.plist": "./"
+      "gen/partial.plist": "./",
+      "lproj/en.lproj/InfoPlist.strings": "en.lproj/",
+      "lproj/de.lproj/InfoPlist.strings": "de.lproj/",
+      "lproj/ar.lproj/InfoPlist.strings": "ar.lproj/"
     }
   },
   "app": {
