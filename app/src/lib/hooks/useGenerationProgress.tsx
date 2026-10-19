@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import { useGenerationSettings } from '@/lib/hooks/useSettings';
 import { condenseError } from '@/lib/utils/errorText';
@@ -95,16 +96,18 @@ export function useGenerationProgress() {
                   queryClient.invalidateQueries({ queryKey: ['stories'] });
                   queryClient.invalidateQueries({ queryKey: ['stories', storyId] });
                   toast({
-                    title: 'Added to story',
+                    title: i18n.t('generation.toast.addedToStory'),
                     description: data.duration
-                      ? `Audio generated (${data.duration.toFixed(2)}s) and added to story`
-                      : 'Audio generated and added to story',
+                      ? i18n.t('generation.toast.addedToStoryWithDuration', {
+                          seconds: data.duration.toFixed(2),
+                        })
+                      : i18n.t('generation.toast.addedToStoryDescription'),
                   });
                 })
                 .catch(() => {
                   toast({
-                    title: 'Generation complete',
-                    description: 'Audio generated but failed to add to story',
+                    title: i18n.t('generation.toast.complete'),
+                    description: i18n.t('generation.toast.storyAddFailed'),
                     variant: 'destructive',
                   });
                 });
@@ -133,18 +136,21 @@ export function useGenerationProgress() {
 
             queryClient.refetchQueries({ queryKey: ['history'] });
 
-            const condensed = condenseError(data.error || 'An error occurred during generation');
+            const condensed = condenseError(data.error || i18n.t('generation.toast.errorFallback'));
             toast({
-              title: data.status === 'not_found' ? 'Generation not found' : 'Generation failed',
+              title:
+                data.status === 'not_found'
+                  ? i18n.t('generation.toast.notFound')
+                  : i18n.t('generation.toast.failed'),
               description: condensed.truncated
-                ? `${condensed.display}\n\n(${condensed.omitted} more characters — copy for the full error, or see Settings → Logs)`
+                ? `${condensed.display}\n\n${i18n.t('generation.toast.truncated', { count: condensed.omitted })}`
                 : condensed.display,
               variant: 'destructive',
               // Only offered when there is more to read than what is shown, so
               // the common short error keeps a plain toast.
               action: condensed.truncated ? (
                 <ToastAction
-                  altText="Copy the full error text"
+                  altText={i18n.t('generation.toast.copyFullError')}
                   onClick={() => {
                     // Two ways this fails: the Clipboard API is absent outside
                     // a secure context (property access throws), or writeText
@@ -156,16 +162,15 @@ export function useGenerationProgress() {
                         await navigator.clipboard.writeText(condensed.full);
                       } catch {
                         toast({
-                          title: 'Could not copy',
-                          description:
-                            'Clipboard unavailable. The full error is in Settings → Logs.',
+                          title: i18n.t('generation.toast.copyFailed'),
+                          description: i18n.t('generation.toast.copyFailedDescription'),
                           variant: 'destructive',
                         });
                       }
                     })();
                   }}
                 >
-                  Copy
+                  {i18n.t('captures.actions.copy')}
                 </ToastAction>
               ) : undefined,
             });

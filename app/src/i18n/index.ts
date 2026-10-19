@@ -66,6 +66,12 @@ function applyDocumentLanguage(lng: string) {
   if (!lng || typeof document === 'undefined') return;
   document.documentElement.lang = lng;
   document.documentElement.dir = RTL_LANGUAGES.has(lng) ? 'rtl' : 'ltr';
+  // In the desktop app, relabel the native macOS menu bar to match.
+  if ('__TAURI_INTERNALS__' in window) {
+    import('@tauri-apps/api/core')
+      .then(({ invoke }) => invoke('set_menu_language', { lang: lng }))
+      .catch((error) => console.warn('Could not localize the app menu:', error));
+  }
 }
 
 applyDocumentLanguage(i18n.language);

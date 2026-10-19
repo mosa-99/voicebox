@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod accessibility;
+mod app_menu;
 mod audio_capture;
 mod audio_output;
 mod clipboard;
@@ -1547,7 +1548,8 @@ pub fn run() {
             paste_final_text,
             enable_hotkey,
             disable_hotkey,
-            update_chord_bindings
+            update_chord_bindings,
+            app_menu::set_menu_language
         ])
         .on_window_event({
             let closing = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));

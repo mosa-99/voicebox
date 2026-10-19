@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import i18n from '@/i18n';
 
 export function useAudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,8 +33,8 @@ export function useAudioPlayer() {
       audio.addEventListener('error', () => {
         setIsPlaying(false);
         toast({
-          title: 'Playback error',
-          description: 'Failed to play audio file',
+          title: i18n.t('player.errors.playbackTitle'),
+          description: i18n.t('player.errors.playFileFailed'),
           variant: 'destructive',
         });
         if (audioRef.current) {

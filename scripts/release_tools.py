@@ -26,6 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
 BUMP_CFG = ROOT / ".bumpversion.cfg"
 TAURI_CONF = ROOT / "tauri" / "src-tauri" / "tauri.conf.json"
 CARGO_LOCK = ROOT / "tauri" / "src-tauri" / "Cargo.lock"
+# bun.lock repeats each workspace package version; bumpversion does not know it.
+BUN_LOCK = ROOT / "bun.lock"
 
 
 def fail(message: str) -> None:
@@ -90,6 +92,9 @@ def cmd_bump(part: str) -> None:
     rewrite(
         BUMP_CFG, f"current_version = {current}", f"current_version = {new}", count=1
     )
+    # Only the workspace entries use a "version" key; packages are listed as
+    # "name@x.y.z" strings, so this cannot touch a dependency.
+    rewrite(BUN_LOCK, f'"version": "{current}"', f'"version": "{new}"')
     print(new)
 
 
@@ -97,6 +102,7 @@ def cmd_files() -> None:
     paths = [p for p, _, _ in version_files(read_bump_config())] + [
         BUMP_CFG,
         CARGO_LOCK,
+        BUN_LOCK,
     ]
     for path in paths:
         print(path.relative_to(ROOT))

@@ -58,7 +58,7 @@ export function FloatingGenerateBox({
 
   const composeMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedProfileId) throw new Error('No profile selected');
+      if (!selectedProfileId) throw new Error(t('generation.toast.noProfile'));
       return apiClient.composeWithPersonality(selectedProfileId);
     },
     onError: (err: Error) => {
@@ -267,8 +267,8 @@ export function FloatingGenerateBox({
         'fixed',
         isStoriesRoute
           ? // Aligned with StoryContent: sidebar + list width + gap (tab bleeds with -mx-8)
-            'left-[calc(5rem+360px+1.5rem)] right-8'
-          : 'left-[calc(5rem+2rem)] right-8 lg:right-auto lg:w-[calc((100%-5rem-4rem)/2-1rem)]',
+            'start-[calc(5rem+360px+1.5rem)] end-8'
+          : 'start-[calc(5rem+2rem)] end-8 lg:end-auto lg:w-[calc((100%-5rem-4rem)/2-1rem)]',
       )}
       style={{
         // On stories route: offset by track editor height when visible
@@ -635,7 +635,11 @@ export function FloatingGenerateBox({
                           )}
                         {effectPresets?.map((preset) => (
                           <SelectItem key={preset.id} value={preset.id} className="text-xs">
-                            {preset.name}
+                            {preset.is_builtin
+                              ? t(`effects.builtinPresets.${preset.name}.name`, {
+                                  defaultValue: preset.name,
+                                })
+                              : preset.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

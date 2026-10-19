@@ -2,6 +2,31 @@ import { formatDistance } from 'date-fns';
 import { ar, de, es, fr, ja, zhCN, zhTW } from 'date-fns/locale';
 import i18n from '@/i18n';
 
+/** Display name of an effect type ("reverb" → "Hall"), falling back to the raw id. */
+export function formatEffectType(type: string): string {
+  return i18n.t(`effects.types.${type}.label`, { defaultValue: type });
+}
+
+/**
+ * Effect chain as "Hall → Delay", using the display name of each effect. The
+ * arrow points in reading direction, so it turns into ← for Arabic.
+ */
+export function formatEffectChain(chain: { type: string }[], separator?: string): string {
+  const arrow = i18n.dir(i18n.language) === 'rtl' ? ' ← ' : ' → ';
+  return chain.map((e) => formatEffectType(e.type)).join(separator ?? arrow);
+}
+
+/**
+ * Version labels are stored by the backend ("original", "clean", "take-2",
+ * "version-3"); show those in the UI language and leave user-chosen ones as-is.
+ */
+export function formatVersionLabel(label: string): string {
+  if (label === 'original' || label === 'clean') return i18n.t(`versions.${label}`);
+  const numbered = /^(take|version)-(\d+)$/.exec(label);
+  if (numbered) return i18n.t(`versions.${numbered[1]}`, { n: numbered[2] });
+  return label;
+}
+
 export function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);

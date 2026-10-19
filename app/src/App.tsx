@@ -1,15 +1,18 @@
+import { DirectionProvider } from '@radix-ui/react-direction';
 import { RouterProvider } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import voiceboxLogo from '@/assets/voicebox-logo.png';
 import { DictateWindow } from '@/components/DictateWindow/DictateWindow';
 import ShinyText from '@/components/ShinyText';
 import { TitleBarDragRegion } from '@/components/TitleBarDragRegion';
 import { useAutoUpdater } from '@/hooks/useAutoUpdater';
 import { useThemeSync } from '@/hooks/useThemeSync';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type { HealthResponse } from '@/lib/api/types';
-import { useChordSync } from '@/lib/hooks/useChordSync';
 import { TOP_SAFE_AREA_PADDING } from '@/lib/constants/ui';
+import { useChordSync } from '@/lib/hooks/useChordSync';
 import { cn } from '@/lib/utils/cn';
 import { usePlatform } from '@/platform/PlatformContext';
 import { router } from '@/router';
@@ -52,43 +55,50 @@ function isPortInUseError(error: unknown): boolean {
   );
 }
 
-const LOADING_MESSAGES = [
-  'Warming up tensors...',
-  'Calibrating synthesizer engine...',
-  'Initializing voice models...',
-  'Loading neural networks...',
-  'Preparing audio pipelines...',
-  'Optimizing waveform generators...',
-  'Tuning frequency analyzers...',
-  'Building voice embeddings...',
-  'Configuring text-to-speech cores...',
-  'Syncing audio buffers...',
-  'Establishing model connections...',
-  'Preprocessing training data...',
-  'Validating voice samples...',
-  'Compiling inference engines...',
-  'Mapping phoneme sequences...',
-  'Aligning prosody parameters...',
-  'Activating speech synthesis...',
-  'Fine-tuning acoustic models...',
-  'Preparing voice cloning matrices...',
-  'Initializing Qwen TTS framework...',
-];
+// Keys under app.loading in the locale files, shown in this order.
+const LOADING_MESSAGE_KEYS = [
+  'tensors',
+  'synthesizer',
+  'voiceModels',
+  'neuralNetworks',
+  'audioPipelines',
+  'waveformGenerators',
+  'frequencyAnalyzers',
+  'voiceEmbeddings',
+  'ttsCores',
+  'audioBuffers',
+  'modelConnections',
+  'trainingData',
+  'voiceSamples',
+  'inferenceEngines',
+  'phonemes',
+  'prosody',
+  'speechSynthesis',
+  'acousticModels',
+  'cloningMatrices',
+  'qwenFramework',
+] as const;
 
 function App() {
   useThemeSync();
+  const { i18n: i18next } = useTranslation();
 
-  // The dictate window runs in a separate Tauri webview that must skip
-  // server bootstrap (the main window owns that lifecycle) and render only
-  // the floating recording surface. Split into a sibling component so the
-  // main app's hooks are not called on the dictate path.
-  if (isDictateView()) {
-    return <DictateWindow />;
-  }
-  return <MainApp />;
+  // Radix menus, tabs and sliders read the reading direction from context
+  // (the <html dir> attribute alone doesn't reach them), so Arabic gets
+  // right-to-left keyboard navigation and submenus opening to the left.
+  return (
+    <DirectionProvider dir={i18next.dir()}>
+      {/* The dictate window runs in a separate Tauri webview that must skip
+          server bootstrap (the main window owns that lifecycle) and render only
+          the floating recording surface. Split into a sibling component so the
+          main app's hooks are not called on the dictate path. */}
+      {isDictateView() ? <DictateWindow /> : <MainApp />}
+    </DirectionProvider>
+  );
 }
 
 function MainApp() {
+  const { t } = useTranslation();
   const platform = usePlatform();
   const [serverReady, setServerReady] = useState(false);
   const [startupError, setStartupError] = useState<string | null>(null);
@@ -218,10 +228,9 @@ function MainApp() {
         setTimeout(() => {
           clearInterval(pollInterval);
           serverStartingRef.current = false;
-          setStartupError(
-            'Could not connect to a Voicebox server within 2 minutes. ' +
-              'Please check that the server is running and try again.',
-          );
+          // i18n.t, not t: depending on t here would restart the server bootstrap
+          // whenever the language changes.
+          setStartupError(i18n.t('app.startup.timeout'));
         }, 120_000);
       });
 
@@ -242,7 +251,7 @@ function MainApp() {
     }
 
     const interval = setInterval(() => {
-      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGE_KEYS.length);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -271,7 +280,7 @@ function MainApp() {
           </div>
           {startupError ? (
             <div className="animate-fade-in-delayed max-w-md mx-auto space-y-3">
-              <p className="text-lg font-medium text-destructive">Server startup failed</p>
+              <p className="text-lg font-medium text-destructive">{t('app.startup.failed')}</p>
               <p className="text-sm text-muted-foreground">{startupError}</p>
               <button
                 type="button"
@@ -283,13 +292,13 @@ function MainApp() {
                   window.location.reload();
                 }}
               >
-                Retry
+                {t('app.startup.retry')}
               </button>
             </div>
           ) : (
             <div className="animate-fade-in-delayed">
               <ShinyText
-                text={LOADING_MESSAGES[loadingMessageIndex]}
+                text={t(`app.loading.${LOADING_MESSAGE_KEYS[loadingMessageIndex]}`)}
                 className="text-lg font-medium text-muted-foreground"
                 speed={2}
                 color="hsl(var(--muted-foreground))"

@@ -8,7 +8,9 @@
  * Kokoro supports 8 languages.
  */
 
-/** All languages that any engine supports. */
+import i18n from '@/i18n';
+
+/** All languages that any engine supports. English names, used as a fallback. */
 export const ALL_LANGUAGES = {
   ar: 'Arabic',
   da: 'Danish',
@@ -100,19 +102,40 @@ export const ENGINE_LANGUAGES: Record<string, readonly LanguageCode[]> = {
   ],
 } as const;
 
+/**
+ * Name of a language in the current UI language ("Deutsch", "الألمانية", …),
+ * via the browser's built-in Intl data. Falls back to the English name.
+ */
+export function getLanguageLabel(code: string): string {
+  const uiLanguage = i18n.language || 'en';
+  try {
+    const name = new Intl.DisplayNames([uiLanguage], { type: 'language' }).of(code);
+    if (name && name !== code) {
+      return name.charAt(0).toLocaleUpperCase(uiLanguage) + name.slice(1);
+    }
+  } catch {
+    // Unknown code or no Intl.DisplayNames support: fall through.
+  }
+  return ALL_LANGUAGES[code as LanguageCode] ?? code;
+}
+
 /** Helper: get language options for a given engine. */
 export function getLanguageOptionsForEngine(engine: string) {
   const codes = ENGINE_LANGUAGES[engine] ?? ENGINE_LANGUAGES.qwen;
   return codes.map((code) => ({
     value: code,
-    label: ALL_LANGUAGES[code],
+    label: getLanguageLabel(code),
+  }));
+}
+
+/** All languages as select options, labelled in the current UI language. */
+export function getLanguageOptions() {
+  return LANGUAGE_CODES.map((code) => ({
+    value: code,
+    label: getLanguageLabel(code),
   }));
 }
 
 // ── Backwards-compatible exports used elsewhere ──────────────────────
 export const SUPPORTED_LANGUAGES = ALL_LANGUAGES;
 export const LANGUAGE_CODES = Object.keys(ALL_LANGUAGES) as LanguageCode[];
-export const LANGUAGE_OPTIONS = LANGUAGE_CODES.map((code) => ({
-  value: code,
-  label: ALL_LANGUAGES[code],
-}));

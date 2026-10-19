@@ -98,7 +98,7 @@ function ChordKeys({ keys }: { keys: string[] }) {
           >
             {displayLabelForKey(k)}
             {side ? (
-              <span className="absolute -top-1 -right-1 h-3 min-w-[0.75rem] px-0.5 rounded-sm bg-accent text-[7px] font-bold leading-none flex items-center justify-center text-accent-foreground">
+              <span className="absolute -top-1 -end-1 h-3 min-w-[0.75rem] px-0.5 rounded-sm bg-accent text-[7px] font-bold leading-none flex items-center justify-center text-accent-foreground">
                 {side}
               </span>
             ) : null}
@@ -338,7 +338,7 @@ export function CapturesTab() {
     try {
       const dest = await save({
         defaultPath: `capture_${selected.id.slice(0, 8)}.wav`,
-        filters: [{ name: 'Audio', extensions: ['wav'] }],
+        filters: [{ name: t('files.audio'), extensions: ['wav'] }],
       });
       if (!dest) return;
       const res = await fetch(apiClient.getCaptureAudioUrl(selected.id));
@@ -361,7 +361,7 @@ export function CapturesTab() {
     try {
       const dest = await save({
         defaultPath: `capture_${selected.id.slice(0, 8)}.txt`,
-        filters: [{ name: 'Text', extensions: ['txt'] }],
+        filters: [{ name: t('files.text'), extensions: ['txt'] }],
       });
       if (!dest) return;
       await writeTextFile(dest, text);
@@ -373,19 +373,20 @@ export function CapturesTab() {
 
   const buildCaptureMarkdown = (capture: CaptureResponse): string => {
     const lines: string[] = [];
-    lines.push(`# Capture ${capture.id}`, '');
-    lines.push(`- **Source:** ${capture.source}`);
-    lines.push(`- **Created:** ${capture.created_at}`);
-    if (capture.duration_ms != null) lines.push(`- **Duration:** ${formatDuration(capture.duration_ms)}`);
-    if (capture.language) lines.push(`- **Language:** ${capture.language}`);
-    if (capture.stt_model) lines.push(`- **STT model:** ${capture.stt_model}`);
-    if (capture.llm_model) lines.push(`- **LLM model:** ${capture.llm_model}`);
+    const field = (key: string, value: string) => `- **${t(`captures.markdown.${key}`)}:** ${value}`;
+    lines.push(`# ${t('captures.markdown.heading', { id: capture.id })}`, '');
+    lines.push(field('source', capture.source));
+    lines.push(field('created', capture.created_at));
+    if (capture.duration_ms != null) lines.push(field('duration', formatDuration(capture.duration_ms)));
+    if (capture.language) lines.push(field('language', capture.language));
+    if (capture.stt_model) lines.push(field('sttModel', capture.stt_model));
+    if (capture.llm_model) lines.push(field('llmModel', capture.llm_model));
     lines.push('');
     if (capture.transcript_refined?.trim()) {
-      lines.push('## Refined transcript', '', capture.transcript_refined.trim(), '');
+      lines.push(`## ${t('captures.markdown.refined')}`, '', capture.transcript_refined.trim(), '');
     }
     if (capture.transcript_raw?.trim()) {
-      lines.push('## Raw transcript', '', capture.transcript_raw.trim(), '');
+      lines.push(`## ${t('captures.markdown.raw')}`, '', capture.transcript_raw.trim(), '');
     }
     return lines.join('\n');
   };
@@ -458,7 +459,7 @@ export function CapturesTab() {
               <ListPaneTitle>{t('captures.title')}</ListPaneTitle>
               <Badge
                 variant="secondary"
-                className="h-5 px-1.5 -ml-2 text-[10px] font-medium text-accent bg-accent/10 border border-accent/20"
+                className="h-5 px-1.5 -ms-2 text-[10px] font-medium text-accent bg-accent/10 border border-accent/20"
               >
                 {t('captures.beta')}
               </Badge>
@@ -494,7 +495,7 @@ export function CapturesTab() {
                     key={capture.id}
                     onClick={() => setSelectedId(capture.id)}
                     className={cn(
-                      'w-full text-left p-3 rounded-lg transition-colors block',
+                      'w-full text-start p-3 rounded-lg transition-colors block',
                       isActive
                         ? 'bg-muted/70 border border-border'
                         : 'border border-transparent hover:bg-muted/30',
@@ -535,10 +536,10 @@ export function CapturesTab() {
 
       {/* Right: capture detail */}
       <div className="flex-1 flex flex-col relative overflow-hidden min-w-0">
-        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 start-0 end-0 h-20 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
 
         {/* Top action bar */}
-        <div className="absolute top-0 left-0 right-0 z-20 px-8">
+        <div className="absolute top-0 start-0 end-0 z-20 px-8">
           <div className="flex items-center gap-3 py-4">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="w-1.5 h-1.5 rounded-full bg-accent" />
@@ -563,7 +564,7 @@ export function CapturesTab() {
               <>
                 <Button variant="outline" asChild>
                   <Link to="/settings/captures">
-                    <Settings2 className="mr-2 h-4 w-4" />
+                    <Settings2 className="me-2 h-4 w-4" />
                     {t('captures.actions.configure')}
                   </Link>
                 </Button>
@@ -574,9 +575,9 @@ export function CapturesTab() {
                     disabled={session.isUploading}
                   >
                     {session.isUploading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4 mr-2" />
+                      <Upload className="h-4 w-4 me-2" />
                     )}
                     {session.isUploading ? t('captures.actions.importing') : t('captures.actions.import')}
                   </Button>
@@ -595,12 +596,12 @@ export function CapturesTab() {
               >
                 {session.isRecording ? (
                   <>
-                    <Square className="h-4 w-4 mr-2 fill-current" />
+                    <Square className="h-4 w-4 me-2 fill-current" />
                     {t('captures.actions.stop')}
                   </>
                 ) : (
                   <>
-                    <Mic className="h-4 w-4 mr-2" />
+                    <Mic className="h-4 w-4 me-2" />
                     {t('captures.actions.dictate')}
                   </>
                 )}
@@ -651,7 +652,7 @@ export function CapturesTab() {
                       : 'text-muted-foreground hover:text-foreground disabled:opacity-40',
                   )}
                 >
-                  <Sparkles className="h-3 w-3 inline-block mr-1 -translate-y-px" />
+                  <Sparkles className="h-3 w-3 inline-block me-1 -translate-y-px" />
                   {t('captures.transcript.refined')}
                 </button>
                 <button
@@ -664,7 +665,7 @@ export function CapturesTab() {
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  <Captions className="h-3 w-3 inline-block mr-1 -translate-y-px" />
+                  <Captions className="h-3 w-3 inline-block me-1 -translate-y-px" />
                   {t('captures.transcript.raw')}
                 </button>
               </div>
@@ -701,7 +702,7 @@ export function CapturesTab() {
                   onClick={() => handlePlayAs()}
                   disabled={!playAsVoice || playAsMutation.isPending}
                   className={cn(
-                    'gap-2 rounded-r-none border-r-0 pr-3 pl-2 transition-colors',
+                    'gap-2 rounded-e-none border-e-0 pe-3 ps-2 transition-colors',
                     playbackState !== 'idle' &&
                       'border-accent/50 text-foreground bg-accent/10 hover:bg-accent/15 hover:text-foreground hover:border-accent/50',
                   )}
@@ -733,7 +734,7 @@ export function CapturesTab() {
                       variant="outline"
                       size="sm"
                       className={cn(
-                        'rounded-l-none px-2 transition-colors',
+                        'rounded-s-none px-2 transition-colors',
                         playbackState !== 'idle' &&
                           'border-accent/50 bg-accent/10 hover:bg-accent/15 hover:text-foreground hover:border-accent/50',
                       )}
@@ -768,7 +769,7 @@ export function CapturesTab() {
                 </DropdownMenu>
               </div>
               <Button variant="outline" size="sm" onClick={handleCopy}>
-                <Copy className="h-3.5 w-3.5 mr-1.5" />
+                <Copy className="h-3.5 w-3.5 me-1.5" />
                 {t('captures.actions.copy')}
               </Button>
               <Button
@@ -778,9 +779,9 @@ export function CapturesTab() {
                 disabled={session.isRefining}
               >
                 {session.isRefining ? (
-                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 me-1.5 animate-spin" />
                 ) : (
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  <Sparkles className="h-3.5 w-3.5 me-1.5" />
                 )}
                 {selected.transcript_refined
                   ? t('captures.actions.reRefine')
@@ -789,9 +790,9 @@ export function CapturesTab() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    <Download className="h-3.5 w-3.5 me-1.5" />
                     {t('captures.actions.export')}
-                    <ChevronDown className="h-3.5 w-3.5 ml-1 opacity-70" />
+                    <ChevronDown className="h-3.5 w-3.5 ms-1 opacity-70" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
@@ -800,15 +801,15 @@ export function CapturesTab() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleExportAudio}>
-                    <FileAudio className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                    <FileAudio className="h-3.5 w-3.5 me-2 text-muted-foreground" />
                     {t('captures.actions.exportAudio')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleExportTranscript}>
-                    <Captions className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                    <Captions className="h-3.5 w-3.5 me-2 text-muted-foreground" />
                     {t('captures.actions.exportTranscript')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleExportMarkdown}>
-                    <FileText className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                    <FileText className="h-3.5 w-3.5 me-2 text-muted-foreground" />
                     {t('captures.actions.exportMarkdown')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -822,9 +823,9 @@ export function CapturesTab() {
                 className="text-muted-foreground "
               >
                 {deleteMutation.isPending ? (
-                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 me-1.5 animate-spin" />
                 ) : (
-                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                  <Trash2 className="h-3.5 w-3.5 me-1.5" />
                 )}
                 {t('captures.actions.delete')}
               </Button>

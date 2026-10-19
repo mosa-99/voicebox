@@ -167,6 +167,17 @@
         "rechecking": "جارٍ التحقق…",
         "stillMissing": "لم يُكتشف بعد. يتطلب macOS عادةً إغلاق Voicebox وإعادة فتحه بعد تغيير الإذن."
       }
+    },
+    "markdown": {
+      "heading": "الالتقاط {{id}}",
+      "source": "المصدر",
+      "created": "تاريخ الإنشاء",
+      "duration": "المدة",
+      "language": "اللغة",
+      "sttModel": "نموذج تحويل الكلام إلى نص",
+      "llmModel": "نموذج اللغة",
+      "refined": "النص المحسَّن",
+      "raw": "النص الخام"
     }
   },
   "voicesTab": {
@@ -471,7 +482,8 @@
       "label": "معاينة",
       "button": "معاينة",
       "processing": "جارٍ المعالجة…",
-      "hint": "تطبّق المعاينة المؤثرات على النسخة الأصلية دون حفظ."
+      "hint": "تطبّق المعاينة المؤثرات على النسخة الأصلية دون حفظ.",
+      "playerTitle": "معاينة المؤثرات"
     },
     "saveAs": {
       "title": "حفظ كإعداد مسبق مخصص",
@@ -718,7 +730,56 @@
       "sourcePlaceholder": "اختر نسخة المصدر",
       "apply": "تطبيق",
       "applying": "جارٍ التطبيق…"
-    }
+    },
+    "toast": {
+      "cancelling": "جارٍ إلغاء التوليد",
+      "cancelFailed": "فشل الإلغاء",
+      "cancelFailedFallback": "تعذّر إلغاء التوليد",
+      "downloadFailed": "تعذّر تنزيل الصوت",
+      "exportFailed": "تعذّر تصدير التوليد",
+      "retryFailed": "فشلت إعادة المحاولة",
+      "retryFailedFallback": "تعذّرت إعادة محاولة التوليد",
+      "regenerateFailed": "فشلت إعادة التوليد",
+      "regenerateFailedFallback": "تعذّرت إعادة التوليد",
+      "favoriteFailed": "تعذّر تحديث المفضلة",
+      "effectsApplied": "تم تطبيق المؤثرات",
+      "effectsAppliedDescription": "تم إنشاء نسخة جديدة.",
+      "effectsFailed": "تعذّر تطبيق المؤثرات",
+      "switchVersionFailed": "تعذّر تبديل النسخة",
+      "imported": "تم استيراد التوليد",
+      "importedFallback": "تم استيراد التوليد بنجاح",
+      "importFailed": "تعذّر استيراد التوليد",
+      "clearedFailed": "تم مسح التوليدات الفاشلة",
+      "clearedFailedDescription_zero": "لم يُحذف أي توليد فاشل.",
+      "clearedFailedDescription_one": "تم حذف توليد فاشل واحد.",
+      "clearedFailedDescription_two": "تم حذف توليدين فاشلين.",
+      "clearedFailedDescription_few": "تم حذف {{count}} توليدات فاشلة.",
+      "clearedFailedDescription_many": "تم حذف {{count}} توليدًا فاشلًا.",
+      "clearedFailedDescription_other": "تم حذف {{count}} توليد فاشل.",
+      "clearFailed": "فشل المسح"
+    },
+    "clearFailedButton": "مسح الفاشلة",
+    "row": {
+      "generatingAria": "جارٍ توليد الكلام بصوت {{name}}…",
+      "failedAria": "فشل التوليد بصوت {{name}}",
+      "playingAria": "مقطع بصوت {{name}}، {{duration}}، {{date}}. قيد التشغيل. اضغط Enter لإعادة التشغيل من البداية.",
+      "playAria": "مقطع بصوت {{name}}، {{duration}}، {{date}}. اضغط Enter للتشغيل.",
+      "failed": "فشل",
+      "loadingModel": "جارٍ تحميل النموذج…",
+      "generating": "جارٍ التوليد…",
+      "transcriptAria": "نص المقطع بصوت {{name}}، {{duration}}",
+      "toggleVersions": "إظهار النسخ أو إخفاؤها",
+      "retry": "إعادة محاولة التوليد",
+      "delete": "حذف التوليد",
+      "cancel": "إلغاء التوليد",
+      "favorite": "إضافة إلى المفضلة",
+      "unfavorite": "إزالة من المفضلة"
+    },
+    "versions": {
+      "from": "من {{label}}",
+      "active": "نشطة"
+    },
+    "end": "وصلت إلى النهاية"
   },
   "generation": {
     "placeholder": {
@@ -758,6 +819,26 @@
       "tooltipInactive": "التحدث بأسلوب الشخصية",
       "ariaLabelActive": "يتحدث بأسلوب الشخصية",
       "ariaLabelInactive": "التحدث بأسلوب الشخصية"
+    },
+    "engine": {
+      "omnivoice": "OmniVoice (غير تجاري)"
+    },
+    "toast": {
+      "noProfile": "لم يُختر ملف صوت",
+      "noProfileDescription": "يرجى اختيار ملف صوت من البطاقات في الأعلى.",
+      "failed": "فشل التوليد",
+      "failedFallback": "تعذّر توليد الصوت",
+      "notFound": "التوليد غير موجود",
+      "errorFallback": "حدث خطأ أثناء التوليد",
+      "truncated": "({{count}} حرفًا إضافيًا — انسخ الخطأ الكامل أو راجع الإعدادات ← السجلات)",
+      "copyFullError": "نسخ نص الخطأ كاملًا",
+      "copyFailed": "تعذّر النسخ",
+      "copyFailedDescription": "الحافظة غير متاحة. الخطأ الكامل موجود في الإعدادات ← السجلات.",
+      "addedToStory": "تمت الإضافة إلى القصة",
+      "addedToStoryWithDuration": "تم توليد الصوت ({{seconds}} ث) وإضافته إلى القصة",
+      "addedToStoryDescription": "تم توليد الصوت وإضافته إلى القصة",
+      "complete": "اكتمل التوليد",
+      "storyAddFailed": "تم توليد الصوت لكن تعذّرت إضافته إلى القصة"
     }
   },
   "main": {
@@ -1239,7 +1320,8 @@
     "changelog": {
       "devBadge": "تطوير",
       "showLess": "عرض أقل",
-      "showMore": "عرض المزيد"
+      "showMore": "عرض المزيد",
+      "unreleased": "غير منشور"
     },
     "about": {
       "tagline": "استوديو تركيب الصوت مفتوح المصدر. استنسخ الأصوات، وولّد الكلام، وطبّق المؤثرات، وابنِ تطبيقات تعمل بالصوت — كل ذلك محليًا على جهازك.",
@@ -1334,6 +1416,213 @@
       "migrationFailed": "فشل النقل",
       "migrationFailedGeneric": "تعذّر نقل النماذج",
       "migrationConnectionLost": "انقطع الاتصال أثناء النقل"
+    },
+    "descriptions": {
+      "qwenTts17b": "تحويل نص إلى كلام عالي الجودة ومتعدد اللغات من Alibaba. يدعم 10 لغات بتنغيم طبيعي واستنساخ الصوت من مقطع مرجعي قصير.",
+      "qwenTts06b": "نسخة خفيفة من Qwen TTS. نفس اللغات المدعومة مع استدلال أسرع، مثالية للأجهزة الأقل قوة.",
+      "luxtts": "محرك خفيف لتحويل النص إلى كلام مبني على ZipVoice، مصمم لاستنساخ صوت عالي الجودة وتوليد كلام بتردد 48 كيلوهرتز بسرعة تتجاوز 150 ضعف الزمن الحقيقي.",
+      "chatterboxTts": "محرك مفتوح المصدر جاهز للإنتاج من Resemble AI لتحويل النص إلى كلام. يدعم 23 لغة مع استنساخ الصوت والتحكم في مبالغة العاطفة.",
+      "chatterboxTurbo": "محرك مبسّط بـ 350 مليون معامل من Resemble AI. كلام إنجليزي عالي الجودة بقدرة حسابية وذاكرة VRAM أقل من النماذج الأكبر.",
+      "tada1b": "HumeAI TADA 1B — نموذج كلام ولغة إنجليزي مبني على Llama 3.2 1B. يولّد أكثر من 700 ثانية من الصوت المتماسك مع مواءمة متزامنة بين النص والصوت.",
+      "tada3bMl": "HumeAI TADA 3B Multilingual — مبني على Llama 3.2 3B. يدعم 10 لغات مع استنساخ صوت عالي الدقة عبر مواءمة مزدوجة بين النص والصوت.",
+      "kokoro": "Kokoro 82M من hexgrad. محرك صغير بـ 82 مليون معامل يعمل في الزمن الحقيقي على المعالج المركزي. يدعم 8 لغات بأنماط أصوات جاهزة. مرخّص بموجب Apache 2.0.",
+      "omnivoice": "OmniVoice من k2-fsa. استنساخ صوت دون تدريب مسبق عبر نموذج لغة انتشاري، إضافة إلى تصميم الصوت حسب السمات (الجنس، العمر، طبقة الصوت، اللكنة). يغطي النموذج أكثر من 600 لغة؛ ويعرض Voicebox منها اللغات الـ 23 الموجودة في قائمته. الإخراج بتردد 24 كيلوهرتز. غير تجاري: الأوزان مرخّصة بموجب CC-BY-NC (الشيفرة بموجب Apache 2.0، ومرماز Higgs Audio V2 المضمَّن بموجب رخصة مجتمع Boson)، لذا لا تستخدم المخرجات تجاريًا.",
+      "qwenCustomVoice17b": "Qwen3-TTS CustomVoice 1.7B من Alibaba. تسعة أصوات جاهزة مميزة مع تحكم بالأسلوب عبر التعليمات في النبرة والعاطفة والتنغيم. يدعم 10 لغات.",
+      "qwenCustomVoice06b": "Qwen3-TTS CustomVoice 0.6B من Alibaba. نسخة خفيفة بالأصوات الجاهزة التسعة نفسها والتحكم بالتعليمات. استدلال أسرع للأجهزة الأقل قوة.",
+      "qwenVoiceDesign17b": "Qwen3-TTS VoiceDesign 1.7B من Alibaba. يبني صوتًا من وصف مكتوب بدلًا من صوت مرجعي أو صوت جاهز. يدعم اللغات العشر نفسها.",
+      "whisperBase": "أصغر نموذج Whisper (74 مليون معامل). تفريغ سريع بدقة متوسطة.",
+      "whisperSmall": "Whisper Small (244 مليون معامل). توازن جيد بين السرعة والدقة في التفريغ.",
+      "whisperMedium": "Whisper Medium (769 مليون معامل). تفريغ أدق بسرعة متوسطة.",
+      "whisperLarge": "Whisper Large (1.5 مليار معامل). أفضل دقة في تحويل الكلام إلى نص عبر لغات متعددة.",
+      "whisperTurbo": "Whisper Large v3 Turbo. مُقلَّص لاستدلال أسرع بكثير مع الحفاظ على دقة قريبة من Large.",
+      "qwen3_06b": "Qwen3 0.6B — أصغر نماذج عائلة Qwen3 Instruct. سريع جدًا على المعالج المركزي، ويحتاج نحو 400 ميغابايت بعد التكميم على Apple Silicon. مناسب لتحسين الإملاء والإكمالات القصيرة.",
+      "qwen3_17b": "Qwen3 1.7B — توازن بين الحجم والجودة. يتعامل مع التصحيحات الذاتية الدقيقة والمصطلحات التقنية أفضل من 0.6B. يحتاج نحو 1.1 غيغابايت بعد التكميم على Apple Silicon.",
+      "qwen3_4b": "Qwen3 4B — أعلى جودة للتحسين المحلي والاستدلال الأطول. نحو 2.5 غيغابايت بعد التكميم على Apple Silicon، ونحو 8 غيغابايت بالدقة الكاملة على PyTorch."
     }
+  },
+  "app": {
+    "loading": {
+      "tensors": "جارٍ تسخين الموترات…",
+      "synthesizer": "جارٍ معايرة محرك التركيب…",
+      "voiceModels": "جارٍ تهيئة نماذج الصوت…",
+      "neuralNetworks": "جارٍ تحميل الشبكات العصبية…",
+      "audioPipelines": "جارٍ تجهيز مسارات الصوت…",
+      "waveformGenerators": "جارٍ تحسين مولدات الموجات…",
+      "frequencyAnalyzers": "جارٍ ضبط محللات التردد…",
+      "voiceEmbeddings": "جارٍ بناء تمثيلات الأصوات…",
+      "ttsCores": "جارٍ تهيئة أنوية تحويل النص إلى كلام…",
+      "audioBuffers": "جارٍ مزامنة مخازن الصوت المؤقتة…",
+      "modelConnections": "جارٍ إنشاء اتصالات النماذج…",
+      "trainingData": "جارٍ المعالجة المسبقة لبيانات التدريب…",
+      "voiceSamples": "جارٍ التحقق من عينات الصوت…",
+      "inferenceEngines": "جارٍ تجميع محركات الاستدلال…",
+      "phonemes": "جارٍ ربط تسلسلات الفونيمات…",
+      "prosody": "جارٍ مواءمة معاملات التنغيم…",
+      "speechSynthesis": "جارٍ تفعيل تركيب الكلام…",
+      "acousticModels": "جارٍ ضبط النماذج الصوتية بدقة…",
+      "cloningMatrices": "جارٍ تجهيز مصفوفات استنساخ الصوت…",
+      "qwenFramework": "جارٍ تهيئة إطار Qwen TTS…"
+    },
+    "startup": {
+      "failed": "تعذّر بدء تشغيل الخادم",
+      "timeout": "تعذّر الاتصال بخادم Voicebox خلال دقيقتين. يرجى التحقق من أن الخادم يعمل ثم المحاولة مرة أخرى.",
+      "retry": "إعادة المحاولة"
+    }
+  },
+  "player": {
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "notLoaded": "لم يُحمَّل الصوت",
+    "position": "موضع التشغيل",
+    "toggleLoop": "تبديل التكرار",
+    "loop": "تكرار",
+    "stopLoop": "إيقاف التكرار",
+    "volume": "مستوى الصوت",
+    "volumeLevel": "مستوى الصوت: {{percent}}٪",
+    "mute": "كتم الصوت",
+    "unmute": "إلغاء كتم الصوت",
+    "close": "إغلاق المشغّل",
+    "errors": {
+      "audio": "خطأ في الصوت: {{message}}",
+      "waveform": "تعذّرت تهيئة الموجة الصوتية: {{message}}",
+      "load": "تعذّر تحميل الصوت: {{message}}",
+      "playback": "خطأ في التشغيل: {{message}}",
+      "notLoadedWait": "لم يُحمَّل الصوت بعد. يرجى الانتظار…",
+      "playbackTitle": "خطأ في التشغيل",
+      "playFileFailed": "تعذّر تشغيل الملف الصوتي",
+      "invalidDuration": "بيانات مدة الملف الصوتي غير صالحة",
+      "loadFile": "تعذّر تحميل الملف الصوتي"
+    }
+  },
+  "storyEditor": {
+    "volumeTitle": "مستوى الصوت — {{percent}}٪",
+    "adjustVolume": "ضبط مستوى صوت المقطع",
+    "clipVolume": "مستوى صوت المقطع",
+    "resize": "تغيير حجم محرر المسارات",
+    "playPause": "تشغيل/إيقاف مؤقت (مسافة)",
+    "split": "تقسيم عند مؤشر التشغيل",
+    "splitShortcut": "تقسيم عند مؤشر التشغيل (S)",
+    "duplicate": "تكرار المقطع",
+    "duplicateShortcut": "تكرار (Cmd/Ctrl+D)",
+    "delete": "حذف المقطع",
+    "deleteShortcut": "حذف (Delete/Backspace)",
+    "regenerate": "إعادة توليد المقطع",
+    "changeVersion": "تغيير النسخة/اللقطة",
+    "defaultVersion": "افتراضي",
+    "fxCount": "{{count}} مؤثر",
+    "zoomOut": "تصغير",
+    "zoomIn": "تكبير",
+    "seek": "التنقل في المخطط الزمني",
+    "addTrackAbove": "إضافة مسار في الأعلى",
+    "addTrackBelow": "إضافة مسار في الأسفل",
+    "trimStart": "قص البداية",
+    "trimEnd": "قص النهاية",
+    "zoomLeft": "التكبير من الحافة اليسرى",
+    "zoomRight": "التكبير من الحافة اليمنى",
+    "toast": {
+      "setVersionFailed": "تعذّر تعيين النسخة",
+      "trimFailed": "تعذّر قص المقطع",
+      "invalidSplit": "نقطة تقسيم غير صالحة",
+      "invalidSplitDescription": "يجب أن يكون مؤشر التشغيل داخل المقطع المحدد",
+      "splitFailed": "تعذّر تقسيم المقطع",
+      "duplicateFailed": "تعذّر تكرار المقطع",
+      "deleteFailed": "تعذّر حذف المقطع",
+      "moveFailed": "تعذّر نقل العنصر",
+      "volumeFailed": "تعذّر تحديث مستوى الصوت"
+    },
+    "zoomLabel": "التكبير:"
+  },
+  "sampleUpload": {
+    "title": "إضافة عينة صوتية",
+    "description": "ارفع ملفًا صوتيًا وأدخل النص المرجعي المطابق له.",
+    "uploading": "جارٍ الرفع…",
+    "validation": {
+      "fileRequired": "يرجى اختيار ملف صوتي",
+      "referenceTooLong": "يجب أن يكون النص المرجعي أقل من 1000 حرف"
+    },
+    "toast": {
+      "added": "تمت إضافة العينة",
+      "addedDescription": "تمت إضافة العينة الصوتية بنجاح."
+    }
+  },
+  "cloud": {
+    "title": "Voicebox Cloud",
+    "description": "نسخ احتياطي ومزامنة مشفّران من طرف إلى طرف عبر أجهزتك.",
+    "connected": "متصل",
+    "account": "الحساب",
+    "thisDevice": "هذا الجهاز",
+    "linkedAs": "مرتبط باسم {{device}}",
+    "loginHint": "سجّل الدخول لنسخ التقاطاتك وتوليداتك احتياطيًا ومزامنتها.",
+    "disconnect": "قطع الاتصال",
+    "disconnecting": "جارٍ قطع الاتصال…",
+    "waitingForBrowser": "بانتظار المتصفح…",
+    "opening": "جارٍ الفتح…",
+    "login": "تسجيل الدخول عبر المتصفح",
+    "manage": "الإدارة",
+    "manageDescription": "ألغِ ربط هذا الجهاز، أو أضف مفاتيح API، أو أدر الفوترة من حسابك.",
+    "openDashboard": "فتح لوحة الحساب",
+    "toast": {
+      "connected": "تم الاتصال بـ Voicebox Cloud",
+      "linkedAs": "مرتبط باسم {{device}}.",
+      "timedOut": "انتهت مهلة تسجيل الدخول",
+      "timedOutDescription": "لم يكتمل تسجيل الدخول في المتصفح. حاول مرة أخرى.",
+      "continueInBrowser": "تابع في المتصفح",
+      "continueInBrowserDescription": "امنح هذا الجهاز الإذن، ثم عُد إلى هنا.",
+      "startFailed": "تعذّر بدء تسجيل الدخول",
+      "disconnected": "تم قطع الاتصال",
+      "disconnectedDescription": "لم يعد هذا الجهاز مرتبطًا. يبقى المفتاح صالحًا حتى تلغيه من حسابك.",
+      "disconnectFailed": "تعذّر قطع الاتصال"
+    }
+  },
+  "generationPicker": {
+    "placeholder": "اختر توليدًا…",
+    "search": "البحث بالصوت أو النص…",
+    "empty": "لم يُعثر على توليدات"
+  },
+  "modelDownload": {
+    "connecting": "جارٍ الاتصال لبدء التنزيل…",
+    "processing": "جارٍ المعالجة…",
+    "complete": "اكتمل التنزيل",
+    "failed": "فشل التنزيل. راجع لوحة «المشكلات» للتفاصيل.",
+    "downloading": "جارٍ التنزيل…",
+    "extracting": "جارٍ فك الضغط…",
+    "trackFailed": "تعذّر تتبع تقدم التنزيل"
+  },
+  "recording": {
+    "errors": {
+      "noNavigator": "واجهة Navigator غير متاحة. قد تكون المشكلة في إعدادات Tauri.",
+      "noMicrophoneApp": "الوصول إلى الميكروفون غير متاح. يرجى التأكد مما يلي:\n1. للتطبيق إذن الميكروفون في إعدادات النظام (macOS: إعدادات النظام > الخصوصية والأمن > الميكروفون)\n2. أعدت تشغيل التطبيق بعد منح الإذن\n3. تستخدم Tauri v2 مع عارض ويب يدعم getUserMedia",
+      "noMicrophoneBrowser": "الوصول إلى الميكروفون غير متاح. يرجى التأكد من استخدام اتصال آمن (HTTPS أو localhost) ومن أن المتصفح يملك إذن الميكروفون.",
+      "generic": "حدث خطأ أثناء التسجيل",
+      "microphoneDenied": "تعذّر الوصول إلى الميكروفون. يرجى التحقق من الأذونات.",
+      "systemDesktopOnly": "التقاط صوت النظام متاح فقط في تطبيق سطح المكتب.",
+      "systemUnsupported": "التقاط صوت النظام غير مدعوم على هذه المنصة.",
+      "systemStartFailed": "تعذّر بدء التقاط صوت النظام. يرجى التحقق من الأذونات.",
+      "systemStopFailed": "تعذّر إيقاف التقاط صوت النظام."
+    },
+    "tooShort": "التسجيل قصير جدًا، أُلغي",
+    "refinementFailed": "فشل التحسين",
+    "uploadFailed": "فشل الرفع"
+  },
+  "files": {
+    "audio": "ملف صوتي",
+    "generation": "توليد Voicebox",
+    "profile": "ملف صوت Voicebox",
+    "text": "نص"
+  },
+  "versions": {
+    "original": "الأصلي",
+    "clean": "بدون معالجة",
+    "take": "اللقطة {{n}}",
+    "version": "النسخة {{n}}"
+  },
+  "toast": {
+    "label": "إشعار",
+    "viewportLabel": "الإشعارات ({hotkey})"
+  },
+  "keys": {
+    "space": "مسافة",
+    "ctrl": "Ctrl",
+    "shift": "Shift"
   }
 }

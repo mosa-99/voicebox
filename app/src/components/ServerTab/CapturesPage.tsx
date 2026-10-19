@@ -51,7 +51,7 @@ function ChordPreview({ keys }: { keys: string[] }) {
           >
             {displayLabelForKey(k)}
             {side ? (
-              <span className="absolute -top-1 -right-1 h-3 min-w-[0.75rem] px-0.5 rounded-sm bg-accent text-[7px] font-bold leading-none flex items-center justify-center text-accent-foreground">
+              <span className="absolute -top-1 -end-1 h-3 min-w-[0.75rem] px-0.5 rounded-sm bg-accent text-[7px] font-bold leading-none flex items-center justify-center text-accent-foreground">
                 {side}
               </span>
             ) : null}
@@ -284,7 +284,7 @@ export function CapturesPage() {
                 disabled={!hotkeyEnabled}
                 onClick={() => setChordEditor('push')}
               >
-                <Keyboard className="h-3.5 w-3.5 mr-1.5" />
+                <Keyboard className="h-3.5 w-3.5 me-1.5" />
                 {t('settings.captures.dictation.pushToTalk.change')}
               </Button>
             </div>
@@ -303,7 +303,7 @@ export function CapturesPage() {
                 disabled={!hotkeyEnabled}
                 onClick={() => setChordEditor('toggle')}
               >
-                <Keyboard className="h-3.5 w-3.5 mr-1.5" />
+                <Keyboard className="h-3.5 w-3.5 me-1.5" />
                 {t('settings.captures.dictation.toggle.change')}
               </Button>
             </div>
@@ -543,7 +543,7 @@ export function CapturesPage() {
             <label htmlFor="customLlmApiKey" className="block text-xs font-medium text-muted-foreground pt-1">
               {t('settings.captures.refinement.customEndpoint.apiKeyLabel')}
               {customLlmApiKeyConfigured ? (
-                <span className="ml-2 text-[10px] uppercase tracking-wide text-emerald-600">
+                <span className="ms-2 text-[10px] uppercase tracking-wide text-emerald-600">
                   {t('settings.captures.refinement.customEndpoint.apiKeyConfigured')}
                 </span>
               ) : null}
@@ -660,7 +660,7 @@ export function CapturesPage() {
               onClick={openCapturesFolder}
               disabled={opening || !capturesPath}
             >
-              <FolderOpen className="h-3.5 w-3.5 mr-1.5" />
+              <FolderOpen className="h-3.5 w-3.5 me-1.5" />
               {t('settings.captures.storage.folder.open')}
             </Button>
           }

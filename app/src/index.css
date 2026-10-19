@@ -118,6 +118,10 @@
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+  /* Arrows and chevrons that point "forward" flip in right-to-left (Arabic) layouts. */
+  [dir='rtl'] .rtl-mirror {
+    transform: scaleX(-1);
+  }
   /* Paths, URLs and code stay left-to-right inside right-to-left (Arabic) layouts. */
   [dir='rtl'] code,
   [dir='rtl'] kbd,

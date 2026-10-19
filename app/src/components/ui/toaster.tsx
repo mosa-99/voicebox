@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { usePlayerStore } from '@/stores/playerStore';
 import {
   Toast,
@@ -10,11 +11,12 @@ import {
 import { useToast } from './use-toast';
 
 export function Toaster() {
+  const { t } = useTranslation();
   const { toasts } = useToast();
   const isPlayerOpen = !!usePlayerStore((s) => s.audioUrl);
 
   return (
-    <ToastProvider>
+    <ToastProvider label={t('toast.label')}>
       {toasts.map(({ id, title, description, action, ...props }) => (
         <Toast key={id} {...props}>
           <div className="grid gap-1 flex-1 min-w-0">
@@ -22,10 +24,13 @@ export function Toaster() {
             {description && <ToastDescription>{description}</ToastDescription>}
           </div>
           {action}
-          <ToastClose />
+          <ToastClose aria-label={t('common.close')} />
         </Toast>
       ))}
-      <ToastViewport className={isPlayerOpen ? 'sm:bottom-44' : ''} />
+      <ToastViewport
+        label={t('toast.viewportLabel')}
+        className={isPlayerOpen ? 'sm:bottom-44' : ''}
+      />
     </ToastProvider>
   );
 }

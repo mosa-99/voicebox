@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useToast } from '@/components/ui/use-toast';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type { EffectConfig } from '@/lib/api/types';
 import { engineSupportsInstruct } from '@/lib/constants/engines';
@@ -81,8 +82,8 @@ export function useGenerationForm(options: UseGenerationFormOptions = {}) {
   ): Promise<void> {
     if (!selectedProfileId) {
       toast({
-        title: 'No profile selected',
-        description: 'Please select a voice profile from the cards above.',
+        title: i18n.t('generation.toast.noProfile'),
+        description: i18n.t('generation.toast.noProfileDescription'),
         variant: 'destructive',
       });
       return;
@@ -184,8 +185,9 @@ export function useGenerationForm(options: UseGenerationFormOptions = {}) {
       options.onSuccess?.(result.id);
     } catch (error) {
       toast({
-        title: 'Generation failed',
-        description: error instanceof Error ? error.message : 'Failed to generate audio',
+        title: i18n.t('generation.toast.failed'),
+        description:
+          error instanceof Error ? error.message : i18n.t('generation.toast.failedFallback'),
         variant: 'destructive',
       });
     } finally {

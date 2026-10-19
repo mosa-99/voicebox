@@ -254,7 +254,7 @@ export function DictationReadinessChecklist({
           ready={readiness.inputMonitoring}
           action={
             <Button size="sm" onClick={readiness.openInputMonitoringSettings} className="gap-1.5">
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="rtl-mirror h-3.5 w-3.5" />
               {t('captures.readiness.inputMonitoring.openSettings')}
             </Button>
           }
@@ -273,7 +273,7 @@ export function DictationReadinessChecklist({
           ready={readiness.accessibility}
           action={
             <Button size="sm" onClick={readiness.openAccessibilitySettings} className="gap-1.5">
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="rtl-mirror h-3.5 w-3.5" />
               {t('captures.readiness.accessibility.openSettings')}
             </Button>
           }

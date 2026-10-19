@@ -37,7 +37,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { apiClient } from '@/lib/api/client';
 import type { EffectConfig, PresetVoice, VoiceType } from '@/lib/api/types';
-import { LANGUAGE_CODES, LANGUAGE_OPTIONS, type LanguageCode } from '@/lib/constants/languages';
+import { getLanguageOptions, LANGUAGE_CODES, type LanguageCode } from '@/lib/constants/languages';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { useAudioRecording } from '@/lib/hooks/useAudioRecording';
 import {
@@ -750,9 +750,11 @@ export function ProfileForm() {
               });
             } catch (avatarError) {
               toast({
-                title: 'Avatar upload failed',
+                title: t('profileForm.toast.avatarUploadFailed'),
                 description:
-                  avatarError instanceof Error ? avatarError.message : 'Failed to upload avatar',
+                  avatarError instanceof Error
+                    ? avatarError.message
+                    : t('profileForm.toast.avatarUploadFailedFallback'),
                 variant: 'destructive',
               });
             }
@@ -900,7 +902,7 @@ export function ProfileForm() {
                     setDesignPrompt('');
                   }}
                 >
-                  <X className="h-3 w-3 mr-1" />
+                  <X className="h-3 w-3 me-1" />
                   {t('profileForm.discard')}
                 </Button>
               </div>
@@ -911,7 +913,7 @@ export function ProfileForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 min-h-0 flex flex-col">
               <div className="grid gap-6 grid-cols-2 flex-1 min-h-0 overflow-hidden">
                 {/* Left column: Sample management */}
-                <div className="space-y-4 border-r pr-6 overflow-y-auto min-h-0">
+                <div className="space-y-4 border-e pe-6 overflow-y-auto min-h-0">
                   {isCreating ? (
                     <>
                       {/* Voice source selector */}
@@ -1007,7 +1009,7 @@ export function ProfileForm() {
                           {/* Voice picker */}
                           <FormItem>
                             <FormLabel>{t('profileForm.fields.voice')}</FormLabel>
-                            <div className="grid grid-cols-2 gap-1.5 max-h-[340px] overflow-y-auto pr-1">
+                            <div className="grid grid-cols-2 gap-1.5 max-h-[340px] overflow-y-auto pe-1">
                               {presetVoices.map((voice: PresetVoice) => (
                                 <button
                                   key={voice.voice_id}
@@ -1019,7 +1021,7 @@ export function ProfileForm() {
                                       form.setValue('language', voice.language as LanguageCode);
                                     }
                                   }}
-                                  className={`text-left px-3 py-2 rounded-md border text-sm transition-colors ${
+                                  className={`text-start px-3 py-2 rounded-md border text-sm transition-colors ${
                                     selectedPresetVoiceId === voice.voice_id
                                       ? 'border-accent bg-accent/10 text-accent-foreground'
                                       : 'border-border hover:bg-muted'
@@ -1262,7 +1264,7 @@ export function ProfileForm() {
                                   type="button"
                                   onClick={handleRemoveAvatar}
                                   disabled={deleteAvatar.isPending}
-                                  className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground flex items-center justify-center hover:bg-background/80 hover:text-foreground transition-colors shadow-sm border border-border/50"
+                                  className="absolute bottom-0 end-0 h-6 w-6 rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground flex items-center justify-center hover:bg-background/80 hover:text-foreground transition-colors shadow-sm border border-border/50"
                                 >
                                   <X className="h-3.5 w-3.5" />
                                 </button>
@@ -1347,7 +1349,7 @@ export function ProfileForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {LANGUAGE_OPTIONS.map((lang) => (
+                            {getLanguageOptions().map((lang) => (
                               <SelectItem key={lang.value} value={lang.value}>
                                 {lang.label}
                               </SelectItem>

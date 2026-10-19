@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { FormControl } from '@/components/ui/form';
 import {
   Select,
@@ -128,6 +129,7 @@ interface EngineModelSelectorProps {
 }
 
 export function EngineModelSelector({ form, compact, selectedProfile }: EngineModelSelectorProps) {
+  const { t } = useTranslation();
   const engine = form.watch('engine') || 'qwen';
   const modelSize = form.watch('modelSize');
   const selectValue = getSelectValue(engine, modelSize);
@@ -156,7 +158,7 @@ export function EngineModelSelector({ form, compact, selectedProfile }: EngineMo
       <SelectContent side={compact ? 'top' : undefined}>
         {availableOptions.map((opt) => (
           <SelectItem key={opt.value} value={opt.value} className={itemClass}>
-            {opt.label}
+            {opt.value === 'omnivoice' ? t('generation.engine.omnivoice') : opt.label}
           </SelectItem>
         ))}
       </SelectContent>

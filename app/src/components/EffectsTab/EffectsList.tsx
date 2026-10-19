@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { apiClient } from '@/lib/api/client';
 import type { EffectPresetResponse } from '@/lib/api/types';
 import { cn } from '@/lib/utils/cn';
+import { formatEffectChain } from '@/lib/utils/format';
 import { useEffectsStore } from '@/stores/effectsStore';
 
 export function EffectsList() {
@@ -57,7 +58,7 @@ export function EffectsList() {
           <ListPaneTitle>{t('effects.title')}</ListPaneTitle>
           <ListPaneActions>
             <Button onClick={handleCreateNew} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               {t('effects.newPreset')}
             </Button>
           </ListPaneActions>
@@ -146,7 +147,7 @@ function PresetCard({
     <button
       type="button"
       className={cn(
-        'w-full text-left rounded-xl border p-3 h-[88px] transition-all duration-150',
+        'w-full text-start rounded-xl border p-3 h-[88px] transition-all duration-150',
         isSelected
           ? 'border-accent/50 bg-accent/10'
           : 'border-border bg-card hover:bg-muted/50 hover:border-border',
@@ -164,18 +165,15 @@ function PresetCard({
           </span>
         )}
       </div>
-      <p className="text-xs text-muted-foreground mt-1 line-clamp-1 pl-6">
+      <p className="text-xs text-muted-foreground mt-1 line-clamp-1 ps-6">
         {description || t('effects.noDescription')}
       </p>
-      <div className="flex items-center gap-2 mt-1.5 pl-6">
+      <div className="flex items-center gap-2 mt-1.5 ps-6">
         <span className="text-[10px] text-muted-foreground">
           {t('effects.effectCount', { count: effectCount })}
         </span>
         <span className="text-[10px] text-muted-foreground/50">
-          {preset.effects_chain
-            .filter((e) => e.enabled)
-            .map((e) => e.type)
-            .join(' → ')}
+          {formatEffectChain(preset.effects_chain.filter((e) => e.enabled))}
         </span>
       </div>
     </button>

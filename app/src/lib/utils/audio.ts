@@ -1,3 +1,5 @@
+import i18n from '@/i18n';
+
 export function createAudioUrl(audioId: string, serverUrl: string): string {
   return `${serverUrl}/audio/${audioId}`;
 }
@@ -56,13 +58,13 @@ export async function getAudioDuration(
         if (Number.isFinite(audio.duration) && audio.duration > 0) {
           resolve(audio.duration);
         } else {
-          reject(new Error('Audio file has invalid duration metadata'));
+          reject(new Error(i18n.t('player.errors.invalidDuration')));
         }
       });
 
       audio.addEventListener('error', () => {
         URL.revokeObjectURL(url);
-        reject(new Error('Failed to load audio file'));
+        reject(new Error(i18n.t('player.errors.loadFile')));
       });
 
       audio.src = url;

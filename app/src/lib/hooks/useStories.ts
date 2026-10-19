@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type {
   StoryCreate,
@@ -253,7 +254,7 @@ export function useExportStoryAudio() {
 
       await platform.filesystem.saveFile(filename, blob, [
         {
-          name: 'Audio File',
+          name: i18n.t('files.audio'),
           extensions: [format],
         },
       ]);

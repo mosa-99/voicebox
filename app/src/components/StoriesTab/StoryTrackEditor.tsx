@@ -15,6 +15,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import WaveSurfer from 'wavesurfer.js';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +27,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/components/ui/use-toast';
+import i18n from '@/i18n';
 import { apiClient } from '@/lib/api/client';
 import type { StoryItemDetail } from '@/lib/api/types';
 import {
@@ -38,6 +40,7 @@ import {
   useUpdateStoryItemVolume,
 } from '@/lib/hooks/useStories';
 import { cn } from '@/lib/utils/cn';
+import { formatVersionLabel } from '@/lib/utils/format';
 import { useGenerationStore } from '@/stores/generationStore';
 import { useStoryStore } from '@/stores/storyStore';
 
@@ -149,6 +152,7 @@ function ClipVolumePopover({
   volume: number;
   onChange: (value: number) => void;
 }) {
+  const { t } = useTranslation();
   const [localVolume, setLocalVolume] = useState(volume);
   // Re-sync when the selected clip changes or the persisted value updates
   // out-of-band (split/duplicate carry the value forward).
@@ -166,15 +170,15 @@ function ClipVolumePopover({
           variant="ghost"
           size="icon"
           className="h-7 w-7"
-          title={`Volume — ${display}%`}
-          aria-label="Adjust clip volume"
+          title={t('storyEditor.volumeTitle', { percent: display })}
+          aria-label={t('storyEditor.adjustVolume')}
         >
           <Icon className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="center" className="w-56 p-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-muted-foreground">Volume</span>
+          <span className="text-xs text-muted-foreground">{t('player.volume')}</span>
           <span className="text-xs tabular-nums">{display}%</span>
         </div>
         <Slider
@@ -184,7 +188,7 @@ function ClipVolumePopover({
           min={0}
           max={200}
           step={1}
-          aria-label="Clip volume"
+          aria-label={t('storyEditor.clipVolume')}
         />
         <div className="flex justify-between mt-2 text-[10px] text-muted-foreground tabular-nums">
           <span>0%</span>
@@ -216,6 +220,7 @@ const MIN_EDITOR_HEIGHT = 120;
 const MAX_EDITOR_HEIGHT = 500;
 
 export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
+  const { t } = useTranslation();
   const [pixelsPerSecond, setPixelsPerSecond] = useState(FALLBACK_PIXELS_PER_SECOND);
   const hasAppliedDefaultZoomRef = useRef(false);
   const [draggingItem, setDraggingItem] = useState<string | null>(null);
@@ -259,7 +264,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
     // If the item has a pinned version_id, find its label
     if (selectedItem.version_id) {
       const pinned = selectedItemVersions.find((v) => v.id === selectedItem.version_id);
-      return pinned?.label ?? null;
+      return pinned ? formatVersionLabel(pinned.label) : null;
     }
     // Otherwise use the generation's default version
     const defaultVersion = selectedItemVersions.find((v) => v.is_default);
@@ -278,7 +283,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
         {
           onError: (error) => {
             toast({
-              title: 'Failed to set version',
+              title: i18n.t('storyEditor.toast.setVersionFailed'),
               description: error instanceof Error ? error.message : String(error),
               variant: 'destructive',
             });
@@ -669,7 +674,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
         {
           onError: (error) => {
             toast({
-              title: 'Failed to trim clip',
+              title: i18n.t('storyEditor.toast.trimFailed'),
               description: error instanceof Error ? error.message : String(error),
               variant: 'destructive',
             });
@@ -698,8 +703,8 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
 
     if (splitTimeMs <= 0 || splitTimeMs >= effectiveDuration) {
       toast({
-        title: 'Invalid split point',
-        description: 'Playhead must be within the selected clip',
+        title: i18n.t('storyEditor.toast.invalidSplit'),
+        description: i18n.t('storyEditor.toast.invalidSplitDescription'),
         variant: 'destructive',
       });
       return;
@@ -717,7 +722,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
         },
         onError: (error) => {
           toast({
-            title: 'Failed to split clip',
+            title: i18n.t('storyEditor.toast.splitFailed'),
             description: error instanceof Error ? error.message : String(error),
             variant: 'destructive',
           });
@@ -746,7 +751,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
       {
         onError: (error) => {
           toast({
-            title: 'Failed to duplicate clip',
+            title: i18n.t('storyEditor.toast.duplicateFailed'),
             description: error instanceof Error ? error.message : String(error),
             variant: 'destructive',
           });
@@ -769,7 +774,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
         },
         onError: (error) => {
           toast({
-            title: 'Failed to delete clip',
+            title: i18n.t('storyEditor.toast.deleteFailed'),
             description: error instanceof Error ? error.message : String(error),
             variant: 'destructive',
           });
@@ -785,7 +790,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
       addPendingGeneration(selectedItem.generation_id);
     } catch (error) {
       toast({
-        title: 'Failed to regenerate',
+        title: i18n.t('storyContent.toast.regenerateFailed'),
         description: error instanceof Error ? error.message : String(error),
         variant: 'destructive',
       });
@@ -922,7 +927,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
         {
           onError: (error) => {
             toast({
-              title: 'Failed to move item',
+              title: i18n.t('storyEditor.toast.moveFailed'),
               description: error instanceof Error ? error.message : String(error),
               variant: 'destructive',
             });
@@ -1081,7 +1086,11 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
+    // Waveforms and timelines run left-to-right in every UI language.
+    <div
+      dir="ltr"
+      className="fixed bottom-0 start-0 end-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50"
+    >
       <div
         className="border-t bg-background/30 backdrop-blur-2xl overflow-hidden relative"
         ref={containerRef}
@@ -1089,9 +1098,9 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
         {/* Resize handle at top */}
         <button
           type="button"
-          className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize flex items-center justify-center hover:bg-muted/50 transition-colors z-20 group"
+          className="absolute top-0 start-0 end-0 h-2 cursor-ns-resize flex items-center justify-center hover:bg-muted/50 transition-colors z-20 group"
           onMouseDown={handleResizeStart}
-          aria-label="Resize track editor"
+          aria-label={t('storyEditor.resize')}
         >
           <GripHorizontal className="h-3 w-3 text-muted-foreground/50 group-hover:text-muted-foreground" />
         </button>
@@ -1105,8 +1114,8 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               size="icon"
               className="h-7 w-7"
               onClick={handlePlayPause}
-              title="Play/Pause (Space)"
-              aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
+              title={t('storyEditor.playPause')}
+              aria-label={isCurrentlyPlaying ? t('player.pause') : t('player.play')}
             >
               {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
@@ -1116,11 +1125,11 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               className="h-7 w-7"
               onClick={handleStop}
               disabled={!isCurrentlyPlaying}
-              aria-label="Stop"
+              aria-label={t('sampleList.player.stop')}
             >
               <Square className="h-3 w-3" />
             </Button>
-            <span className="text-xs text-muted-foreground tabular-nums ml-2">
+            <span className="text-xs text-muted-foreground tabular-nums ms-2">
               {formatTime(currentTimeMs)} / {formatTime(totalDurationMs)}
             </span>
           </div>
@@ -1133,8 +1142,8 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                 size="icon"
                 className="h-7 w-7"
                 onClick={handleSplit}
-                title="Split at playhead (S)"
-                aria-label="Split at playhead"
+                title={t('storyEditor.splitShortcut')}
+                aria-label={t('storyEditor.split')}
               >
                 <Scissors className="h-4 w-4" />
               </Button>
@@ -1143,8 +1152,8 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                 size="icon"
                 className="h-7 w-7"
                 onClick={handleDuplicate}
-                title="Duplicate (Cmd/Ctrl+D)"
-                aria-label="Duplicate clip"
+                title={t('storyEditor.duplicateShortcut')}
+                aria-label={t('storyEditor.duplicate')}
               >
                 <Copy className="h-4 w-4" />
               </Button>
@@ -1163,7 +1172,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                       {
                         onError: (error) => {
                           toast({
-                            title: 'Failed to update volume',
+                            title: i18n.t('storyEditor.toast.volumeFailed'),
                             description: error instanceof Error ? error.message : String(error),
                             variant: 'destructive',
                           });
@@ -1178,8 +1187,8 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                 size="icon"
                 className="h-7 w-7"
                 onClick={handleDelete}
-                title="Delete (Delete/Backspace)"
-                aria-label="Delete clip"
+                title={t('storyEditor.deleteShortcut')}
+                aria-label={t('storyEditor.delete')}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -1189,8 +1198,8 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                   size="icon"
                   className="h-7 w-7"
                   onClick={handleRegenerate}
-                  title="Regenerate"
-                  aria-label="Regenerate clip"
+                  title={t('storyContent.itemActions.regenerate')}
+                  aria-label={t('storyEditor.regenerate')}
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>
@@ -1203,11 +1212,11 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                       <Button
                         variant="ghost"
                         className="h-7 gap-1.5 px-2 text-xs"
-                        title="Change version/take"
+                        title={t('storyEditor.changeVersion')}
                       >
                         <GalleryVerticalEnd className="h-3.5 w-3.5" />
                         <span className="max-w-[80px] truncate">
-                          {activeVersionLabel ?? 'default'}
+                          {activeVersionLabel ?? t('storyEditor.defaultVersion')}
                         </span>
                       </Button>
                     </DropdownMenuTrigger>
@@ -1225,10 +1234,10 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                             <Check
                               className={cn('h-3 w-3', isActive ? 'opacity-100' : 'opacity-0')}
                             />
-                            <span className="truncate">{version.label}</span>
+                            <span className="truncate">{formatVersionLabel(version.label)}</span>
                             {version.effects_chain && version.effects_chain.length > 0 && (
-                              <span className="text-muted-foreground ml-auto text-[10px]">
-                                {version.effects_chain.length} fx
+                              <span className="text-muted-foreground ms-auto text-[10px]">
+                                {t('storyEditor.fxCount', { count: version.effects_chain.length })}
                               </span>
                             )}
                           </DropdownMenuItem>
@@ -1243,13 +1252,13 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
 
           {/* Zoom controls - right side */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Zoom:</span>
+            <span className="text-xs text-muted-foreground">{t('storyEditor.zoomLabel')}</span>
             <Button
               variant="ghost"
               size="icon"
               className="h-6 w-6"
               onClick={handleZoomOut}
-              aria-label="Zoom out"
+              aria-label={t('storyEditor.zoomOut')}
             >
               <Minus className="h-3 w-3" />
             </Button>
@@ -1258,7 +1267,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               size="icon"
               className="h-6 w-6"
               onClick={handleZoomIn}
-              aria-label="Zoom in"
+              aria-label={t('storyEditor.zoomIn')}
             >
               <Plus className="h-3 w-3" />
             </Button>
@@ -1280,13 +1289,13 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
             className="flex sticky top-0 z-30"
             style={{ width: `${timelineWidth + LABEL_COL_WIDTH}px` }}
           >
-            <div className="w-16 h-6 shrink-0 border-b border-r bg-muted/30 sticky left-0 z-40" />
+            <div className="w-16 h-6 shrink-0 border-b border-e bg-muted/30 sticky start-0 z-40" />
             <button
               type="button"
-              className="h-6 border-b bg-muted/20 cursor-pointer text-left relative"
+              className="h-6 border-b bg-muted/20 cursor-pointer text-start relative"
               style={{ width: `${timelineWidth}px` }}
               onClick={handleTimelineClick}
-              aria-label="Seek timeline"
+              aria-label={t('storyEditor.seek')}
             >
               {timeMarkers.map((ms) => (
                 <div
@@ -1295,7 +1304,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                   style={{ left: `${msToPixels(ms)}px` }}
                 >
                   <div className="h-2 w-px bg-border" />
-                  <span className="text-[10px] text-muted-foreground ml-1 select-none">
+                  <span className="text-[10px] text-muted-foreground ms-1 select-none">
                     {formatTime(ms)}
                   </span>
                 </div>
@@ -1318,13 +1327,13 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               return (
                 <div
                   key={trackNumber}
-                  className="absolute left-0 right-0 flex"
+                  className="absolute start-0 end-0 flex"
                   style={{
                     top: `${index * TRACK_HEIGHT}px`,
                     height: `${TRACK_HEIGHT}px`,
                   }}
                 >
-                  <div className="w-16 shrink-0 border-b border-r flex items-center justify-center sticky left-0 z-20 h-full bg-background">
+                  <div className="w-16 shrink-0 border-b border-e flex items-center justify-center sticky start-0 z-20 h-full bg-background">
                     <div className="absolute inset-0 bg-muted/20 pointer-events-none" />
                     <span className="relative text-[10px] text-muted-foreground select-none">
                       {trackNumber}
@@ -1333,9 +1342,9 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                       <button
                         type="button"
                         onClick={handleAddTrackAbove}
-                        title="Add track above"
-                        aria-label="Add track above"
-                        className="absolute top-0 right-0 left-0 h-3 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
+                        title={t('storyEditor.addTrackAbove')}
+                        aria-label={t('storyEditor.addTrackAbove')}
+                        className="absolute top-0 end-0 start-0 h-3 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
                       >
                         <Plus className="h-2.5 w-2.5" />
                       </button>
@@ -1344,9 +1353,9 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                       <button
                         type="button"
                         onClick={handleAddTrackBelow}
-                        title="Add track below"
-                        aria-label="Add track below"
-                        className="absolute bottom-0 right-0 left-0 h-3 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
+                        title={t('storyEditor.addTrackBelow')}
+                        aria-label={t('storyEditor.addTrackBelow')}
+                        className="absolute bottom-0 end-0 start-0 h-3 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
                       >
                         <Plus className="h-2.5 w-2.5" />
                       </button>
@@ -1372,7 +1381,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                 type="button"
                 className="absolute inset-0 z-0 cursor-pointer"
                 onClick={handleTimelineClick}
-                aria-label="Seek timeline"
+                aria-label={t('storyEditor.seek')}
               />
 
               {/* Audio clips */}
@@ -1425,7 +1434,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                       }}
                     >
                       {/* Clip label */}
-                      <div className="absolute top-0 left-1 right-1 z-10">
+                      <div className="absolute top-0 start-1 end-1 z-10">
                         <p className="text-[9px] font-medium text-accent-foreground truncate">
                           {item.engine === 'import' ? item.text : item.profile_name}
                         </p>
@@ -1449,16 +1458,16 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                         {/* Left trim handle */}
                         <button
                           type="button"
-                          className="trim-handle absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/30 bg-primary/20 z-30 rounded-l"
+                          className="trim-handle absolute start-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/30 bg-primary/20 z-30 rounded-s"
                           onMouseDown={(e) => handleTrimStart(e, item, 'start')}
-                          aria-label="Trim start"
+                          aria-label={t('storyEditor.trimStart')}
                         />
                         {/* Right trim handle */}
                         <button
                           type="button"
-                          className="trim-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/30 bg-primary/20 z-30 rounded-r"
+                          className="trim-handle absolute end-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/30 bg-primary/20 z-30 rounded-e"
                           onMouseDown={(e) => handleTrimStart(e, item, 'end')}
-                          aria-label="Trim end"
+                          aria-label={t('storyEditor.trimEnd')}
                         />
                       </>
                     )}
@@ -1482,7 +1491,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
           className="flex border-t bg-background/40"
           style={{ height: `${SCRUB_BAR_HEIGHT}px` }}
         >
-          <div className="w-16 shrink-0 border-r" />
+          <div className="w-16 shrink-0 border-e" />
           <div
             ref={scrollbarTrackRef}
             className="relative flex-1 overflow-hidden select-none px-1"
@@ -1495,18 +1504,18 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               {/* biome-ignore lint/a11y/noStaticElementInteractions: mouse-driven edge handle */}
               <div
                 role="slider"
-                aria-label="Zoom from left edge"
+                aria-label={t('storyEditor.zoomLeft')}
                 aria-valuenow={Math.round(pixelsPerSecond)}
                 aria-valuemin={Math.round(minPps)}
                 aria-valuemax={Math.round(maxPps)}
-                className="absolute top-0 bottom-0 left-0 w-1.5 cursor-ew-resize bg-foreground/25 hover:bg-foreground/40 transition-colors rounded-l-full"
+                className="absolute top-0 bottom-0 start-0 w-1.5 cursor-ew-resize bg-foreground/25 hover:bg-foreground/40 transition-colors rounded-s-full"
                 onMouseDown={handleScrollbarMouseDown('left')}
               />
               {/* Pan area */}
               {/* biome-ignore lint/a11y/noStaticElementInteractions: mouse-driven drag area */}
               <div
                 className={cn(
-                  'absolute top-0 bottom-0 left-1.5 right-1.5',
+                  'absolute top-0 bottom-0 start-1.5 end-1.5',
                   canScrollHorizontally ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
                 )}
                 onMouseDown={canScrollHorizontally ? handleScrollbarMouseDown('pan') : undefined}
@@ -1515,11 +1524,11 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               {/* biome-ignore lint/a11y/noStaticElementInteractions: mouse-driven edge handle */}
               <div
                 role="slider"
-                aria-label="Zoom from right edge"
+                aria-label={t('storyEditor.zoomRight')}
                 aria-valuenow={Math.round(pixelsPerSecond)}
                 aria-valuemin={Math.round(minPps)}
                 aria-valuemax={Math.round(maxPps)}
-                className="absolute top-0 bottom-0 right-0 w-1.5 cursor-ew-resize bg-foreground/25 hover:bg-foreground/40 transition-colors rounded-r-full"
+                className="absolute top-0 bottom-0 end-0 w-1.5 cursor-ew-resize bg-foreground/25 hover:bg-foreground/40 transition-colors rounded-e-full"
                 onMouseDown={handleScrollbarMouseDown('right')}
               />
             </div>
