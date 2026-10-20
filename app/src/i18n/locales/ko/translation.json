@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "번역할 언어",
-          "description": "번역 단축키가 출력하는 언어입니다."
+          "description": "번역 단축키가 출력하는 언어입니다. 받아쓰는 중에 영어, 독일어 또는 아랍어로 말할 수도 있습니다(예: “translate this into German: …”)."
         },
         "chordPicker": {
           "pttTitle": "푸시투톡 단축키 설정",

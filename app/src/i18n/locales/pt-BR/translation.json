@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "Traduzir para",
-          "description": "O idioma para o qual o atalho de tradução traduz."
+          "description": "O idioma para o qual o atalho de tradução traduz. Você também pode dizê-lo ao ditar, em inglês, alemão ou árabe, por exemplo “translate this into German: …”."
         },
         "chordPicker": {
           "pttTitle": "Definir atalho de apertar para falar",

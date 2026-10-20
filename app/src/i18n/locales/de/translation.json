@@ -1014,7 +1014,7 @@
         },
         "translateTo": {
           "title": "Übersetzen in",
-          "description": "Die Sprache, in die das Übersetzungs-Kürzel übersetzt."
+          "description": "Die Sprache, in die das Übersetzungs-Kürzel übersetzt. Du kannst sie auch beim Diktieren sagen (auf Deutsch, Englisch oder Arabisch), z. B. „…, übersetze das auf Arabisch“."
         },
         "chordPicker": {
           "pttTitle": "Tastenkürzel zum Sprechen festlegen",

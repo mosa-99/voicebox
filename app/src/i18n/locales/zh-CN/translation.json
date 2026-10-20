@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "翻译为",
-          "description": "翻译快捷键输出的语言。"
+          "description": "翻译快捷键输出的语言。听写时也可以用英语、德语或阿拉伯语说出来，例如“translate this into German: …”。"
         },
         "chordPicker": {
           "pttTitle": "设置按住说话快捷键",
