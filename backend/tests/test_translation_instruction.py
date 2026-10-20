@@ -28,6 +28,8 @@ from backend.services.translation_instruction import split_translation_instructi
         # An instruction without a language: dropped, default target.
         ("ترجم الجملة التالية البحث عن فرص عمل في ألمانيا", None, "البحث عن فرص عمل في ألمانيا"),
         ("سأتأخر غدا ترجم هذا إلى الألمانية", "de", "سأتأخر غدا"),
+        # Whisper's spelling of الإنجليزية in a real capture.
+        ("أنا متعب اليوم، ترجم هذا إلى الاندليزية.", "en", "أنا متعب اليوم"),
         ("من فضلك ترجم إلى الإنجليزية من أين أنت", "en", "من أين أنت"),
         ("ترجم من العربية إلى الألمانية أنا جائع", "de", "أنا جائع"),
         ("ترجم لي هذا النص بالعربي إلى الإنجليزية أنا جائع", "en", "أنا جائع"),
