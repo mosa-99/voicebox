@@ -13,7 +13,7 @@
 //! AppKit accepts those.
 
 use tauri::menu::{
-    AboutMetadata, Menu, PredefinedMenuItem, Submenu, HELP_SUBMENU_ID, WINDOW_SUBMENU_ID,
+    AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu, HELP_SUBMENU_ID, WINDOW_SUBMENU_ID,
 };
 use tauri::{AppHandle, Runtime};
 
@@ -40,6 +40,20 @@ pub(crate) struct Labels {
     pub(crate) help: &'static str,
     /// Menu bar icon: bring the main window back.
     pub(crate) tray_open: &'static str,
+    pub(crate) settings: &'static str,
+    pub(crate) check_updates: &'static str,
+    pub(crate) start_dictation: &'static str,
+    pub(crate) stop_dictation: &'static str,
+    pub(crate) copy_last: &'static str,
+    pub(crate) captures: &'static str,
+    pub(crate) voices: &'static str,
+    pub(crate) launch_at_login: &'static str,
+    pub(crate) status_starting: &'static str,
+    pub(crate) status_ready: &'static str,
+    pub(crate) status_offline: &'static str,
+    pub(crate) status_recording: &'static str,
+    pub(crate) status_processing: &'static str,
+    pub(crate) status_speaking: &'static str,
 }
 
 // Wording follows each language's standard macOS menu titles.
@@ -65,6 +79,20 @@ const EN: Labels = Labels {
     zoom: "Zoom",
     help: "Help",
     tray_open: "Open Voicebox",
+    settings: "Settings…",
+    check_updates: "Check for Updates…",
+    start_dictation: "Start Dictation",
+    stop_dictation: "Stop Dictation",
+    copy_last: "Copy Last Transcript",
+    captures: "Captures",
+    voices: "Voices",
+    launch_at_login: "Start at Login",
+    status_starting: "Starting…",
+    status_ready: "Ready",
+    status_offline: "Server not running",
+    status_recording: "Recording…",
+    status_processing: "Transcribing…",
+    status_speaking: "Speaking…",
 };
 
 const DE: Labels = Labels {
@@ -89,6 +117,20 @@ const DE: Labels = Labels {
     zoom: "Zoomen",
     help: "Hilfe",
     tray_open: "Voicebox öffnen",
+    settings: "Einstellungen …",
+    check_updates: "Nach Updates suchen …",
+    start_dictation: "Diktat starten",
+    stop_dictation: "Diktat beenden",
+    copy_last: "Letztes Transkript kopieren",
+    captures: "Mitschnitte",
+    voices: "Stimmen",
+    launch_at_login: "Bei der Anmeldung starten",
+    status_starting: "Wird gestartet …",
+    status_ready: "Bereit",
+    status_offline: "Server läuft nicht",
+    status_recording: "Aufnahme läuft …",
+    status_processing: "Wird transkribiert …",
+    status_speaking: "Spricht …",
 };
 
 const AR: Labels = Labels {
@@ -113,6 +155,20 @@ const AR: Labels = Labels {
     zoom: "تكبير/تصغير",
     help: "مساعدة",
     tray_open: "فتح Voicebox",
+    settings: "الإعدادات…",
+    check_updates: "البحث عن تحديثات…",
+    start_dictation: "بدء الإملاء",
+    stop_dictation: "إيقاف الإملاء",
+    copy_last: "نسخ آخر نص",
+    captures: "الالتقاطات",
+    voices: "الأصوات",
+    launch_at_login: "التشغيل عند تسجيل الدخول",
+    status_starting: "جارٍ البدء…",
+    status_ready: "جاهز",
+    status_offline: "الخادم لا يعمل",
+    status_recording: "جارٍ التسجيل…",
+    status_processing: "جارٍ التفريغ…",
+    status_speaking: "يتحدث…",
 };
 
 pub(crate) fn labels(lang: &str) -> &'static Labels {
@@ -142,6 +198,21 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, lang: &str) -> tauri::Result<Menu<R
         true,
         &[
             &PredefinedMenuItem::about(app, Some(l.about), Some(about_metadata))?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(
+                app,
+                crate::tray::ITEM_SETTINGS,
+                l.settings,
+                true,
+                Some("CmdOrCtrl+,"),
+            )?,
+            &MenuItem::with_id(
+                app,
+                crate::tray::ITEM_CHECK_UPDATES,
+                l.check_updates,
+                true,
+                None::<&str>,
+            )?,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::services(app, Some(l.services))?,
             &PredefinedMenuItem::separator(app)?,
@@ -211,8 +282,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, lang: &str) -> tauri::Result<Menu<R
 /// Rebuild the menu bar (and the menu bar icon's menu) in `lang`. Called by the frontend on startup and
 /// whenever the user switches the display language.
 #[tauri::command]
-pub fn set_menu_language<R: Runtime>(app: AppHandle<R>, lang: String) -> Result<(), String> {
-    crate::background::relabel_tray(&app, &lang);
+pub fn set_menu_language(app: AppHandle, lang: String) -> Result<(), String> {
+    crate::tray::set_language(&app, &lang);
     if !cfg!(target_os = "macos") {
         return Ok(());
     }
