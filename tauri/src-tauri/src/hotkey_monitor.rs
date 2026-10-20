@@ -5,7 +5,8 @@
 //! longest-match resolution, sticky-toggle semantics); this module's only
 //! job is:
 //!
-//!   1. Build a `ChordMatcher` from the user's saved PTT + Toggle chords.
+//!   1. Build a `ChordMatcher` from the user's saved PTT, Toggle and
+//!      Translate chords.
 //!   2. Translate `ChordEvent` → voicebox's [`Effect`] on a dispatcher
 //!      thread.
 //!   3. Fan [`Effect`]s out into Tauri events + dictate-window show/hide.
@@ -43,11 +44,13 @@ use crate::DICTATE_WINDOW_LABEL;
 
 /// Semantic action a chord can be bound to. `PushToTalk` = hold chord to
 /// record, release to stop. `ToggleToTalk` = press chord to start recording,
-/// press again to stop.
+/// press again to stop. `Translate` = like push-to-talk, but the transcript
+/// is translated before it's pasted.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ChordAction {
     PushToTalk,
     ToggleToTalk,
+    Translate,
 }
 
 /// Effect produced after the chord matcher resolves an event. Hosts
@@ -167,6 +170,14 @@ fn build_matcher(bindings: &Bindings) -> Result<ChordMatcher<ChordAction>, keyta
             );
         }
     }
+    // Momentary like push-to-talk. Its default is the push-to-talk chord plus
+    // Shift, so adding Shift mid-hold arrives as a RestartRecording(Translate)
+    // upgrade rather than a fresh start.
+    if let Some(keys) = bindings.get(&ChordAction::Translate) {
+        if !keys.is_empty() {
+            builder = builder.add(ChordAction::Translate, Chord::of(keys.iter().copied()));
+        }
+    }
     builder.build()
 }
 
@@ -243,7 +254,7 @@ pub fn stop_dictation(app: &AppHandle) {
 
 fn apply_effect(app: &AppHandle, effect: Effect) {
     match effect {
-        Effect::StartRecording(_) => {
+        Effect::StartRecording(action) => {
             // Snapshot focus BEFORE we touch the window — any AppKit
             // reshuffle triggered by set_position / show could in principle
             // steal key focus and poison the reading. In practice those
@@ -283,7 +294,10 @@ fn apply_effect(app: &AppHandle, effect: Effect) {
                 // it out of whatever app the user was typing in, which is
                 // the opposite of what a dictation overlay should do.
                 let _ = window.show();
-                let payload = serde_json::json!({ "focus": focus });
+                let payload = serde_json::json!({
+                    "focus": focus,
+                    "translate": action == ChordAction::Translate,
+                });
                 let _ = window.emit("dictate:start", payload);
             }
         }
@@ -292,9 +306,14 @@ fn apply_effect(app: &AppHandle, effect: Effect) {
                 let _ = window.emit("dictate:stop", ());
             }
         }
-        Effect::RestartRecording(_) => {
+        Effect::RestartRecording(action) => {
+            // The recording keeps running; the frontend only learns whether
+            // the chord it turned into translates (PTT + Shift held).
             if let Some(window) = app.get_webview_window(DICTATE_WINDOW_LABEL) {
-                let _ = window.emit("dictate:restart", ());
+                let payload = serde_json::json!({
+                    "translate": action == ChordAction::Translate,
+                });
+                let _ = window.emit("dictate:restart", payload);
             }
         }
     }

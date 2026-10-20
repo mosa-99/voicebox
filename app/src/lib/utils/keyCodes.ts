@@ -74,11 +74,15 @@ export function canonicalKeyFromEvent(event: KeyboardEvent): string | null {
 const PLATFORM_IS_MAC =
   typeof navigator !== 'undefined' && /mac/i.test(navigator.platform);
 
-export function defaultChordKeys(mode: 'push' | 'toggle'): string[] {
+export function defaultChordKeys(mode: 'push' | 'toggle' | 'translate'): string[] {
   const base = PLATFORM_IS_MAC
     ? ['MetaRight', 'AltGr']
     : ['ControlRight', 'ShiftRight'];
-  return mode === 'toggle' ? [...base, 'Space'] : base;
+  if (mode === 'toggle') return [...base, 'Space'];
+  // Mirrors backend default_translate_chord: push-to-talk plus Shift, or
+  // plus right Alt where push-to-talk already holds Shift.
+  if (mode === 'translate') return [...base, PLATFORM_IS_MAC ? 'ShiftRight' : 'AltGr'];
+  return base;
 }
 
 /**

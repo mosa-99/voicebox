@@ -13,7 +13,9 @@ import { useCaptureRecordingSession } from '@/lib/hooks/useCaptureRecordingSessi
  *
  * The pill surfaces for two independent cycles:
  *   1. User dictation — driven by ``dictate:start`` / ``dictate:stop``
- *      from the Rust hotkey monitor.
+ *      from the Rust hotkey monitor. ``translate`` on the start payload (or
+ *      on a ``dictate:restart`` upgrade, when Shift joins the held chord)
+ *      marks a translate dictation.
  *   2. Agent speech — driven by ``dictate:speak-start`` / ``dictate:speak-end``
  *      from the Rust ``speak_monitor`` (which owns the backend SSE stream).
  *      On speak-start we subscribe to this single generation's status SSE,
@@ -74,9 +76,16 @@ export function DictateWindow() {
   useEffect(() => {
     const unlistens: Promise<UnlistenFn>[] = [];
     unlistens.push(
-      listen<{ focus: FocusSnapshot | null }>('dictate:start', (event) => {
+      listen<{ focus: FocusSnapshot | null; translate?: boolean }>('dictate:start', (event) => {
         focusRef.current = event.payload?.focus ?? null;
-        sessionRef.current.startRecording();
+        sessionRef.current.startRecording({ translate: Boolean(event.payload?.translate) });
+      }),
+    );
+    unlistens.push(
+      listen<{ translate?: boolean }>('dictate:restart', (event) => {
+        // No isRecording check: Shift often lands a few ms after the
+        // dictation keys, before the microphone has actually started.
+        if (event.payload?.translate) sessionRef.current.markTranslate();
       }),
     );
     unlistens.push(
@@ -294,6 +303,7 @@ export function DictateWindow() {
         <CapturePill
           state={effectiveState}
           elapsedMs={effectiveElapsed}
+          translate={!isSpeaking && session.translateMode}
           errorMessage={session.errorMessage}
           onDismiss={session.dismissError}
           onStop={session.isRecording ? session.stopRecording : undefined}

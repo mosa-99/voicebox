@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "精修",
       "raw": "原始",
+      "translated": "译文",
       "refinedHint": "由 Qwen3 · {{model}} 精修",
-      "rawHint": "由 Whisper {{model}} 转录"
+      "rawHint": "由 Whisper {{model}} 转录",
+      "translatedHint": "由 Qwen3 · {{model}} 翻译（{{language}}）"
     },
     "actions": {
       "configure": "配置",
@@ -99,6 +101,7 @@
       "recording": "录制中",
       "transcribing": "转录中",
       "refining": "精修中",
+      "translating": "翻译中",
       "speaking": "朗读中",
       "completed": "完成",
       "stopAria": "停止录制",
@@ -916,11 +919,22 @@
           "description": "按一次开始免提录制,再按一次停止。通常是按住说话的快捷键加上空格。",
           "change": "更改"
         },
+        "translate": {
+          "title": "听写并翻译快捷键",
+          "description": "按住这些键并用任意语言说话。松开后会粘贴译文，而不是你说的原话。通常是按住说话的快捷键加上 Shift。",
+          "change": "更改"
+        },
+        "translateTo": {
+          "title": "翻译为",
+          "description": "翻译快捷键输出的语言。"
+        },
         "chordPicker": {
           "pttTitle": "设置按住说话快捷键",
           "pttDescription": "按住您要使用的按键,然后松开并点击「保存」。右侧的修饰键徽章会显示按键是左侧还是右侧的变体。",
           "toggleTitle": "设置切换快捷键",
-          "toggleDescription": "按住您要使用的按键,然后松开并点击「保存」。请选择与按住说话组合键不同的按键。"
+          "toggleDescription": "按住您要使用的按键,然后松开并点击「保存」。请选择与按住说话组合键不同的按键。",
+          "translateTitle": "设置翻译快捷键",
+          "translateDescription": "按住要使用的按键，然后松开并点击保存。按住说话的快捷键加上 Shift 很好记。"
         },
         "preview": {
           "title": "预览",

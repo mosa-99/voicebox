@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "Refinada",
       "raw": "En bruto",
+      "translated": "Traducida",
       "refinedHint": "Refinada con Qwen3 · {{model}}",
-      "rawHint": "Transcrita con Whisper {{model}}"
+      "rawHint": "Transcrita con Whisper {{model}}",
+      "translatedHint": "Traducida a {{language}} con Qwen3 · {{model}}"
     },
     "actions": {
       "configure": "Configurar",
@@ -99,6 +101,7 @@
       "recording": "Grabando",
       "transcribing": "Transcribiendo",
       "refining": "Refinando",
+      "translating": "Traduciendo",
       "speaking": "Hablando",
       "completed": "Listo",
       "stopAria": "Detener grabación",
@@ -916,11 +919,22 @@
           "description": "Pulsa una vez para iniciar una grabación manos libres. Pulsa de nuevo para detener. Normalmente, pulsar para hablar más Espacio.",
           "change": "Cambiar"
         },
+        "translate": {
+          "title": "Atajo para dictar y traducir",
+          "description": "Mantén pulsadas estas teclas y habla en cualquier idioma. Al soltarlas se pega la traducción en lugar de lo que dijiste. Normalmente, pulsar para hablar más Shift.",
+          "change": "Cambiar"
+        },
+        "translateTo": {
+          "title": "Traducir a",
+          "description": "El idioma al que traduce el atajo de traducción."
+        },
         "chordPicker": {
           "pttTitle": "Definir el atajo de pulsar para hablar",
           "pttDescription": "Mantén pulsadas las teclas que quieras usar, luego suéltalas y haz clic en Guardar. La insignia del modificador derecho muestra si una tecla es la variante izquierda o derecha.",
           "toggleTitle": "Definir el atajo de alternancia",
-          "toggleDescription": "Mantén pulsadas las teclas que quieras usar, luego suéltalas y haz clic en Guardar. Elige algo distinto de tu combinación de pulsar para hablar."
+          "toggleDescription": "Mantén pulsadas las teclas que quieras usar, luego suéltalas y haz clic en Guardar. Elige algo distinto de tu combinación de pulsar para hablar.",
+          "translateTitle": "Configurar atajo de traducción",
+          "translateDescription": "Mantén pulsadas las teclas que quieras usar, suéltalas y haz clic en Guardar. Pulsar para hablar más Shift es fácil de recordar."
         },
         "preview": {
           "title": "Vista previa",

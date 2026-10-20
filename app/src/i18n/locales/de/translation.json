@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "Überarbeitet",
       "raw": "Roh",
+      "translated": "Übersetzt",
       "refinedHint": "Überarbeitet mit Qwen3 · {{model}}",
-      "rawHint": "Transkribiert mit Whisper {{model}}"
+      "rawHint": "Transkribiert mit Whisper {{model}}",
+      "translatedHint": "Übersetzt ({{language}}) mit Qwen3 · {{model}}"
     },
     "actions": {
       "configure": "Konfigurieren",
@@ -99,6 +101,7 @@
       "recording": "Aufnahme",
       "transcribing": "Transkribiere",
       "refining": "Überarbeite",
+      "translating": "Übersetze",
       "speaking": "Spricht",
       "completed": "Fertig",
       "stopAria": "Aufnahme stoppen",
@@ -173,7 +176,8 @@
       "sttModel": "Spracherkennungsmodell",
       "llmModel": "LLM-Modell",
       "refined": "Überarbeitetes Transkript",
-      "raw": "Roh-Transkript"
+      "raw": "Roh-Transkript",
+      "translated": "Übersetzung"
     }
   },
   "voicesTab": {
@@ -1003,11 +1007,22 @@
           "description": "Einmal drücken startet eine freihändige Aufnahme, nochmal drücken stoppt sie. Meist das Sprechen-Kürzel plus Leertaste.",
           "change": "Ändern"
         },
+        "translate": {
+          "title": "Tastenkürzel zum Diktieren und Übersetzen",
+          "description": "Halte diese Tasten gedrückt und sprich in einer beliebigen Sprache. Beim Loslassen wird statt des Gesagten die Übersetzung eingefügt. Meist das Sprechen-Kürzel plus Shift.",
+          "change": "Ändern"
+        },
+        "translateTo": {
+          "title": "Übersetzen in",
+          "description": "Die Sprache, in die das Übersetzungs-Kürzel übersetzt."
+        },
         "chordPicker": {
           "pttTitle": "Tastenkürzel zum Sprechen festlegen",
           "pttDescription": "Halte die gewünschten Tasten gedrückt, lass dann los und klicke auf „Speichern“. Das Abzeichen an der Sondertaste zeigt, ob es die linke oder rechte Taste ist.",
           "toggleTitle": "Tastenkürzel zum Umschalten festlegen",
-          "toggleDescription": "Halte die gewünschten Tasten gedrückt, lass dann los und klicke auf „Speichern“. Wähle etwas, das sich von deinem Sprechen-Kürzel unterscheidet."
+          "toggleDescription": "Halte die gewünschten Tasten gedrückt, lass dann los und klicke auf „Speichern“. Wähle etwas, das sich von deinem Sprechen-Kürzel unterscheidet.",
+          "translateTitle": "Tastenkürzel zum Übersetzen festlegen",
+          "translateDescription": "Halte die gewünschten Tasten gedrückt, lass dann los und klicke auf „Speichern“. Das Sprechen-Kürzel plus Shift ist leicht zu merken."
         },
         "preview": {
           "title": "Vorschau",
@@ -1583,6 +1598,7 @@
     },
     "tooShort": "Aufnahme zu kurz, abgebrochen",
     "refinementFailed": "Überarbeitung fehlgeschlagen",
+    "translationFailed": "Übersetzung fehlgeschlagen. Das Transkript ist unter Mitschnitte gespeichert.",
     "uploadFailed": "Hochladen fehlgeschlagen"
   },
   "files": {

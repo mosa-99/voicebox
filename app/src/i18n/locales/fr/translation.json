@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "Corrigé",
       "raw": "Brut",
+      "translated": "Traduit",
       "refinedHint": "Corrigé avec Qwen3 · {{model}}",
-      "rawHint": "Transcrit avec Whisper {{model}}"
+      "rawHint": "Transcrit avec Whisper {{model}}",
+      "translatedHint": "Traduit ({{language}}) avec Qwen3 · {{model}}"
     },
     "actions": {
       "configure": "Configurer",
@@ -99,6 +101,7 @@
       "recording": "Enregistrement",
       "transcribing": "Transcription",
       "refining": "Correction",
+      "translating": "Traduction",
       "speaking": "Parole",
       "completed": "Terminé",
       "stopAria": "Arrêter l'enregistrement",
@@ -916,11 +919,22 @@
           "description": "Appuyez une fois pour démarrer un enregistrement mains-libres. Appuyez à nouveau pour arrêter. Généralement push-to-talk plus Espace.",
           "change": "Modifier"
         },
+        "translate": {
+          "title": "Raccourci dicter et traduire",
+          "description": "Maintenez ces touches et parlez dans n'importe quelle langue. Au relâchement, la traduction est collée à la place de ce que vous avez dit. Généralement push-to-talk plus Maj.",
+          "change": "Modifier"
+        },
+        "translateTo": {
+          "title": "Traduire en",
+          "description": "La langue dans laquelle le raccourci de traduction écrit."
+        },
         "chordPicker": {
           "pttTitle": "Définir le raccourci push-to-talk",
           "pttDescription": "Maintenez les touches souhaitées, puis relâchez et cliquez sur Enregistrer. Le badge de modification droite/gauche indique de quel côté est une touche.",
           "toggleTitle": "Définir le raccourci bascule",
-          "toggleDescription": "Maintenez les touches souhaitées, puis relâchez et cliquez sur Enregistrer. Choisissez quelque chose de distinct de votre combinaison push-to-talk."
+          "toggleDescription": "Maintenez les touches souhaitées, puis relâchez et cliquez sur Enregistrer. Choisissez quelque chose de distinct de votre combinaison push-to-talk.",
+          "translateTitle": "Définir le raccourci de traduction",
+          "translateDescription": "Maintenez les touches souhaitées, relâchez-les puis cliquez sur Enregistrer. Le push-to-talk plus Maj est facile à retenir."
         },
         "preview": {
           "title": "Aperçu",

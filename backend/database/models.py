@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from ..utils.capture_chords import (
     default_push_to_talk_chord,
     default_toggle_to_talk_chord,
+    default_translate_chord,
 )
 
 Base = declarative_base()
@@ -218,6 +219,10 @@ class CaptureSettings(Base):
     chord_toggle_to_talk_keys = Column(
         JSON, nullable=False, default=default_toggle_to_talk_chord
     )
+    # Hold to dictate, release to translate into ``translation_language``.
+    # Defaults to the push-to-talk chord plus Shift.
+    chord_translate_keys = Column(JSON, nullable=False, default=default_translate_chord)
+    translation_language = Column(String, nullable=False, default="en")
     # Optional OpenAI-compatible endpoint that overrides the built-in Qwen3
     # LLM for refinement / personality rewriting. When ``custom_llm_endpoint``
     # is set, the backend layer delegates every LLM call to this URL instead
@@ -308,4 +313,7 @@ class Capture(Base):
     stt_model = Column(String, nullable=True)
     llm_model = Column(String, nullable=True)
     refinement_flags = Column(Text, nullable=True)  # JSON blob
+    # Set when the capture was dictated with the translate shortcut.
+    transcript_translated = Column(Text, nullable=True)
+    translation_language = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC), index=True)

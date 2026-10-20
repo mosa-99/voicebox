@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "Refinada",
       "raw": "Bruta",
+      "translated": "Traduzida",
       "refinedHint": "Refinada com Qwen3 · {{model}}",
-      "rawHint": "Transcrita com Whisper {{model}}"
+      "rawHint": "Transcrita com Whisper {{model}}",
+      "translatedHint": "Traduzida para {{language}} com Qwen3 · {{model}}"
     },
     "actions": {
       "configure": "Configurar",
@@ -99,6 +101,7 @@
       "recording": "Gravando",
       "transcribing": "Transcrevendo",
       "refining": "Refinando",
+      "translating": "Traduzindo",
       "speaking": "Falando",
       "completed": "Concluído",
       "stopAria": "Parar gravação",
@@ -916,11 +919,22 @@
           "description": "Pressione uma vez para iniciar uma gravação mãos-livres. Pressione de novo para parar. Geralmente é o atalho de apertar para falar mais a barra de espaço.",
           "change": "Alterar"
         },
+        "translate": {
+          "title": "Atalho para ditar e traduzir",
+          "description": "Segure estas teclas e fale em qualquer idioma. Ao soltar, a tradução é colada no lugar do que você disse. Geralmente é o atalho de apertar para falar mais Shift.",
+          "change": "Alterar"
+        },
+        "translateTo": {
+          "title": "Traduzir para",
+          "description": "O idioma para o qual o atalho de tradução traduz."
+        },
         "chordPicker": {
           "pttTitle": "Definir atalho de apertar para falar",
           "pttDescription": "Segure as teclas que deseja usar, depois solte e clique em Salvar. O selo de modificador da direita mostra se a tecla é a variante esquerda ou direita.",
           "toggleTitle": "Definir atalho de alternância",
-          "toggleDescription": "Segure as teclas que deseja usar, depois solte e clique em Salvar. Escolha algo distinto da sua combinação de apertar para falar."
+          "toggleDescription": "Segure as teclas que deseja usar, depois solte e clique em Salvar. Escolha algo distinto da sua combinação de apertar para falar.",
+          "translateTitle": "Definir atalho de tradução",
+          "translateDescription": "Segure as teclas que deseja usar, solte e clique em Salvar. Apertar para falar mais Shift é fácil de lembrar."
         },
         "preview": {
           "title": "Prévia",

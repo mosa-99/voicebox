@@ -9,6 +9,7 @@ from datetime import datetime
 from .utils.capture_chords import (
     default_push_to_talk_chord,
     default_toggle_to_talk_chord,
+    default_translate_chord,
 )
 
 
@@ -203,6 +204,8 @@ class CaptureResponse(BaseModel):
     stt_model: Optional[str] = None
     llm_model: Optional[str] = None
     refinement_flags: Optional[RefinementFlagsModel] = None
+    transcript_translated: Optional[str] = None
+    translation_language: Optional[str] = None
     created_at: datetime
 
     class Config:
@@ -238,6 +241,17 @@ class CaptureRefineRequest(BaseModel):
     model_size: Optional[str] = Field(default=None, pattern="^(0\\.6B|1\\.7B|4B)$")
 
 
+# Languages the translate shortcut can translate dictation into.
+TRANSLATION_LANGUAGE_PATTERN = "^(en|de|ar|fr|es|ja|zh|hi)$"
+
+
+class CaptureTranslateRequest(BaseModel):
+    """Request to translate a capture's transcript via the LLM."""
+
+    target_language: Optional[str] = Field(default=None, pattern=TRANSLATION_LANGUAGE_PATTERN)
+    model_size: Optional[str] = Field(default=None, pattern="^(0\\.6B|1\\.7B|4B)$")
+
+
 class CaptureRetranscribeRequest(BaseModel):
     """Request to re-run STT on a capture's audio with a different model."""
 
@@ -264,6 +278,8 @@ class CaptureSettingsResponse(BaseModel):
     chord_toggle_to_talk_keys: List[str] = Field(
         default_factory=default_toggle_to_talk_chord
     )
+    chord_translate_keys: List[str] = Field(default_factory=default_translate_chord)
+    translation_language: str = Field(default="en", pattern=TRANSLATION_LANGUAGE_PATTERN)
     custom_llm_endpoint: Optional[str] = None
     custom_llm_model: Optional[str] = None
     # Provider credential — write-only. The response reports whether one is
@@ -316,6 +332,8 @@ class CaptureSettingsUpdate(BaseModel):
     hotkey_enabled: Optional[bool] = None
     chord_push_to_talk_keys: Optional[List[str]] = Field(default=None, min_length=1, max_length=6)
     chord_toggle_to_talk_keys: Optional[List[str]] = Field(default=None, min_length=1, max_length=6)
+    chord_translate_keys: Optional[List[str]] = Field(default=None, min_length=1, max_length=6)
+    translation_language: Optional[str] = Field(default=None, pattern=TRANSLATION_LANGUAGE_PATTERN)
     custom_llm_endpoint: Optional[str] = None
     custom_llm_model: Optional[str] = None
     custom_llm_api_key: Optional[str] = None

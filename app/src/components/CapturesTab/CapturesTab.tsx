@@ -12,6 +12,7 @@ import {
   Download,
   FileAudio,
   FileText,
+  Languages,
   Loader2,
   Mic,
   Settings2,
@@ -131,6 +132,33 @@ function SourceBadge({ source }: { source: CaptureSource }) {
 
 type PlaybackState = 'idle' | 'generating' | 'playing';
 
+type TranscriptView = 'translated' | 'refined' | 'raw';
+
+/** The text a capture delivered: its translation, else refined, else raw. */
+function finalTextOf(capture: CaptureResponse): string {
+  return (
+    capture.transcript_translated || capture.transcript_refined || capture.transcript_raw || ''
+  );
+}
+
+/** The view to show for a capture, falling back to what it actually has. */
+function resolveView(preferred: TranscriptView, capture: CaptureResponse): TranscriptView {
+  if (preferred === 'raw') return 'raw';
+  const order: TranscriptView[] =
+    preferred === 'translated' ? ['translated', 'refined'] : ['refined', 'translated'];
+  for (const view of order) {
+    if (view === 'translated' && capture.transcript_translated) return view;
+    if (view === 'refined' && capture.transcript_refined) return view;
+  }
+  return 'raw';
+}
+
+function transcriptFor(capture: CaptureResponse, view: TranscriptView): string {
+  if (view === 'translated') return capture.transcript_translated || '';
+  if (view === 'refined') return capture.transcript_refined || '';
+  return capture.transcript_raw || '';
+}
+
 export function CapturesTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -139,13 +167,12 @@ export function CapturesTab() {
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const snippetOf = (capture: CaptureResponse): string => {
-    const source = capture.transcript_refined || capture.transcript_raw || '';
-    return source.trim() || t('captures.snippetEmpty');
+    return finalTextOf(capture).trim() || t('captures.snippetEmpty');
   };
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [showRefined, setShowRefined] = useState(true);
+  const [preferredView, setPreferredView] = useState<TranscriptView>('translated');
   const [launchedPlayAsId, setLaunchedPlayAsId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -231,13 +258,14 @@ export function CapturesTab() {
     const q = search.trim().toLowerCase();
     if (!q) return captures;
     return captures.filter((c) => {
-      const raw = (c.transcript_raw || '').toLowerCase();
-      const refined = (c.transcript_refined || '').toLowerCase();
-      return raw.includes(q) || refined.includes(q);
+      return [c.transcript_raw, c.transcript_refined, c.transcript_translated].some((text) =>
+        (text || '').toLowerCase().includes(q),
+      );
     });
   }, [search, captures]);
 
   const selected = captures.find((c) => c.id === selectedId) ?? null;
+  const view: TranscriptView = selected ? resolveView(preferredView, selected) : 'raw';
   // Source of truth is capture_settings.default_playback_voice_id, shared
   // with Settings → Captures and the MCP global default. Stale ids (e.g.
   // referenced profile was deleted) fall through to the first profile.
@@ -261,7 +289,7 @@ export function CapturesTab() {
 
   const playAsMutation = useMutation({
     mutationFn: async ({ capture, voice }: { capture: CaptureResponse; voice: VoiceProfileResponse }) => {
-      const text = capture.transcript_refined || capture.transcript_raw;
+      const text = finalTextOf(capture);
       if (!text.trim()) throw new Error(t('captures.noTranscriptError'));
       const language = (capture.language || voice.language) as LanguageCode;
       // Preset profiles (Kokoro etc.) reject the qwen default — honor the
@@ -309,9 +337,7 @@ export function CapturesTab() {
 
   const handleCopy = async () => {
     if (!selected) return;
-    const text = showRefined
-      ? selected.transcript_refined || selected.transcript_raw
-      : selected.transcript_raw;
+    const text = transcriptFor(selected, view);
     try {
       await navigator.clipboard.writeText(text || '');
       toast({ title: t('captures.toast.transcriptCopied') });
@@ -353,7 +379,7 @@ export function CapturesTab() {
 
   const handleExportTranscript = async () => {
     if (!selected) return;
-    const text = (selected.transcript_refined || selected.transcript_raw || '').trim();
+    const text = finalTextOf(selected).trim();
     if (!text) {
       toast({ title: t('captures.toast.exportEmpty'), variant: 'destructive' });
       return;
@@ -382,6 +408,14 @@ export function CapturesTab() {
     if (capture.stt_model) lines.push(field('sttModel', capture.stt_model));
     if (capture.llm_model) lines.push(field('llmModel', capture.llm_model));
     lines.push('');
+    if (capture.transcript_translated?.trim()) {
+      lines.push(
+        `## ${t('captures.markdown.translated')}`,
+        '',
+        capture.transcript_translated.trim(),
+        '',
+      );
+    }
     if (capture.transcript_refined?.trim()) {
       lines.push(`## ${t('captures.markdown.refined')}`, '', capture.transcript_refined.trim(), '');
     }
@@ -393,7 +427,7 @@ export function CapturesTab() {
 
   const handleExportMarkdown = async () => {
     if (!selected) return;
-    const hasContent = (selected.transcript_refined || selected.transcript_raw || '').trim();
+    const hasContent = finalTextOf(selected).trim();
     if (!hasContent) {
       toast({ title: t('captures.toast.exportEmpty'), variant: 'destructive' });
       return;
@@ -489,6 +523,7 @@ export function CapturesTab() {
                 filtered.map((capture) => {
                 const isActive = selectedId === capture.id;
                 const refined = !!capture.transcript_refined;
+                const translated = !!capture.transcript_translated;
                 return (
                   <button
                     type="button"
@@ -522,6 +557,15 @@ export function CapturesTab() {
                         >
                           <Sparkles className="h-2.5 w-2.5" />
                           {t('captures.transcript.refined')}
+                        </Badge>
+                      )}
+                      {translated && (
+                        <Badge
+                          variant="secondary"
+                          className="h-5 px-1.5 text-[10px] gap-1 font-medium bg-accent/10 text-accent border border-accent/20"
+                        >
+                          <Languages className="h-2.5 w-2.5" />
+                          {t('captures.transcript.translated')}
                         </Badge>
                       )}
                     </div>
@@ -641,13 +685,28 @@ export function CapturesTab() {
             {/* Transcript header */}
             <div className="flex items-center gap-3 mb-3">
               <div className="inline-flex rounded-md bg-muted/40 p-0.5 border border-border">
+                {selected.transcript_translated && (
+                  <button
+                    type="button"
+                    onClick={() => setPreferredView('translated')}
+                    className={cn(
+                      'px-3 py-1 text-xs font-medium rounded transition-colors',
+                      view === 'translated'
+                        ? 'bg-background shadow-sm text-foreground'
+                        : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    <Languages className="h-3 w-3 inline-block me-1 -translate-y-px" />
+                    {t('captures.transcript.translated')}
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowRefined(true)}
+                  onClick={() => setPreferredView('refined')}
                   disabled={!selected.transcript_refined}
                   className={cn(
                     'px-3 py-1 text-xs font-medium rounded transition-colors',
-                    showRefined && selected.transcript_refined
+                    view === 'refined'
                       ? 'bg-background shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground disabled:opacity-40',
                   )}
@@ -657,10 +716,10 @@ export function CapturesTab() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowRefined(false)}
+                  onClick={() => setPreferredView('raw')}
                   className={cn(
                     'px-3 py-1 text-xs font-medium rounded transition-colors',
-                    !showRefined || !selected.transcript_refined
+                    view === 'raw'
                       ? 'bg-background shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
@@ -671,7 +730,14 @@ export function CapturesTab() {
               </div>
               <div className="flex-1" />
               <span className="text-xs text-muted-foreground">
-                {showRefined && selected.transcript_refined
+                {view === 'translated'
+                  ? t('captures.transcript.translatedHint', {
+                      language: selected.translation_language
+                        ? t(`settings.captures.transcription.language.${selected.translation_language}`)
+                        : '',
+                      model: selected.llm_model ?? llmModel,
+                    })
+                  : view === 'refined'
                   ? t('captures.transcript.refinedHint', { model: selected.llm_model ?? llmModel })
                   : selected.stt_model
                     ? t('captures.transcript.rawHint', { model: selected.stt_model })
@@ -682,12 +748,8 @@ export function CapturesTab() {
             {/* Transcript body */}
             <div className="rounded-xl border border-border bg-muted/10">
               <Textarea
-                key={`${selected.id}-${showRefined}`}
-                defaultValue={
-                  showRefined && selected.transcript_refined
-                    ? selected.transcript_refined
-                    : selected.transcript_raw
-                }
+                key={`${selected.id}-${view}`}
+                defaultValue={transcriptFor(selected, view)}
                 readOnly
                 className="text-[15px] leading-relaxed min-h-[260px] border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6"
               />

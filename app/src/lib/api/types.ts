@@ -172,6 +172,9 @@ export interface CaptureResponse {
   stt_model?: string | null;
   llm_model?: string | null;
   refinement_flags?: RefinementFlags | null;
+  /** Set when the capture was dictated with the translate shortcut. */
+  transcript_translated?: string | null;
+  translation_language?: TranslationLanguage | null;
   created_at: string;
 }
 
@@ -197,6 +200,16 @@ export interface CaptureRefineRequest {
   model_size?: Qwen3ModelSize;
 }
 
+/** Languages the translate shortcut can translate dictation into. */
+export const TRANSLATION_LANGUAGES = ['en', 'de', 'ar', 'fr', 'es', 'ja', 'zh', 'hi'] as const;
+export type TranslationLanguage = (typeof TRANSLATION_LANGUAGES)[number];
+
+export interface CaptureTranslateRequest {
+  /** Defaults to the saved ``translation_language``. */
+  target_language?: TranslationLanguage;
+  model_size?: Qwen3ModelSize;
+}
+
 export interface CaptureRetranscribeRequest {
   model?: WhisperModelSize;
   language?: LanguageCode;
@@ -219,6 +232,11 @@ export interface CaptureSettings {
   chord_push_to_talk_keys: string[];
   /** keytap key names. Toggle adds Space to the platform-specific PTT chord. */
   chord_toggle_to_talk_keys: string[];
+  /** keytap key names. Hold to dictate, release to translate. Defaults to
+   *  the PTT chord plus Shift. */
+  chord_translate_keys: string[];
+  /** Language the translate shortcut translates into. */
+  translation_language: TranslationLanguage;
   /**
    * Optional OpenAI-compatible endpoint that overrides the built-in Qwen3
    * LLM for refinement / personality rewriting. When set, backend calls hit
