@@ -981,6 +981,11 @@
           "hi": "Hindi",
           "ar": "Arabo"
         },
+        "autoDetect": {
+          "title": "Rileva tra",
+          "description": "Il rilevamento automatico sceglie solo tra le lingue che parli, così le dettature brevi non vengono scambiate per un'altra lingua. Lascia vuoto per consentire qualsiasi lingua.",
+          "any": "Qualsiasi lingua"
+        },
         "archive": {
           "title": "Archivia audio",
           "description": "Conserva la registrazione originale insieme a ciascuna trascrizione."

@@ -1069,6 +1069,11 @@
           "hi": "Hindi",
           "ar": "Arabic"
         },
+        "autoDetect": {
+          "title": "Detect among",
+          "description": "Auto-detect picks only from the languages you speak, so short dictations aren't mistaken for a language you don't. Leave empty to allow any language.",
+          "any": "Any language"
+        },
         "archive": {
           "title": "Archive audio",
           "description": "Keep the original recording alongside every transcript."

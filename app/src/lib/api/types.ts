@@ -201,6 +201,9 @@ export interface CaptureRefineRequest {
 }
 
 /** Languages the translate shortcut can translate dictation into. */
+/** Languages offered for transcription in the capture settings. */
+export const TRANSCRIPTION_LANGUAGES = ['en', 'es', 'fr', 'de', 'ja', 'zh', 'hi', 'ar'] as const;
+
 export const TRANSLATION_LANGUAGES = ['en', 'de', 'ar', 'fr', 'es', 'ja', 'zh', 'hi'] as const;
 export type TranslationLanguage = (typeof TRANSLATION_LANGUAGES)[number];
 
@@ -218,6 +221,9 @@ export interface CaptureRetranscribeRequest {
 export interface CaptureSettings {
   stt_model: WhisperModelSize;
   language: string;
+  /** With ``language`` "auto": the languages detection may choose from.
+   *  Empty means any language Whisper knows. */
+  auto_detect_languages: string[];
   auto_refine: boolean;
   llm_model: Qwen3ModelSize;
   smart_cleanup: boolean;

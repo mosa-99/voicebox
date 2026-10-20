@@ -198,6 +198,9 @@ class CaptureSettings(Base):
     id = Column(Integer, primary_key=True, default=1)
     stt_model = Column(String, nullable=False, default="turbo")
     language = Column(String, nullable=False, default="auto")
+    # With ``language`` "auto": the languages detection may choose from
+    # (e.g. ["de", "ar", "en"]). Empty means any language Whisper knows.
+    auto_detect_languages = Column(JSON, nullable=False, default=list)
     auto_refine = Column(Boolean, nullable=False, default=True)
     llm_model = Column(String, nullable=False, default="0.6B")
     smart_cleanup = Column(Boolean, nullable=False, default=True)

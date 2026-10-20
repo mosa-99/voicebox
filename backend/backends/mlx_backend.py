@@ -2,7 +2,7 @@
 MLX backend implementation for TTS and STT using mlx-audio.
 """
 
-from typing import Optional, List, Tuple
+from typing import Optional, List, Sequence, Tuple
 import asyncio
 import logging
 import numpy as np
@@ -39,6 +39,7 @@ from .base import (  # noqa: E402
     model_load_progress,
     empty_mlx_cache,
 )
+from .stt_language import LanguageTrial, choose_language, normalize_languages  # noqa: E402
 from ..utils.cache import get_cache_key, get_cached_voice_prompt, cache_voice_prompt  # noqa: E402
 
 
@@ -411,6 +412,7 @@ class MLXSTTBackend:
         audio_path: str,
         language: Optional[str] = None,
         model_size: Optional[str] = None,
+        allowed_languages: Optional[Sequence[str]] = None,
     ) -> str:
         """
         Transcribe audio to text.
@@ -419,11 +421,13 @@ class MLXSTTBackend:
             audio_path: Path to audio file
             language: Optional language hint
             model_size: Optional model size override
+            allowed_languages: Without a ``language``, detect only among these
 
         Returns:
             Transcribed text
         """
         resolved_size = model_size if model_size is not None else self.model_size
+        allowed = normalize_languages(allowed_languages)
 
         def _transcribe_sync():
             """Run synchronous transcription in thread pool."""
@@ -432,13 +436,21 @@ class MLXSTTBackend:
             model = self.model
             try:
                 decode_options = {}
+                audio = str(audio_path)
                 if language:
                     decode_options["language"] = language
+                elif len(allowed) == 1:
+                    decode_options["language"] = allowed[0]
+                elif allowed:
+                    from mlx_audio.stt.utils import load_audio
+
+                    audio = load_audio(audio)
+                    decode_options["language"] = _choose_mlx_language(model, audio, allowed)
 
                 # Inference runs with the process's default HF_HUB_OFFLINE
                 # state — see the comment in MLXTTSBackend.generate for the
                 # regression this revert fixes (issue #462).
-                result = model.generate(str(audio_path), **decode_options)
+                result = model.generate(audio, **decode_options)
 
                 # Extract text from result
                 if isinstance(result, str):
@@ -473,3 +485,37 @@ class MLXSTTBackend:
 
         async with self._op_lock:
             return await _run_on_mlx_thread(_reload_and_transcribe_sync)
+
+
+def _choose_mlx_language(model, audio, allowed: Sequence[str]) -> Optional[str]:
+    """Detect the language of ``audio`` among ``allowed`` (see stt_language).
+
+    Works on the first window exactly as ``generate`` decodes it, encoded
+    once and shared by detection and the per-language trials. Returns None,
+    i.e. Whisper's own detection, if mlx-audio's internals have moved.
+    """
+    try:
+        import mlx.core as mx
+        from mlx_audio.stt.models.whisper.audio import (
+            N_FRAMES,
+            N_SAMPLES,
+            log_mel_spectrogram,
+            pad_or_trim,
+        )
+        from mlx_audio.stt.models.whisper.decoding import DecodingOptions
+
+        mel = log_mel_spectrogram(audio, n_mels=model.dims.n_mels, padding=N_SAMPLES)
+        content_frames = mel.shape[-2] - N_FRAMES
+        segment = pad_or_trim(mel[: min(N_FRAMES, content_frames)], N_FRAMES, axis=-2)
+        features = model.encoder(segment.astype(model.dtype)[None])[0]
+        _, probs = model.detect_language(features)
+        fp16 = model.dtype == mx.float16
+
+        def trial(code: str) -> LanguageTrial:
+            result = model.decode(features, DecodingOptions(language=code, fp16=fp16))
+            return LanguageTrial(result.avg_logprob, result.compression_ratio)
+
+        return choose_language(probs, allowed, trial)
+    except Exception:
+        logger.warning("Restricted language detection failed; using Whisper's own", exc_info=True)
+        return None

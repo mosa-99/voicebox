@@ -3,7 +3,7 @@ Pydantic models for request/response validation.
 """
 
 from pydantic import BaseModel, Field, model_validator
-from typing import Any, Optional, List
+from typing import Annotated, Any, Optional, List
 from datetime import datetime
 
 from .utils.capture_chords import (
@@ -264,6 +264,7 @@ class CaptureSettingsResponse(BaseModel):
 
     stt_model: str = Field(default="turbo", pattern="^(base|small|medium|large|turbo)$")
     language: str = Field(default="auto")
+    auto_detect_languages: List[str] = Field(default_factory=list)
     auto_refine: bool = True
     llm_model: str = Field(default="0.6B", pattern="^(0\\.6B|1\\.7B|4B)$")
     smart_cleanup: bool = True
@@ -317,11 +318,16 @@ class CaptureSettingsResponse(BaseModel):
         from_attributes = True
 
 
+# A Whisper language code ("de", "ar", "haw") for ``auto_detect_languages``.
+AutoDetectLanguage = Annotated[str, Field(pattern="^[a-z]{2,3}$")]
+
+
 class CaptureSettingsUpdate(BaseModel):
     """Partial update for capture settings — every field is optional."""
 
     stt_model: Optional[str] = Field(default=None, pattern="^(base|small|medium|large|turbo)$")
     language: Optional[str] = None
+    auto_detect_languages: Optional[List[AutoDetectLanguage]] = Field(default=None, max_length=20)
     auto_refine: Optional[bool] = None
     llm_model: Optional[str] = Field(default=None, pattern="^(0\\.6B|1\\.7B|4B)$")
     smart_cleanup: Optional[bool] = None

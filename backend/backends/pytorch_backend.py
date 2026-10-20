@@ -2,7 +2,7 @@
 PyTorch backend implementation for TTS and STT.
 """
 
-from typing import Optional, List, Tuple
+from typing import Optional, List, Sequence, Tuple
 import asyncio
 import logging
 import torch
@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 WHISPER_SAMPLE_RATE = 16000
 # Whisper encodes one 30s window per pass; longer audio needs sequential long-form decoding.
 WHISPER_WINDOW_SAMPLES = 30 * WHISPER_SAMPLE_RATE
+# Mel frames in that window (10ms hop).
+WHISPER_WINDOW_FRAMES = 3000
 
 from . import TTSBackend, STTBackend, LANGUAGE_CODE_TO_NAME, WHISPER_HF_REPOS
 from .base import (
@@ -23,6 +25,7 @@ from .base import (
     combine_voice_prompts as _combine_voice_prompts,
     model_load_progress,
 )
+from .stt_language import LanguageTrial, choose_language, compression_ratio, normalize_languages
 from ..utils.cache import get_cache_key, get_cached_voice_prompt, cache_voice_prompt
 from ..utils.audio import load_audio
 
@@ -324,6 +327,7 @@ class PyTorchSTTBackend:
         audio_path: str,
         language: Optional[str] = None,
         model_size: Optional[str] = None,
+        allowed_languages: Optional[Sequence[str]] = None,
     ) -> str:
         """
         Transcribe audio to text.
@@ -332,11 +336,13 @@ class PyTorchSTTBackend:
             audio_path: Path to audio file
             language: Optional language hint
             model_size: Optional model size override
+            allowed_languages: Without a ``language``, detect only among these
 
         Returns:
             Transcribed text
         """
         await self.load_model_async(model_size)
+        allowed = normalize_languages(allowed_languages)
 
         def _transcribe_sync():
             """Run synchronous transcription in thread pool."""
@@ -381,8 +387,13 @@ class PyTorchSTTBackend:
             # disables the timestamp tokens that return_timestamps=True (and
             # therefore long-form decoding) depend on.
             generate_kwargs = {}
-            if language:
-                generate_kwargs["language"] = language
+            forced = language
+            if not forced and len(allowed) == 1:
+                forced = allowed[0]
+            elif not forced and allowed:
+                forced = self._choose_language(inputs["input_features"][..., :WHISPER_WINDOW_FRAMES], allowed)
+            if forced:
+                generate_kwargs["language"] = forced
                 generate_kwargs["task"] = "transcribe"
             if is_long_form:
                 generate_kwargs["attention_mask"] = inputs["attention_mask"]
@@ -404,3 +415,41 @@ class PyTorchSTTBackend:
 
         # Run blocking transcription in thread pool
         return await asyncio.to_thread(_transcribe_sync)
+
+    def _choose_language(self, features: "torch.Tensor", allowed: Sequence[str]) -> Optional[str]:
+        """Detect the language of the first 30s window among ``allowed``.
+
+        See stt_language. The window is encoded once and shared by detection
+        and the per-language trials. Returns None, i.e. Whisper's own
+        detection, if transformers' internals have moved.
+        """
+        try:
+            generation_config = self.model.generation_config
+            lang_to_id = generation_config.lang_to_id
+            start = torch.tensor([[generation_config.decoder_start_token_id]], device=self.device)
+            with torch.no_grad():
+                encoder_outputs = self.model.get_encoder()(features)
+                logits = self.model(encoder_outputs=encoder_outputs, decoder_input_ids=start).logits[0, -1]
+                lang_probs = torch.softmax(logits[list(lang_to_id.values())].float(), dim=-1)
+            # "<|de|>" -> "de"
+            probs = {token[2:-2]: p for token, p in zip(lang_to_id, lang_probs.tolist())}
+
+            def trial(code: str) -> LanguageTrial:
+                with torch.no_grad():
+                    out = self.model.generate(
+                        encoder_outputs=encoder_outputs,
+                        language=code,
+                        task="transcribe",
+                        return_dict_in_generate=True,
+                        output_scores=True,
+                    )
+                    logprobs = self.model.compute_transition_scores(
+                        out.sequences, out.scores, normalize_logits=True
+                    )
+                text = self.processor.batch_decode(out.sequences, skip_special_tokens=True)[0]
+                return LanguageTrial(float(logprobs.mean()), compression_ratio(text))
+
+            return choose_language(probs, allowed, trial)
+        except Exception:
+            logger.warning("Restricted language detection failed; using Whisper's own", exc_info=True)
+            return None

@@ -53,6 +53,7 @@ async def create_capture_endpoint(
             source=source,
             language=resolved_language,
             stt_model=resolved_stt,
+            allowed_languages=saved.auto_detect_languages,
             db=db,
         )
     except ValueError as e:
@@ -266,6 +267,7 @@ async def retranscribe_capture_endpoint(
             capture_id=capture_id,
             stt_model=resolved_stt,
             language=resolved_language,
+            allowed_languages=saved.auto_detect_languages,
             db=db,
         )
     except FileNotFoundError as e:

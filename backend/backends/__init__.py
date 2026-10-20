@@ -14,7 +14,7 @@ from ..utils import hf_offline_patch  # noqa: F401
 
 import threading
 from dataclasses import dataclass, field
-from typing import Protocol, Optional, Tuple, List
+from typing import Protocol, Optional, Sequence, Tuple, List
 from typing_extensions import runtime_checkable
 import numpy as np
 
@@ -154,9 +154,13 @@ class STTBackend(Protocol):
         audio_path: str,
         language: Optional[str] = None,
         model_size: Optional[str] = None,
+        allowed_languages: Optional[Sequence[str]] = None,
     ) -> str:
         """
         Transcribe audio to text.
+
+        Without a ``language``, ``allowed_languages`` (when given) limits
+        detection to the languages the speaker actually uses.
 
         Returns:
             Transcribed text

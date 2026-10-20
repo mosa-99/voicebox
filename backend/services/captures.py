@@ -12,7 +12,7 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 import soundfile as sf
 from sqlalchemy.orm import Session
@@ -68,8 +68,13 @@ async def create_capture(
     language: Optional[str],
     stt_model: Optional[str],
     db: Session,
+    allowed_languages: Optional[Sequence[str]] = None,
 ) -> CaptureResponse:
-    """Persist raw audio, run STT, store the row."""
+    """Persist raw audio, run STT, store the row.
+
+    Without a ``language``, detection picks among ``allowed_languages``
+    (any language when empty).
+    """
     if source not in VALID_SOURCES:
         raise ValueError(f"Invalid source '{source}'. Must be one of {sorted(VALID_SOURCES)}")
 
@@ -122,7 +127,9 @@ async def create_capture(
 
         whisper = get_whisper_model()
         resolved_stt = stt_model or whisper.model_size
-        transcript = await whisper.transcribe(str(audio_path), language, resolved_stt)
+        transcript = await whisper.transcribe(
+            str(audio_path), language, resolved_stt, allowed_languages=allowed_languages
+        )
 
         row = DBCapture(
             id=capture_id,
@@ -237,6 +244,7 @@ async def retranscribe_capture(
     stt_model: Optional[str],
     language: Optional[str],
     db: Session,
+    allowed_languages: Optional[Sequence[str]] = None,
 ) -> Optional[CaptureResponse]:
     row = db.query(DBCapture).filter(DBCapture.id == capture_id).first()
     if not row:
@@ -248,7 +256,9 @@ async def retranscribe_capture(
 
     whisper = get_whisper_model()
     resolved_stt = stt_model or whisper.model_size
-    transcript = await whisper.transcribe(str(resolved), language, resolved_stt)
+    transcript = await whisper.transcribe(
+        str(resolved), language, resolved_stt, allowed_languages=allowed_languages
+    )
 
     row.transcript_raw = transcript
     row.stt_model = resolved_stt

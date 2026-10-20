@@ -283,6 +283,13 @@ def _migrate_capture_settings(engine, inspector, tables: set[str]) -> None:
             "chord_translate_keys",
         )
         _derive_translate_chord(engine)
+    if "auto_detect_languages" not in columns:
+        _add_column(
+            engine,
+            "capture_settings",
+            "auto_detect_languages TEXT NOT NULL DEFAULT '[]'",
+            "auto_detect_languages",
+        )
 
 
 def _derive_translate_chord(engine) -> None:
