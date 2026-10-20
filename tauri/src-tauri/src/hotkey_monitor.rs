@@ -230,6 +230,17 @@ fn process_event(
 // Effect → Tauri
 // ========================================================================
 
+/// Start a hands-free dictation as if the toggle chord had been pressed
+/// (used by the menu bar icon's "Start Dictation").
+pub fn start_dictation(app: &AppHandle) {
+    apply_effect(app, Effect::StartRecording(ChordAction::ToggleToTalk));
+}
+
+/// Stop the running dictation and transcribe it, like releasing the chord.
+pub fn stop_dictation(app: &AppHandle) {
+    apply_effect(app, Effect::StopRecording(ChordAction::ToggleToTalk));
+}
+
 fn apply_effect(app: &AppHandle, effect: Effect) {
     match effect {
         Effect::StartRecording(_) => {

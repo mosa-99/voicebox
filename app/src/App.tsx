@@ -247,6 +247,39 @@ function MainApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platform.metadata.isTauri, platform.lifecycle]);
 
+  // Menu bar icon (desktop): report the server status for its status line,
+  // and follow its "open page" and "check for updates" items.
+  useEffect(() => {
+    if (!platform.metadata.isTauri) return;
+    const status = serverReady ? 'ready' : startupError ? 'offline' : 'starting';
+    import('@tauri-apps/api/core')
+      .then(({ invoke }) => invoke('set_tray_server_status', { status }))
+      .catch(() => {});
+  }, [platform.metadata.isTauri, serverReady, startupError]);
+
+  useEffect(() => {
+    if (!platform.metadata.isTauri) return;
+    let disposed = false;
+    const unlisteners: Array<() => void> = [];
+    import('@tauri-apps/api/event').then(async ({ listen }) => {
+      const subscriptions = await Promise.all([
+        listen<string>('tray:navigate', (event) => router.history.push(event.payload)),
+        listen('tray:check-updates', () => {
+          void platform.updater.checkForUpdates();
+        }),
+      ]);
+      if (!disposed) {
+        unlisteners.push(...subscriptions);
+        return;
+      }
+      for (const unlisten of subscriptions) unlisten();
+    });
+    return () => {
+      disposed = true;
+      for (const unlisten of unlisteners) unlisten();
+    };
+  }, [platform]);
+
   // Cycle through loading messages every 3 seconds
   useEffect(() => {
     if (!platform.metadata.isTauri || serverReady) {

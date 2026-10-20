@@ -279,6 +279,12 @@ export function DictateWindow() {
     }
   }, [effectiveState]);
 
+  // Mirror the state on the menu bar icon: red while recording, a status
+  // line, and "Stop Dictation" instead of "Start Dictation".
+  useEffect(() => {
+    invoke('set_tray_dictation_state', { state: effectiveState }).catch(() => {});
+  }, [effectiveState]);
+
   return (
     <div
       className="h-screen w-screen flex items-center justify-center px-3"

@@ -4,6 +4,7 @@
 mod accessibility;
 mod app_menu;
 mod background;
+mod tray;
 mod audio_capture;
 mod audio_output;
 mod clipboard;
@@ -1425,7 +1426,11 @@ pub fn run() {
 
                 // Menu bar icon, then show the main window (it is created
                 // hidden) unless the login item started us in the background.
-                background::create_tray(app.handle())?;
+                tray::create(app.handle())?;
+                // One handler for the menu bar menu and the app menu's extra
+                // items (Settings…, Check for Updates…).
+                app.handle()
+                    .on_menu_event(|app, event| tray::handle_menu_event(app, &event));
                 if background::started_hidden() {
                     background::hide_main_window(app.handle());
                 } else {
@@ -1564,7 +1569,9 @@ pub fn run() {
             disable_hotkey,
             update_chord_bindings,
             app_menu::set_menu_language,
-            background::set_run_in_background
+            background::set_run_in_background,
+            tray::set_tray_server_status,
+            tray::set_tray_dictation_state
         ])
         .on_window_event({
             let closing = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
