@@ -1069,6 +1069,11 @@
           "hi": "Hindi",
           "ar": "Arabisch"
         },
+        "autoDetect": {
+          "title": "Erkennen unter",
+          "description": "Die automatische Erkennung wählt nur unter den Sprachen, die du sprichst – so werden kurze Diktate nicht für eine fremde Sprache gehalten. Leer lassen, um jede Sprache zuzulassen.",
+          "any": "Jede Sprache"
+        },
         "archive": {
           "title": "Audio archivieren",
           "description": "Die Originalaufnahme zusammen mit jedem Transkript behalten."

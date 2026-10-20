@@ -33,6 +33,7 @@ import { useServerStore } from '@/stores/serverStore';
 import { cn } from '@/lib/utils/cn';
 import { defaultChordKeys, displayLabelForKey, modifierSideHint } from '@/lib/utils/keyCodes';
 import {
+  TRANSCRIPTION_LANGUAGES,
   TRANSLATION_LANGUAGES,
   type Qwen3ModelSize,
   type TranslationLanguage,
@@ -137,6 +138,7 @@ export function CapturesPage() {
   const readiness = useDictationReadiness();
   const sttModel = settings?.stt_model ?? 'turbo';
   const language = settings?.language ?? 'auto';
+  const autoDetectLanguages = settings?.auto_detect_languages ?? [];
   const autoRefine = settings?.auto_refine ?? true;
   const llmModel = settings?.llm_model ?? '0.6B';
   const smartCleanup = settings?.smart_cleanup ?? true;
@@ -466,18 +468,69 @@ export function CapturesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="auto">{t('settings.captures.transcription.language.auto')}</SelectItem>
-                <SelectItem value="en">{t('settings.captures.transcription.language.en')}</SelectItem>
-                <SelectItem value="es">{t('settings.captures.transcription.language.es')}</SelectItem>
-                <SelectItem value="fr">{t('settings.captures.transcription.language.fr')}</SelectItem>
-                <SelectItem value="de">{t('settings.captures.transcription.language.de')}</SelectItem>
-                <SelectItem value="ja">{t('settings.captures.transcription.language.ja')}</SelectItem>
-                <SelectItem value="zh">{t('settings.captures.transcription.language.zh')}</SelectItem>
-                <SelectItem value="hi">{t('settings.captures.transcription.language.hi')}</SelectItem>
-                <SelectItem value="ar">{t('settings.captures.transcription.language.ar')}</SelectItem>
+                {TRANSCRIPTION_LANGUAGES.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {t(`settings.captures.transcription.language.${code}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           }
         />
+
+        {language === 'auto' && (
+          <SettingRow
+            title={t('settings.captures.transcription.autoDetect.title')}
+            description={t('settings.captures.transcription.autoDetect.description')}
+            action={
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 w-[180px] justify-between">
+                    {autoDetectLanguages.length > 0 ? (
+                      <span className="truncate">
+                        {autoDetectLanguages
+                          .map((code) =>
+                            t(`settings.captures.transcription.language.${code}`, { defaultValue: code }),
+                          )
+                          .join(', ')}
+                      </span>
+                    ) : (
+                      <span className="truncate text-muted-foreground">
+                        {t('settings.captures.transcription.autoDetect.any')}
+                      </span>
+                    )}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {TRANSCRIPTION_LANGUAGES.map((code) => {
+                    const selected = autoDetectLanguages.includes(code);
+                    return (
+                      <DropdownMenuItem
+                        key={code}
+                        // Keep the menu open so several languages can be ticked in a row.
+                        onSelect={(e) => e.preventDefault()}
+                        onClick={() =>
+                          update({
+                            auto_detect_languages: selected
+                              ? autoDetectLanguages.filter((c) => c !== code)
+                              : [...autoDetectLanguages, code],
+                          })
+                        }
+                        className="gap-2.5"
+                      >
+                        <span className="flex-1">
+                          {t(`settings.captures.transcription.language.${code}`)}
+                        </span>
+                        {selected && <Check className="h-3.5 w-3.5 text-accent shrink-0" />}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            }
+          />
+        )}
 
       </SettingSection>
 

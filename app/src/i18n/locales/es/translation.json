@@ -981,6 +981,11 @@
           "hi": "Hindi",
           "ar": "Árabe"
         },
+        "autoDetect": {
+          "title": "Detectar entre",
+          "description": "La detección automática elige solo entre los idiomas que hablas, para que los dictados cortos no se confundan con otro idioma. Déjalo vacío para permitir cualquier idioma.",
+          "any": "Cualquier idioma"
+        },
         "archive": {
           "title": "Archivar audio",
           "description": "Conserva la grabación original junto a cada transcripción."
