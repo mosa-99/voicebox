@@ -42,9 +42,10 @@ for _code, _english, _german_stems in [
             _LATIN_NAMES[_stem + _ending] = _code
 
 # Arabic names after normalisation (see ``_normalize``), without the article
-# or a ب/ل/و prefix, which ``_arabic_language`` strips.
+# or a ب/ل/و prefix, which ``_arabic_language`` strips. Whisper spells
+# English several ways ("الاندليزية" for الإنجليزية, dialect انقليزي/انغليزي).
 _ARABIC_NAMES: dict[str, str] = {
-    "انجليزيه": "en", "انجليزي": "en", "انكليزيه": "en", "انكليزي": "en",
+    **{f"{stem}{end}": "en" for stem in ("انجليزي", "انكليزي", "اندليزي", "انقليزي", "انغليزي") for end in ("", "ه")},
     "المانيه": "de", "الماني": "de",
     "عربيه": "ar", "عربي": "ar",
     "فرنسيه": "fr", "فرنسي": "fr",
