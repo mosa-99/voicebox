@@ -175,6 +175,65 @@ fn find_voicebox_pid_on_port(port: u16) -> Option<u32> {
 /// must be present as booleans. This prevents misidentifying an unrelated
 /// service that happens to expose a `/health` endpoint.
 #[allow(dead_code)] // Used in platform-specific cfg blocks
+/// Version a Voicebox server on `port` reports at `GET /`, if it answers.
+/// Runs on its own thread: the blocking reqwest client must not live inside
+/// the async runtime that drives `start_server`.
+fn running_server_version(port: u16) -> Option<String> {
+    std::thread::spawn(move || {
+        let client = reqwest::blocking::Client::builder()
+            .timeout(std::time::Duration::from_secs(3))
+            .build()
+            .ok()?;
+        let body: serde_json::Value = client
+            .get(format!("http://127.0.0.1:{}/", port))
+            .send()
+            .ok()?
+            .json()
+            .ok()?;
+        body.get("version")?.as_str().map(str::to_string)
+    })
+    .join()
+    .ok()
+    .flatten()
+}
+
+/// A bundled server left running by "Keep server running" outlives app
+/// updates. Reusing it would pair the new app with the old backend, so
+/// return the old version when it differs from this build.
+fn stale_server_version(app: &tauri::AppHandle) -> Option<String> {
+    let app_version = app.package_info().version.to_string();
+    running_server_version(SERVER_PORT).filter(|v| *v != app_version)
+}
+
+/// Stop a leftover bundled server and wait until its port is free, so a
+/// fresh one can bind it.
+fn stop_stale_server(pid: u32) {
+    use std::net::TcpStream;
+    use std::process::Command;
+    #[cfg(unix)]
+    {
+        let _ = Command::new("kill").args(["-TERM", &pid.to_string()]).output();
+    }
+    #[cfg(windows)]
+    {
+        let _ = Command::new("taskkill")
+            .args(["/PID", &pid.to_string(), "/T", "/F"])
+            .output();
+    }
+    let addr = format!("127.0.0.1:{}", SERVER_PORT).parse().unwrap();
+    for _ in 0..40 {
+        if TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(200)).is_err() {
+            return;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(200));
+    }
+    #[cfg(unix)]
+    {
+        let _ = Command::new("kill").args(["-9", &pid.to_string()]).output();
+        std::thread::sleep(std::time::Duration::from_millis(500));
+    }
+}
+
 fn check_health(port: u16) -> bool {
     let url = format!("http://127.0.0.1:{}/health", port);
     match reqwest::blocking::Client::builder()
@@ -303,6 +362,14 @@ async fn start_server(
                     let pid_str = parts[1];
                     if command.contains("voicebox") {
                         if let Ok(pid) = pid_str.parse::<u32>() {
+                            if let Some(old) = stale_server_version(&app) {
+                                println!(
+                                    "voicebox-server on port {} (PID: {}) is v{}, this app is v{}; restarting it",
+                                    SERVER_PORT, pid, old, app.package_info().version
+                                );
+                                stop_stale_server(pid);
+                                break; // fall through and spawn a fresh server
+                            }
                             println!("Found existing voicebox-server on port {} (PID: {}), reusing it", SERVER_PORT, pid);
                             // Store the PID so we can kill it on exit if needed
                             *state.server_pid.lock().unwrap() = Some(pid);
@@ -337,22 +404,31 @@ async fn start_server(
         ).is_ok() {
             // Port is in use — check if it's a voicebox process by name first
             if let Some(pid) = find_voicebox_pid_on_port(SERVER_PORT) {
-                println!("Found existing voicebox-server on port {} (PID: {}), reusing it", SERVER_PORT, pid);
-                *state.server_pid.lock().unwrap() = Some(pid);
-                return Ok(format!("http://127.0.0.1:{}", SERVER_PORT));
+                if let Some(old) = stale_server_version(&app) {
+                    println!(
+                        "voicebox-server on port {} (PID: {}) is v{}, this app is v{}; restarting it",
+                        SERVER_PORT, pid, old, app.package_info().version
+                    );
+                    stop_stale_server(pid);
+                } else {
+                    println!("Found existing voicebox-server on port {} (PID: {}), reusing it", SERVER_PORT, pid);
+                    *state.server_pid.lock().unwrap() = Some(pid);
+                    return Ok(format!("http://127.0.0.1:{}", SERVER_PORT));
+                }
+            } else {
+                // Process name doesn't match — could be an external Python/Docker server.
+                // Verify via HTTP health check before giving up.
+                println!("Port {} in use by unknown process, checking if it's a Voicebox server...", SERVER_PORT);
+                if check_health(SERVER_PORT) {
+                    println!("Health check passed — reusing external server on port {}", SERVER_PORT);
+                    return Ok(format!("http://127.0.0.1:{}", SERVER_PORT));
+                }
+                return Err(format!(
+                    "Port {} is already in use by another application. \
+                     Close the other application or change the Voicebox port.",
+                    SERVER_PORT
+                ));
             }
-            // Process name doesn't match — could be an external Python/Docker server.
-            // Verify via HTTP health check before giving up.
-            println!("Port {} in use by unknown process, checking if it's a Voicebox server...", SERVER_PORT);
-            if check_health(SERVER_PORT) {
-                println!("Health check passed — reusing external server on port {}", SERVER_PORT);
-                return Ok(format!("http://127.0.0.1:{}", SERVER_PORT));
-            }
-            return Err(format!(
-                "Port {} is already in use by another application. \
-                 Close the other application or change the Voicebox port.",
-                SERVER_PORT
-            ));
         }
     }
 
