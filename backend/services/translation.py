@@ -4,8 +4,9 @@ another language, using the same LLM that refines dictation.
 
 Backs the translate shortcut: hold the dictation keys plus Shift, speak in
 any language, and the translation is pasted instead of the transcript.
-Translation also drops disfluencies, so a translated capture skips the
-separate refinement pass.
+Saying the language ("… übersetze das auf Arabisch") overrides the target
+from settings (see ``translation_instruction``). Translation also drops
+disfluencies, so a translated capture skips the separate refinement pass.
 """
 
 import logging
@@ -20,6 +21,7 @@ from .refinement import (
     collapse_repetitive_artifacts,
     transcript_language,
 )
+from .translation_instruction import split_translation_instruction
 
 logger = logging.getLogger(__name__)
 
@@ -188,22 +190,26 @@ async def translate_transcript(
     transcript: str,
     target_code: str,
     model_size: str | None = None,
-) -> tuple[str, str]:
-    """Translate the transcript into ``target_code`` (a TRANSLATION_LANGUAGES key).
+) -> tuple[str, str, str]:
+    """Translate the transcript into ``target_code`` (a TRANSLATION_LANGUAGES
+    key), or into the language the speaker named in the transcript.
 
     Returns:
-        (translated_text, llm_model_size)
+        (translated_text, llm_model_size, target_code actually used)
 
     Raises:
         TranslationError: if neither attempt produced a plausible translation.
     """
-    target = TRANSLATION_LANGUAGES[target_code]
     backend = llm_service.get_llm_model()
     resolved_size = llm_service.resolve_model_size(backend, model_size)
 
     cleaned_input = collapse_repetitive_artifacts(transcript).strip()
+    spoken_target, cleaned_input = split_translation_instruction(cleaned_input)
+    if spoken_target:
+        target_code = spoken_target
+    target = TRANSLATION_LANGUAGES[target_code]
     if not cleaned_input:
-        return "", resolved_size
+        return "", resolved_size, target_code
 
     prompt = build_translation_request(cleaned_input, target, transcript_language(cleaned_input))
     system = build_translation_prompt(target)
@@ -222,7 +228,7 @@ async def translate_transcript(
         )
         text = text.strip()
         if is_translation(cleaned_input, text, target_code):
-            return text, resolved_size
+            return text, resolved_size, target_code
         logger.warning("Translation into %s failed the sanity check: %r", target, text[:200])
 
     raise TranslationError(f"Could not translate the dictation into {target}")

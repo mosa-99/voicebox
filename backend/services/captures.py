@@ -218,14 +218,14 @@ async def translate_capture(
     if not row:
         return None
 
-    translated, llm_size = await translate_transcript(
+    translated, llm_size, used_language = await translate_transcript(
         row.transcript_raw or "",
         target_language,
         model_size=model_size,
     )
 
     row.transcript_translated = translated
-    row.translation_language = target_language
+    row.translation_language = used_language
     row.llm_model = llm_size
     db.commit()
     db.refresh(row)

@@ -1014,7 +1014,7 @@
         },
         "translateTo": {
           "title": "Translate into",
-          "description": "The language the translate shortcut writes in."
+          "description": "The language the translate shortcut writes in. You can also say it while dictating, in English, German or Arabic, e.g. “translate this into Arabic: …”."
         },
         "chordPicker": {
           "pttTitle": "Set push-to-talk shortcut",

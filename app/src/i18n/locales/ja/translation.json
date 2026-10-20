@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "翻訳先の言語",
-          "description": "翻訳ショートカットが出力する言語です。"
+          "description": "翻訳ショートカットが出力する言語です。ディクテーション中に英語・ドイツ語・アラビア語で言うこともできます（例: “translate this into German: …”）。"
         },
         "chordPicker": {
           "pttTitle": "プッシュトゥトーク用ショートカットを設定",

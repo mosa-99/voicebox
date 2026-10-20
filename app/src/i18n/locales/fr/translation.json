@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "Traduire en",
-          "description": "La langue dans laquelle le raccourci de traduction écrit."
+          "description": "La langue dans laquelle le raccourci de traduction écrit. Vous pouvez aussi la dire en dictant, en anglais, allemand ou arabe, p. ex. « translate this into German: … »."
         },
         "chordPicker": {
           "pttTitle": "Définir le raccourci push-to-talk",

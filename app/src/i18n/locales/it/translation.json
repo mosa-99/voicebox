@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "Traduci in",
-          "description": "La lingua in cui traduce la scorciatoia di traduzione."
+          "description": "La lingua in cui traduce la scorciatoia di traduzione. Puoi anche dirla mentre detti, in inglese, tedesco o arabo, ad es. «translate this into German: …»."
         },
         "chordPicker": {
           "pttTitle": "Imposta la scorciatoia push-to-talk",

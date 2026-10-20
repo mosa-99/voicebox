@@ -926,7 +926,7 @@
         },
         "translateTo": {
           "title": "Traducir a",
-          "description": "El idioma al que traduce el atajo de traducción."
+          "description": "El idioma al que traduce el atajo de traducción. También puedes decirlo al dictar, en inglés, alemán o árabe, p. ej. «translate this into German: …»."
         },
         "chordPicker": {
           "pttTitle": "Definir el atajo de pulsar para hablar",
