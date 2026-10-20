@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "정제됨",
       "raw": "원본",
+      "translated": "번역됨",
       "refinedHint": "Qwen3 · {{model}}로 정제됨",
-      "rawHint": "Whisper {{model}}로 변환됨"
+      "rawHint": "Whisper {{model}}로 변환됨",
+      "translatedHint": "Qwen3 · {{model}}로 번역됨 ({{language}})"
     },
     "actions": {
       "configure": "설정",
@@ -99,6 +101,7 @@
       "recording": "녹음 중",
       "transcribing": "변환 중",
       "refining": "정제 중",
+      "translating": "번역 중",
       "speaking": "말하는 중",
       "completed": "완료",
       "stopAria": "녹음 중지",
@@ -916,11 +919,22 @@
           "description": "한 번 누르면 핸즈프리 녹음이 시작됩니다. 다시 누르면 중지됩니다. 보통 푸시투톡 + Space입니다.",
           "change": "변경"
         },
+        "translate": {
+          "title": "받아쓰기 및 번역 단축키",
+          "description": "이 키를 누른 채 아무 언어로나 말하세요. 키를 놓으면 말한 내용 대신 번역이 붙여넣어집니다. 보통 푸시투톡 + Shift입니다.",
+          "change": "변경"
+        },
+        "translateTo": {
+          "title": "번역할 언어",
+          "description": "번역 단축키가 출력하는 언어입니다."
+        },
         "chordPicker": {
           "pttTitle": "푸시투톡 단축키 설정",
           "pttDescription": "사용할 키를 길게 누른 후 놓고 저장을 클릭하세요. 오른쪽 modifier 배지는 키가 왼쪽인지 오른쪽인지 보여줍니다.",
           "toggleTitle": "토글 단축키 설정",
-          "toggleDescription": "사용할 키를 길게 누른 후 놓고 저장을 클릭하세요. 푸시투톡과 다른 키를 선택하세요."
+          "toggleDescription": "사용할 키를 길게 누른 후 놓고 저장을 클릭하세요. 푸시투톡과 다른 키를 선택하세요.",
+          "translateTitle": "번역 단축키 설정",
+          "translateDescription": "사용할 키를 누른 채로 있다가 놓은 뒤 저장을 클릭하세요. 푸시투톡 + Shift가 기억하기 쉽습니다."
         },
         "preview": {
           "title": "미리보기",

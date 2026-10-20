@@ -61,8 +61,9 @@ export interface UseCaptureRecordingSessionOptions {
    */
   onCaptureCreated?: (capture: CaptureResponse) => void;
   /**
-   * Fired with the final delivered text — refined if ``auto_refine`` was on
-   * for this capture, raw transcript otherwise. Used by the floating
+   * Fired with the final delivered text — the translation for a translate
+   * dictation, else refined if ``auto_refine`` was on for this capture, raw
+   * transcript otherwise. Used by the floating
    * dictate window to hand the text off to the Rust auto-paste pipeline.
    *
    * ``allowAutoPaste`` snapshots the setting at chord-start so a refine that
@@ -83,7 +84,12 @@ export interface UseCaptureRecordingSessionResult {
   isRecording: boolean;
   isUploading: boolean;
   isRefining: boolean;
-  startRecording: () => void;
+  /** Whether the current (or last) dictation gets translated. */
+  translateMode: boolean;
+  startRecording: (options?: { translate?: boolean }) => void;
+  /** Switch the running recording to translate mode (PTT + Shift pressed
+   *  mid-hold). One-way: releasing Shift first doesn't switch back. */
+  markTranslate: () => void;
   stopRecording: () => void;
   toggleRecording: () => void;
   dismissError: () => void;
@@ -123,6 +129,11 @@ export function useCaptureRecordingSession(
 
   const onFinalTextRef = useRef(options.onFinalText);
   onFinalTextRef.current = options.onFinalText;
+
+  // Whether this dictation is translated instead of refined. A ref for the
+  // recorder callback, state for the pill.
+  const translateRef = useRef(false);
+  const [translateMode, setTranslateMode] = useState(false);
 
   // Snapshot of ``allow_auto_paste`` from the capture-create response —
   // held so the refine onSuccess (which only sees the plain CaptureResponse)
@@ -203,10 +214,34 @@ export function useCaptureRecordingSession(
     },
   });
 
+  const translateMutation = useMutation({
+    // Empty body — backend resolves target language and model from capture_settings.
+    mutationFn: async (captureId: string) => apiClient.translateCapture(captureId, {}),
+    onSuccess: (data, captureId) => {
+      queryClient.invalidateQueries({ queryKey: ['captures'] });
+      broadcastUpdated(captureId);
+      if (pillStateRef.current === 'translating') scheduleHidePill();
+      if (data.transcript_translated) {
+        onFinalTextRef.current?.(data.transcript_translated, data, allowAutoPasteRef.current);
+      }
+    },
+    onError: (err: Error) => {
+      // The transcript is still saved in Captures; nothing gets pasted.
+      console.warn('[capture] translation failed:', err);
+      showError(i18n.t('recording.translationFailed'));
+    },
+  });
+
   const uploadMutation = useMutation({
-    mutationFn: async ({ file, source }: { file: File; source: CaptureSource }) =>
-      apiClient.createCapture(file, { source }),
-    onSuccess: (capture) => {
+    mutationFn: async ({
+      file,
+      source,
+    }: {
+      file: File;
+      source: CaptureSource;
+      translate?: boolean;
+    }) => apiClient.createCapture(file, { source }),
+    onSuccess: (capture, { translate }) => {
       queryClient.setQueryData<CaptureListResponse>(['captures'], (prev) => {
         if (!prev) return prev;
         if (prev.items.some((c) => c.id === capture.id)) return prev;
@@ -216,7 +251,11 @@ export function useCaptureRecordingSession(
       broadcastCreated(capture);
       onCaptureCreatedRef.current?.(capture);
       allowAutoPasteRef.current = capture.allow_auto_paste;
-      if (capture.auto_refine) {
+      if (translate) {
+        // Translation cleans up the transcript too, so it replaces refine.
+        setPillState('translating');
+        translateMutation.mutate(capture.id);
+      } else if (capture.auto_refine) {
         setPillState('refining');
         refineMutation.mutate(capture.id);
       } else {
@@ -269,7 +308,7 @@ export function useCaptureRecordingSession(
       const file = new File([blob], `dictation-${Date.now()}.${extension}`, {
         type: blob.type,
       });
-      uploadMutation.mutate({ file, source: 'dictation' });
+      uploadMutation.mutate({ file, source: 'dictation', translate: translateRef.current });
     },
   });
 
@@ -279,13 +318,23 @@ export function useCaptureRecordingSession(
     }
   }, [recordError, showError]);
 
-  const startRecording = useCallback(() => {
-    if (isRecording) return;
-    clearRestTimer();
-    setFrozenElapsedMs(0);
-    setPillState('recording');
-    beginAudioRecording();
-  }, [isRecording, beginAudioRecording, clearRestTimer]);
+  const startRecording = useCallback(
+    (options?: { translate?: boolean }) => {
+      if (isRecording) return;
+      clearRestTimer();
+      translateRef.current = Boolean(options?.translate);
+      setTranslateMode(translateRef.current);
+      setFrozenElapsedMs(0);
+      setPillState('recording');
+      beginAudioRecording();
+    },
+    [isRecording, beginAudioRecording, clearRestTimer],
+  );
+
+  const markTranslate = useCallback(() => {
+    translateRef.current = true;
+    setTranslateMode(true);
+  }, []);
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
@@ -318,8 +367,10 @@ export function useCaptureRecordingSession(
     errorMessage,
     isRecording,
     isUploading: uploadMutation.isPending,
-    isRefining: refineMutation.isPending,
+    isRefining: refineMutation.isPending || translateMutation.isPending,
+    translateMode,
     startRecording,
+    markTranslate,
     stopRecording,
     toggleRecording,
     dismissError,

@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "Refined",
       "raw": "Raw",
+      "translated": "Translated",
       "refinedHint": "Refined with Qwen3 · {{model}}",
-      "rawHint": "Transcribed with Whisper {{model}}"
+      "rawHint": "Transcribed with Whisper {{model}}",
+      "translatedHint": "Translated to {{language}} with Qwen3 · {{model}}"
     },
     "actions": {
       "configure": "Configure",
@@ -99,6 +101,7 @@
       "recording": "Recording",
       "transcribing": "Transcribing",
       "refining": "Refining",
+      "translating": "Translating",
       "speaking": "Speaking",
       "completed": "Done",
       "stopAria": "Stop recording",
@@ -173,7 +176,8 @@
       "sttModel": "STT model",
       "llmModel": "LLM model",
       "refined": "Refined transcript",
-      "raw": "Raw transcript"
+      "raw": "Raw transcript",
+      "translated": "Translation"
     }
   },
   "voicesTab": {
@@ -1003,11 +1007,22 @@
           "description": "Press once to start a hands-free recording. Press again to stop. Usually push-to-talk plus Space.",
           "change": "Change"
         },
+        "translate": {
+          "title": "Dictate & translate shortcut",
+          "description": "Hold these keys and speak in any language. When you release them, the translation is pasted instead of what you said. Usually push-to-talk plus Shift.",
+          "change": "Change"
+        },
+        "translateTo": {
+          "title": "Translate into",
+          "description": "The language the translate shortcut writes in."
+        },
         "chordPicker": {
           "pttTitle": "Set push-to-talk shortcut",
           "pttDescription": "Hold the keys you want to use, then release and click Save. The right-hand modifier badge shows whether a key is the left or right variant.",
           "toggleTitle": "Set toggle shortcut",
-          "toggleDescription": "Hold the keys you want to use, then release and click Save. Pick something distinct from your push-to-talk chord."
+          "toggleDescription": "Hold the keys you want to use, then release and click Save. Pick something distinct from your push-to-talk chord.",
+          "translateTitle": "Set translate shortcut",
+          "translateDescription": "Hold the keys you want to use, then release and click Save. Push-to-talk plus Shift is easy to remember."
         },
         "preview": {
           "title": "Preview",
@@ -1583,6 +1598,7 @@
     },
     "tooShort": "Recording too short, canceled",
     "refinementFailed": "Refinement failed",
+    "translationFailed": "Translation failed. The transcript is saved in Captures.",
     "uploadFailed": "Upload failed"
   },
   "files": {

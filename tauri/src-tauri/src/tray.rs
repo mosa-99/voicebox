@@ -264,12 +264,12 @@ pub fn set_tray_server_status(app: AppHandle, status: String) {
 }
 
 /// `state` is the dictate pill state (recording, transcribing, refining,
-/// speaking, completed, error, hidden).
+/// translating, speaking, completed, error, hidden).
 #[tauri::command]
 pub fn set_tray_dictation_state(app: AppHandle, state: String) {
     let value = match state.as_str() {
         "recording" => DICTATION_RECORDING,
-        "transcribing" | "refining" => DICTATION_PROCESSING,
+        "transcribing" | "refining" | "translating" => DICTATION_PROCESSING,
         "speaking" => DICTATION_SPEAKING,
         _ => DICTATION_IDLE,
     };

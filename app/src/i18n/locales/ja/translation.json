@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "整形済み",
       "raw": "生テキスト",
+      "translated": "翻訳",
       "refinedHint": "Qwen3 · {{model}} で整形",
-      "rawHint": "Whisper {{model}} で文字起こし"
+      "rawHint": "Whisper {{model}} で文字起こし",
+      "translatedHint": "Qwen3 · {{model}} で翻訳（{{language}}）"
     },
     "actions": {
       "configure": "設定",
@@ -99,6 +101,7 @@
       "recording": "録音中",
       "transcribing": "文字起こし中",
       "refining": "整形中",
+      "translating": "翻訳中",
       "speaking": "発話中",
       "completed": "完了",
       "stopAria": "録音を停止",
@@ -916,11 +919,22 @@
           "description": "一度押すとハンズフリー録音を開始します。もう一度押すと停止します。通常はプッシュトゥトーク + Space を使います。",
           "change": "変更"
         },
+        "translate": {
+          "title": "ディクテーション＆翻訳用ショートカット",
+          "description": "これらのキーを押したまま任意の言語で話します。キーを離すと、話した内容の代わりに翻訳が貼り付けられます。通常はプッシュトゥトーク + Shift を使います。",
+          "change": "変更"
+        },
+        "translateTo": {
+          "title": "翻訳先の言語",
+          "description": "翻訳ショートカットが出力する言語です。"
+        },
         "chordPicker": {
           "pttTitle": "プッシュトゥトーク用ショートカットを設定",
           "pttDescription": "使いたいキーを押し続け、離してから「保存」をクリックします。右側の修飾キーバッジは、左右どちらの変種かを示します。",
           "toggleTitle": "トグル用ショートカットを設定",
-          "toggleDescription": "使いたいキーを押し続け、離してから「保存」をクリックします。プッシュトゥトークのコードと区別できるものを選んでください。"
+          "toggleDescription": "使いたいキーを押し続け、離してから「保存」をクリックします。プッシュトゥトークのコードと区別できるものを選んでください。",
+          "translateTitle": "翻訳用ショートカットを設定",
+          "translateDescription": "使いたいキーを押したまま離し、「保存」をクリックします。プッシュトゥトーク + Shift が覚えやすいです。"
         },
         "preview": {
           "title": "プレビュー",

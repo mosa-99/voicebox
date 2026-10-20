@@ -32,7 +32,13 @@ import { usePlatform } from '@/platform/PlatformContext';
 import { useServerStore } from '@/stores/serverStore';
 import { cn } from '@/lib/utils/cn';
 import { defaultChordKeys, displayLabelForKey, modifierSideHint } from '@/lib/utils/keyCodes';
-import type { Qwen3ModelSize, VoiceProfileResponse, WhisperModelSize } from '@/lib/api/types';
+import {
+  TRANSLATION_LANGUAGES,
+  type Qwen3ModelSize,
+  type TranslationLanguage,
+  type VoiceProfileResponse,
+  type WhisperModelSize,
+} from '@/lib/api/types';
 import { SettingRow, SettingSection } from './SettingRow';
 
 function ChordPreview({ keys }: { keys: string[] }) {
@@ -141,6 +147,8 @@ export function CapturesPage() {
   const hotkeyEnabled = settings?.hotkey_enabled ?? false;
   const pushToTalkKeys = settings?.chord_push_to_talk_keys ?? defaultChordKeys('push');
   const toggleToTalkKeys = settings?.chord_toggle_to_talk_keys ?? defaultChordKeys('toggle');
+  const translateKeys = settings?.chord_translate_keys ?? defaultChordKeys('translate');
+  const translationLanguage = settings?.translation_language ?? 'en';
   const customLlmEndpointSaved = settings?.custom_llm_endpoint ?? '';
   const customLlmModelSaved = settings?.custom_llm_model ?? '';
   // The server no longer returns the API key value; it reports whether one
@@ -149,7 +157,7 @@ export function CapturesPage() {
   const customLlmApiKeyConfigured = Boolean(settings?.custom_llm_api_key_configured);
   const customLlmActive = Boolean(customLlmEndpointSaved && customLlmModelSaved);
 
-  const [chordEditor, setChordEditor] = useState<'push' | 'toggle' | null>(null);
+  const [chordEditor, setChordEditor] = useState<'push' | 'toggle' | 'translate' | null>(null);
   const [opening, setOpening] = useState(false);
   const [capturesPath, setCapturesPath] = useState<string | null>(null);
   // Drafts persist to the server on blur so we don't fire a PUT + optimistic
@@ -310,6 +318,47 @@ export function CapturesPage() {
           }
         />
 
+        <SettingRow
+          title={t('settings.captures.dictation.translate.title')}
+          description={t('settings.captures.dictation.translate.description')}
+          action={
+            <div className="flex items-center gap-2">
+              <ChordPreview keys={translateKeys} />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hotkeyEnabled}
+                onClick={() => setChordEditor('translate')}
+              >
+                <Keyboard className="h-3.5 w-3.5 me-1.5" />
+                {t('settings.captures.dictation.translate.change')}
+              </Button>
+            </div>
+          }
+        />
+
+        <SettingRow
+          title={t('settings.captures.dictation.translateTo.title')}
+          description={t('settings.captures.dictation.translateTo.description')}
+          action={
+            <Select
+              value={translationLanguage}
+              onValueChange={(v) => update({ translation_language: v as TranslationLanguage })}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TRANSLATION_LANGUAGES.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {t(`settings.captures.transcription.language.${code}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          }
+        />
+
         <ChordPicker
           open={chordEditor === 'push'}
           title={t('settings.captures.dictation.chordPicker.pttTitle')}
@@ -330,6 +379,18 @@ export function CapturesPage() {
           onCancel={() => setChordEditor(null)}
           onSave={(keys) => {
             update({ chord_toggle_to_talk_keys: keys });
+            setChordEditor(null);
+          }}
+        />
+
+        <ChordPicker
+          open={chordEditor === 'translate'}
+          title={t('settings.captures.dictation.chordPicker.translateTitle')}
+          description={t('settings.captures.dictation.chordPicker.translateDescription')}
+          initialKeys={translateKeys}
+          onCancel={() => setChordEditor(null)}
+          onSave={(keys) => {
+            update({ chord_translate_keys: keys });
             setChordEditor(null);
           }}
         />

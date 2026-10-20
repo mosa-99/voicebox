@@ -26,6 +26,7 @@ from sqlalchemy import inspect, text
 from ..utils.capture_chords import (
     default_push_to_talk_chord,
     default_toggle_to_talk_chord,
+    default_translate_chord,
 )
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ def run_migrations(engine) -> None:
     _migrate_effect_presets(engine, inspector, tables)
     _migrate_generation_versions(engine, inspector, tables)
     _migrate_capture_settings(engine, inspector, tables)
+    _migrate_captures(engine, inspector, tables)
     _migrate_mcp_bindings(engine, inspector, tables)
     _normalize_storage_paths(engine, tables)
     _migrate_add_indexes(engine, tables)
@@ -265,6 +267,54 @@ def _migrate_capture_settings(engine, inspector, tables: set[str]) -> None:
             "custom_llm_api_key VARCHAR",
             "custom_llm_api_key",
         )
+    if "translation_language" not in columns:
+        _add_column(
+            engine,
+            "capture_settings",
+            "translation_language VARCHAR NOT NULL DEFAULT 'en'",
+            "translation_language",
+        )
+    if "chord_translate_keys" not in columns:
+        translate_default = json.dumps(default_translate_chord())
+        _add_column(
+            engine,
+            "capture_settings",
+            f"chord_translate_keys TEXT NOT NULL DEFAULT '{translate_default}'",
+            "chord_translate_keys",
+        )
+        _derive_translate_chord(engine)
+
+
+def _derive_translate_chord(engine) -> None:
+    """Base an existing user's translate chord on their own push-to-talk
+    chord (plus Shift) rather than the platform default, so it sits under
+    the same fingers as the dictation shortcut they already use."""
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text("SELECT id, chord_push_to_talk_keys FROM capture_settings")
+        ).fetchall()
+        for row_id, push_json in rows:
+            try:
+                push = json.loads(push_json) if push_json else None
+            except (TypeError, ValueError):
+                push = None
+            if not isinstance(push, list) or not all(isinstance(k, str) for k in push):
+                continue
+            conn.execute(
+                text("UPDATE capture_settings SET chord_translate_keys = :keys WHERE id = :id"),
+                {"keys": json.dumps(default_translate_chord(push)), "id": row_id},
+            )
+        conn.commit()
+
+
+def _migrate_captures(engine, inspector, tables: set[str]) -> None:
+    if "captures" not in tables:
+        return
+    columns = _get_columns(inspector, "captures")
+    if "transcript_translated" not in columns:
+        _add_column(engine, "captures", "transcript_translated TEXT", "transcript_translated")
+    if "translation_language" not in columns:
+        _add_column(engine, "captures", "translation_language VARCHAR", "translation_language")
 
 
 def _migrate_mcp_bindings(engine, inspector, tables: set[str]) -> None:

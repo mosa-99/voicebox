@@ -13,6 +13,7 @@ from ..database import Capture as DBCapture, get_db
 from ..services import captures as captures_service
 from ..services import settings as settings_service
 from ..services.refinement import RefinementFlags
+from ..services.translation import TranslationError
 
 logger = logging.getLogger(__name__)
 
@@ -147,6 +148,35 @@ async def refine_capture_endpoint(
         )
     except Exception as e:
         logger.exception("Refinement failed for capture %s", capture_id)
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if not capture:
+        raise HTTPException(status_code=404, detail="Capture not found")
+    return capture
+
+
+@router.post("/captures/{capture_id}/translate", response_model=models.CaptureResponse)
+async def translate_capture_endpoint(
+    capture_id: str,
+    request: models.CaptureTranslateRequest,
+    db: Session = Depends(get_db),
+):
+    """Translate the transcript into the requested (or saved) language."""
+    saved = settings_service.get_capture_settings(db)
+    target = request.target_language or saved.translation_language or "en"
+    resolved_model = request.model_size or saved.llm_model
+
+    try:
+        capture = await captures_service.translate_capture(
+            capture_id=capture_id,
+            target_language=target,
+            model_size=resolved_model,
+            db=db,
+        )
+    except TranslationError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        logger.exception("Translation failed for capture %s", capture_id)
         raise HTTPException(status_code=500, detail=str(e))
 
     if not capture:

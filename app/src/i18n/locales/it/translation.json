@@ -40,8 +40,10 @@
     "transcript": {
       "refined": "Perfezionata",
       "raw": "Grezza",
+      "translated": "Tradotta",
       "refinedHint": "Perfezionata con Qwen3 · {{model}}",
-      "rawHint": "Trascritto con Whisper {{model}}"
+      "rawHint": "Trascritto con Whisper {{model}}",
+      "translatedHint": "Tradotta ({{language}}) con Qwen3 · {{model}}"
     },
     "actions": {
       "configure": "Configura",
@@ -99,6 +101,7 @@
       "recording": "Registrazione in corso",
       "transcribing": "Trascrizione in corso",
       "refining": "Perfezionamento in corso",
+      "translating": "Traduzione in corso",
       "speaking": "Riproduzione voce in corso",
       "completed": "Fatto",
       "stopAria": "Interrompi registrazione",
@@ -916,11 +919,22 @@
           "description": "Premi una volta per avviare una registrazione a mani libere. Premi di nuovo per interromperla. Di solito corrisponde alla combinazione push-to-talk più lo Spazio.",
           "change": "Cambia"
         },
+        "translate": {
+          "title": "Scorciatoia per dettare e tradurre",
+          "description": "Tieni premuti questi tasti e parla in qualsiasi lingua. Al rilascio viene incollata la traduzione al posto di ciò che hai detto. Di solito push-to-talk più Maiusc.",
+          "change": "Cambia"
+        },
+        "translateTo": {
+          "title": "Traduci in",
+          "description": "La lingua in cui traduce la scorciatoia di traduzione."
+        },
         "chordPicker": {
           "pttTitle": "Imposta la scorciatoia push-to-talk",
           "pttDescription": "Tieni premuti i tasti che desideri utilizzare, quindi rilasciali e clicca su Salva. L'indicatore del tasto modificatore sul lato destro mostra se si tratta della variante sinistra o destra.",
           "toggleTitle": "Imposta la scorciatoia di attivazione/disattivazione",
-          "toggleDescription": "Tieni premuti i tasti che desideri utilizzare, quindi rilasciali e clicca su Salva. Scegli una combinazione diversa rispetto a quella del push-to-talk."
+          "toggleDescription": "Tieni premuti i tasti che desideri utilizzare, quindi rilasciali e clicca su Salva. Scegli una combinazione diversa rispetto a quella del push-to-talk.",
+          "translateTitle": "Imposta la scorciatoia di traduzione",
+          "translateDescription": "Tieni premuti i tasti che vuoi usare, poi rilasciali e fai clic su Salva. Push-to-talk più Maiusc è facile da ricordare."
         },
         "preview": {
           "title": "Anteprima",

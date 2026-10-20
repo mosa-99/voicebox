@@ -22,6 +22,7 @@ from ..database import Capture as DBCapture
 from ..models import CaptureResponse, RefinementFlagsModel
 from ..utils.audio import load_audio
 from .refinement import RefinementFlags, refine_transcript
+from .translation import translate_transcript
 from .transcribe import get_whisper_model
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,8 @@ def _to_response(row: DBCapture) -> CaptureResponse:
         stt_model=row.stt_model,
         llm_model=row.llm_model,
         refinement_flags=flags_model,
+        transcript_translated=row.transcript_translated,
+        translation_language=row.translation_language,
         created_at=row.created_at,
     )
 
@@ -205,6 +208,30 @@ async def refine_capture(
     return _to_response(row)
 
 
+async def translate_capture(
+    capture_id: str,
+    target_language: str,
+    model_size: Optional[str],
+    db: Session,
+) -> Optional[CaptureResponse]:
+    row = db.query(DBCapture).filter(DBCapture.id == capture_id).first()
+    if not row:
+        return None
+
+    translated, llm_size = await translate_transcript(
+        row.transcript_raw or "",
+        target_language,
+        model_size=model_size,
+    )
+
+    row.transcript_translated = translated
+    row.translation_language = target_language
+    row.llm_model = llm_size
+    db.commit()
+    db.refresh(row)
+    return _to_response(row)
+
+
 async def retranscribe_capture(
     capture_id: str,
     stt_model: Optional[str],
@@ -227,10 +254,12 @@ async def retranscribe_capture(
     row.stt_model = resolved_stt
     if language:
         row.language = language
-    # Refined text is stale after a fresh STT pass — force a re-refine.
+    # Refined and translated text are stale after a fresh STT pass.
     row.transcript_refined = None
     row.llm_model = None
     row.refinement_flags = None
+    row.transcript_translated = None
+    row.translation_language = None
     db.commit()
     db.refresh(row)
     return _to_response(row)

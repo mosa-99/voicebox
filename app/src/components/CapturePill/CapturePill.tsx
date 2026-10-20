@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils/cn';
 
@@ -11,6 +11,7 @@ export type PillState =
   | 'recording'
   | 'transcribing'
   | 'refining'
+  | 'translating'
   | 'speaking'
   | 'completed'
   | 'rest'
@@ -20,6 +21,7 @@ const PILL_LABEL_KEYS: Record<Exclude<PillState, 'rest' | 'error'>, string> = {
   recording: 'captures.pill.recording',
   transcribing: 'captures.pill.transcribing',
   refining: 'captures.pill.refining',
+  translating: 'captures.pill.translating',
   speaking: 'captures.pill.speaking',
   completed: 'captures.pill.completed',
 };
@@ -72,10 +74,13 @@ function formatElapsed(ms: number): string {
  * (recording advances the timer, transcribing/refining hold the final value).
  * The ``error`` state renders a destructive variant — a clickable pill that
  * copies its message to the clipboard on press and calls ``onDismiss``.
+ * ``translate`` adds a translate icon so a translate dictation is
+ * recognisable while it records.
  */
 export function CapturePill({
   state,
   elapsedMs,
+  translate = false,
   onStop,
   errorMessage,
   onDismiss,
@@ -83,6 +88,7 @@ export function CapturePill({
 }: {
   state: PillState;
   elapsedMs: number;
+  translate?: boolean;
   onStop?: () => void;
   errorMessage?: string | null;
   onDismiss?: () => void;
@@ -145,7 +151,13 @@ export function CapturePill({
       )}
     >
       {stopButton}
-      <span className="text-sm font-medium shrink-0" style={{ minWidth: '104px' }}>
+      <span
+        className="text-sm font-medium shrink-0 inline-flex items-center gap-1.5"
+        style={{ minWidth: '104px' }}
+      >
+        {translate && state !== 'completed' && state !== 'rest' ? (
+          <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        ) : null}
         {labelText}
       </span>
       <PillAudioBars mode={barMode} />
