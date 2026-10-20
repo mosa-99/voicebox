@@ -169,13 +169,55 @@ unsafe fn bundle_id_for_pid(pid: i32) -> Option<String> {
     ns_string_to_rust(bundle)
 }
 
-/// Read the system-wide focused UI element's PID, bundle id, and AX role.
+/// Snapshot the paste target: the focused UI element's app when the AX API
+/// reports one, else the frontmost app.
 ///
-/// Returns an error when no element is focused (e.g. Dock has focus) or
-/// when Accessibility permission is missing — `AXUIElementCopyAttributeValue`
-/// returns `-25204 kAXErrorAPIDisabled` in that case.
+/// Many apps never answer the system-wide `AXFocusedUIElement` query:
+/// Chrome and Electron apps (VS Code, Slack, WhatsApp, Discord, …) only
+/// build their AX tree once an assistive client opts in, so the query fails
+/// even though a text field has keyboard focus. Without a snapshot the
+/// dictation would never be pasted there, so fall back to the frontmost
+/// app — activating it and sending ⌘V lands in its focused field just the
+/// same.
 #[cfg(target_os = "macos")]
 pub fn capture_focus() -> Result<FocusSnapshot, String> {
+    capture_focused_element().or_else(|ax_err| frontmost_app().ok_or(ax_err))
+}
+
+/// The frontmost app, which owns keyboard focus. Needs no permission.
+#[cfg(target_os = "macos")]
+fn frontmost_app() -> Option<FocusSnapshot> {
+    unsafe {
+        let _pool = AutoreleasePool::new();
+        let workspace: Id = msg_send![class!(NSWorkspace), sharedWorkspace];
+        if workspace.is_null() {
+            return None;
+        }
+        let app: Id = msg_send![workspace, frontmostApplication];
+        if app.is_null() {
+            return None;
+        }
+        let pid: i32 = msg_send![app, processIdentifier];
+        if pid <= 0 {
+            return None;
+        }
+        let bundle: Id = msg_send![app, bundleIdentifier];
+        Some(FocusSnapshot {
+            pid,
+            bundle_id: ns_string_to_rust(bundle),
+            role: None,
+        })
+    }
+}
+
+/// Read the system-wide focused UI element's PID, bundle id, and AX role.
+///
+/// Returns an error when no element is focused (e.g. Dock has focus), when
+/// the app doesn't expose one, or when Accessibility permission is missing
+/// — `AXUIElementCopyAttributeValue` returns `-25204 kAXErrorAPIDisabled`
+/// in that case.
+#[cfg(target_os = "macos")]
+fn capture_focused_element() -> Result<FocusSnapshot, String> {
     use ffi::*;
     unsafe {
         let system_wide = AXUIElementCreateSystemWide();

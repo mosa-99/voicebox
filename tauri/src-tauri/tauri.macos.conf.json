@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "externalBin": ["binaries/voicebox-mcp"],
+    "macOS": {
+      "files": {
+        "Resources/voicebox-server": "binaries/voicebox-server-onedir"
+      }
+    }
+  }
+}
