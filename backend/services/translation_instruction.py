@@ -13,7 +13,10 @@ the instruction's end is found from the words themselves: the language name
 after a "to / in / إلى / باللغة" style preposition.
 
 Only English, German and Arabic phrasings are recognised — the languages
-the translate shortcut is used with.
+the translate shortcut is used with. Whisper often gets one letter of the
+Arabic instruction wrong ("تلجم" for ترجم, "للغاة" for للغة, "العلمانية" for
+الألمانية), so inside an instruction those words match with one letter
+added, dropped or changed.
 """
 
 import re
@@ -55,6 +58,8 @@ _ARABIC_NAMES: dict[str, str] = {
     "هنديه": "hi", "هندي": "hi",
 }  # fmt: skip
 _ARABIC_PREFIXES = ("وبال", "بال", "لل", "وال", "فال", "ال", "ب", "ل", "و")
+# Shorter names ("عربي") are too close to everyday words to match loosely.
+_MIN_LOOSE_NAME = 6
 
 # Words that lead into the language name: "into German", "auf Arabisch",
 # "ins Englische", "إلى اللغة الألمانية", "باللغة الألمانية".
@@ -63,6 +68,8 @@ _PREPOSITIONS = {"to", "into", "in", "auf", "ins", "nach", "zu", "zum", "الي"
 # carry the preposition themselves ("باللغة الألمانية").
 _NAME_LEAD_INS = {"the", "die", "das", "den", "dem", "اللغه", "لغه"}
 _PREPOSITION_LEAD_INS = {"باللغه", "للغه", "بلغه"}
+# "language" words a misspelling is read as, most likely first.
+_LOOSE_LEAD_INS = ("للغه", "باللغه", "بلغه", "اللغه")
 # Politeness and filler, allowed before the verb, around the language name
 # and in front of an instruction at the end.
 _FILLER_PHRASES = [
@@ -81,6 +88,7 @@ _OBJECT_PHRASES = sorted(
         ("folgenden", "text"), ("folgendes",), ("diesen", "satz"), ("das",), ("dies",), ("es",),
         ("الجمله", "الاتيه"), ("الجمله", "التاليه"), ("النص", "الاتي"), ("النص", "التالي"),
         ("هذه", "الجمله"), ("هذا", "النص"), ("الجمله",), ("هذا",), ("هذه",),
+        ("الاتي",), ("الاتيه",), ("التالي",), ("التاليه",),
     ],
     key=len,
     reverse=True,
@@ -116,14 +124,42 @@ def _normalize(word: str) -> str:
     )  # fmt: skip
 
 
-def _arabic_language(word: str) -> tuple[str | None, bool]:
-    """(language code, whether a ب/ل prefix — "in"/"to" — was attached)."""
-    if word in _ARABIC_NAMES:
-        return _ARABIC_NAMES[word], False
-    for prefix in _ARABIC_PREFIXES:
+def _one_edit_apart(a: str, b: str) -> bool:
+    """Whether ``a`` and ``b`` differ by exactly one added, dropped or changed letter."""
+    if a == b or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) > len(b):
+        a, b = b, a
+    i = 0
+    while i < len(a) and a[i] == b[i]:
+        i += 1
+    if len(a) == len(b):
+        return a[i + 1 :] == b[i + 1 :]
+    return a[i:] == b[i + 1 :]
+
+
+def _loose_name(word: str) -> str | None:
+    """The language a misspelt Arabic name stands for ("علمانيه" → de)."""
+    if len(word) < _MIN_LOOSE_NAME:
+        return None
+    codes = {
+        code for name, code in _ARABIC_NAMES.items() if len(name) >= _MIN_LOOSE_NAME and _one_edit_apart(word, name)
+    }
+    return codes.pop() if len(codes) == 1 else None
+
+
+def _arabic_language(word: str, *, loose: bool = False) -> tuple[str | None, bool]:
+    """(language code, whether a ب/ل prefix — "in"/"to" — was attached).
+
+    ``loose`` also accepts a name with one letter wrong.
+    """
+    for prefix in ("", *_ARABIC_PREFIXES):
         rest = word[len(prefix):]
-        if word.startswith(prefix) and len(rest) >= 3 and rest in _ARABIC_NAMES:
-            return _ARABIC_NAMES[rest], prefix in ("وبال", "بال", "لل", "ب", "ل")
+        if not word.startswith(prefix) or len(rest) < 3:
+            continue
+        code = _loose_name(rest) if loose else _ARABIC_NAMES.get(rest)
+        if code:
+            return code, prefix in ("وبال", "بال", "لل", "ب", "ل")
     return None, False
 
 
@@ -133,11 +169,31 @@ def _is_verb(word: str) -> bool:
     return word.lstrip("وف").startswith(("ترجم", "اترجم"))
 
 
+def _is_loose_verb(word: str) -> bool:
+    """ترجم with one letter wrong ("تلجم"). Only trusted when a target
+    language follows, and only between ت and م, which keeps out ترجع."""
+    word = word.lstrip("وف")
+    return word[:1] == "ت" and word[-1:] == "م" and _one_edit_apart(word, "ترجم")
+
+
+def _loose_lead_in(word: str) -> str | None:
+    """The "language" word (للغة, باللغة, …) a misspelling stands for."""
+    if len(word) < 4 or word in _NAME_LEAD_INS or word in _PREPOSITION_LEAD_INS:
+        return None
+    return next((lead for lead in _LOOSE_LEAD_INS if _one_edit_apart(word, lead)), None)
+
+
 class _Words:
     def __init__(self, text: str):
         self.text = text
         self.spans = [(m.start(), m.end()) for m in re.finditer(r"\S+", text)]
         self.norm = [_normalize(text[a:b]) for a, b in self.spans]
+        # A misspelt "language" word right before a language name reads as
+        # the word it stands for ("للغاة الألمانية").
+        for i in range(len(self.norm) - 1):
+            lead = _loose_lead_in(self.norm[i])
+            if lead and self._names_language(i + 1):
+                self.norm[i] = lead
 
     def __len__(self) -> int:
         return len(self.norm)
@@ -145,6 +201,9 @@ class _Words:
     def is_language(self, i: int) -> bool:
         word = self.norm[i]
         return word in _LATIN_NAMES or _arabic_language(word)[0] is not None
+
+    def _names_language(self, i: int) -> bool:
+        return self.is_language(i) or _arabic_language(self.norm[i], loose=True)[0] is not None
 
     def target_at(self, i: int) -> str | None:
         """The language named by word ``i`` when it reads as a target
@@ -154,6 +213,8 @@ class _Words:
         prefixed = False
         if code is None:
             code, prefixed = _arabic_language(word)
+        if code is None:
+            code, prefixed = _arabic_language(word, loose=True)
         if code is None:
             return None
         if prefixed:
@@ -211,7 +272,7 @@ def _instruction_at_start(words: _Words) -> tuple[str | None, int] | None:
     i = 0
     while i < len(words) and i < 3 and words.filler_len(i):
         i += words.filler_len(i)
-    if i < len(words) and _is_verb(words.norm[i]):
+    if i < len(words) and (_is_verb(words.norm[i]) or _is_loose_verb(words.norm[i])):
         verb = i
         name = _target_after_verb(words, verb, len(words))
         if name is not None:
@@ -219,6 +280,8 @@ def _instruction_at_start(words: _Words) -> tuple[str | None, int] | None:
             while end < len(words) and words.filler_len(end) and not words.ends_clause(end - 1):
                 end += words.filler_len(end)
             return words.target_at(name), end
+        if not _is_verb(words.norm[verb]):
+            return None
         # No language named: drop "translate the following sentence" and use
         # the default language.
         for phrase in _OBJECT_PHRASES:
@@ -254,7 +317,7 @@ def _instruction_at_end(words: _Words) -> tuple[str, int] | None:
     target = words.target_at(last)
     if target:
         for verb in range(last - 1, max(-1, last - _MAX_INSTRUCTION_WORDS - 1), -1):
-            if _is_verb(words.norm[verb]):
+            if _is_verb(words.norm[verb]) or _is_loose_verb(words.norm[verb]):
                 if _target_after_verb(words, verb, last + 1) != last:
                     return None
                 return target, _extend_back(words, verb, _CONNECTORS | _FILLER_WORDS)

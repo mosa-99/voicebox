@@ -33,6 +33,12 @@ from backend.services.translation_instruction import split_translation_instructi
         ("من فضلك ترجم إلى الإنجليزية من أين أنت", "en", "من أين أنت"),
         ("ترجم من العربية إلى الألمانية أنا جائع", "de", "أنا جائع"),
         ("ترجم لي هذا النص بالعربي إلى الإنجليزية أنا جائع", "en", "أنا جائع"),
+        # Whisper got a letter of the instruction wrong (the user's captures):
+        # "تلجم" for ترجم, "للغاة" for للغة, "العلمانية" for الألمانية.
+        ("تلجم النص الآتي للغاة الألمانية أريد تحسين واجهة المستخدم", "de", "أريد تحسين واجهة المستخدم"),
+        ("ترجم الاتي للغة العلمانية اريد تحسين اليو اي", "de", "اريد تحسين اليو اي"),
+        ("تترجم هذا إلى الإنجليزية أنا جائع", "en", "أنا جائع"),
+        ("أنا جائع، ترجم هذا إلى العلمانية", "de", "أنا جائع"),
         # English
         (
             'Translate the following sentence into German: "Search for job opportunities in Germany."',
@@ -67,6 +73,14 @@ def test_instruction_is_split_off(transcript, target, content):
         "Kannst du mir sagen, wie man das auf Englisch sagt?",
         "أنا أتكلم بالعربي مع عائلتي",
         "I need a translator who speaks German.",
+        # Close to an instruction, but ordinary sentences: ترجع ("you return")
+        # is one letter from ترجم, العلمانية ("secularism") one from الألمانية.
+        "ترجع إلى اللغة العربية بعد العطلة",
+        "أنا مهتم بالعلمانية",
+        "أدرس العلمانية في الجامعة",
+        "هذا مهم للغاية الآن",
+        # A misspelt verb without a language is not an instruction.
+        "تلجم النص الآتي أريد تحسين واجهة المستخدم",
         # Nothing left to translate.
         "Translate this to Arabic",
         "ترجم إلى الألمانية",
