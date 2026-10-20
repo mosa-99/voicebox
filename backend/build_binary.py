@@ -48,8 +48,14 @@ def build_server(cuda=False, rocm=False):
     #   1. Server core (~200-400MB) — versioned with the app
     #   2. GPU libs (~2GB) — versioned independently (only redownloaded on
     #      GPU toolkit / torch major version changes)
-    # CPU builds remain --onefile for simplicity.
-    pack_mode = "--onedir" if (cuda or rocm) else "--onefile"
+    # macOS also uses --onedir: the app bundles the folder in
+    # Contents/Resources, so a start needs no unpacking. A --onefile server
+    # extracts ~1.5 GB to $TMPDIR on every launch (7+ s, and newly written
+    # dylibs are re-verified by macOS each time) and a killed server leaves
+    # that copy behind.
+    # Other CPU builds remain --onefile for simplicity.
+    onedir = cuda or rocm or platform.system() == "Darwin"
+    pack_mode = "--onedir" if onedir else "--onefile"
     args = [
         "server.py",  # Use server.py as entry point instead of main.py
         pack_mode,

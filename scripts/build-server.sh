@@ -25,7 +25,15 @@ mkdir -p ../tauri/src-tauri/binaries
 copy_sidecar() {
     local name="$1"
 
-    if [ -f "dist/${name}" ]; then
+    if [ -d "dist/${name}" ]; then
+        # --onedir build (macOS server): the app bundles this folder in
+        # Contents/Resources (see tauri.macos.conf.json). -a keeps the
+        # symlinks PyInstaller creates.
+        rm -rf "../tauri/src-tauri/binaries/${name}-onedir"
+        cp -a "dist/${name}" "../tauri/src-tauri/binaries/${name}-onedir"
+        find "../tauri/src-tauri/binaries/${name}-onedir" -name .DS_Store -delete
+        echo "Built ${name}-onedir"
+    elif [ -f "dist/${name}" ]; then
         cp "dist/${name}" "../tauri/src-tauri/binaries/${name}-${PLATFORM}"
         chmod +x "../tauri/src-tauri/binaries/${name}-${PLATFORM}"
         echo "Built ${name}-${PLATFORM}"
@@ -38,6 +46,8 @@ copy_sidecar() {
     fi
 }
 
+# PyInstaller can't replace a --onefile output with a --onedir folder.
+rm -rf dist/voicebox-server
 python build_binary.py
 copy_sidecar voicebox-server
 

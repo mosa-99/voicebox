@@ -301,6 +301,23 @@ fn write_persisted_backend_override(data_dir: &std::path::Path, value: Option<&s
     }
 }
 
+/// The bundled CPU server. macOS ships it as a PyInstaller onedir folder in
+/// Contents/Resources/voicebox-server (see tauri.macos.conf.json), which starts
+/// without unpacking anything; elsewhere, and in dev, it's the onefile sidecar
+/// next to the app binary.
+fn bundled_server_command(
+    app: &tauri::AppHandle,
+) -> Result<tauri_plugin_shell::process::Command, tauri_plugin_shell::Error> {
+    if let Ok(dir) = app.path().resource_dir().map(|d| d.join("voicebox-server")) {
+        let exe = dir.join("voicebox-server");
+        if exe.is_file() {
+            println!("Using bundled server folder {:?}", dir);
+            return Ok(app.shell().command(exe).current_dir(dir));
+        }
+    }
+    app.shell().sidecar("voicebox-server")
+}
+
 /// Run `<exe> --version` with a 10-second timeout to avoid hanging Tauri startup.
 /// Returns the last whitespace-delimited token from stdout (e.g. "0.4.4"), or None on any failure.
 async fn probe_binary_version(exe: &std::path::Path, cwd: &std::path::Path) -> Option<String> {
@@ -580,7 +597,7 @@ async fn start_server(
         }
     };
 
-    let sidecar_result = app.shell().sidecar("voicebox-server");
+    let sidecar_result = bundled_server_command(&app);
 
     let mut sidecar = match sidecar_result {
         Ok(s) => s,

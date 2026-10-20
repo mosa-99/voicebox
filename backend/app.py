@@ -357,7 +357,46 @@ async def _run_startup(application: FastAPI) -> None:
     except Exception as e:
         logger.warning("Could not create HuggingFace cache directory: %s", e)
 
+    create_background_task(_preload_dictation_models())
+
     logger.info("Ready")
+
+
+async def _preload_dictation_models() -> None:
+    """Load the dictation models right after startup when the global
+    shortcut is on, so the first dictation doesn't wait for them (a few
+    seconds each, much longer on the first start after an update). Only
+    models that are already downloaded; never starts a download."""
+    from .services.settings import get_capture_settings
+
+    db = next(get_db())
+    try:
+        saved = get_capture_settings(db)
+        hotkey_enabled = bool(saved.hotkey_enabled)
+        stt_size, llm_size = saved.stt_model, saved.llm_model
+        auto_refine = bool(saved.auto_refine)
+    finally:
+        db.close()
+    if not hotkey_enabled:
+        return
+
+    try:
+        whisper = transcribe.get_whisper_model()
+        if whisper._is_model_cached(stt_size):
+            await whisper.load_model_async(stt_size)
+    except Exception as e:
+        logger.warning("Could not preload the speech-to-text model: %s", e)
+
+    if not auto_refine:
+        return
+    try:
+        backend = llm.get_llm_model()
+        # A custom OpenAI-compatible endpoint has nothing to load.
+        is_cached = getattr(backend, "_is_model_cached", None)
+        if is_cached is not None and is_cached(llm_size):
+            await backend.load_model(llm_size)
+    except Exception as e:
+        logger.warning("Could not preload the refinement model: %s", e)
 
 
 async def _run_shutdown() -> None:

@@ -61,8 +61,17 @@ next start. **Settings → App Updates → Restart Now** switches to it right aw
 
 - `gh` must be logged in (`gh auth status`).
 
-The builds are ad-hoc signed, not signed with an Apple Developer ID. On another
-Mac, the first launch of a downloaded .dmg needs **System Settings → Privacy &
-Security → Open Anyway**. Updates after that install on their own. Because
-the signature changes with each build, macOS may ask again for microphone or
-Accessibility access after an update.
+Builds are signed with a self-signed certificate, "Voicebox Local Signing",
+not with an Apple Developer ID. The first build creates it in
+`~/Library/Keychains/voicebox-signing.keychain-db` and keeps that keychain's
+password in the login Keychain (service `voicebox-codesign-keychain`). Every
+build signed with it has the same identity, so macOS keeps the microphone,
+Accessibility and Input Monitoring permissions across updates. (Ad-hoc signed
+builds got a new identity each time, and dictation silently stopped pasting
+after an update until the permissions were granted again.) If the keychain
+is deleted, the next build creates a new certificate and the permissions have
+to be granted once more.
+
+Gatekeeper doesn't trust that certificate. On another Mac, the first launch of
+a downloaded .dmg needs **System Settings → Privacy & Security → Open
+Anyway**. Updates after that install on their own.
