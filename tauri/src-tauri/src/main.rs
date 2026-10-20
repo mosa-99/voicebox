@@ -15,6 +15,8 @@ mod input_monitoring;
 #[cfg(desktop)]
 mod key_codes;
 mod keyboard_layout;
+#[cfg(target_os = "macos")]
+mod pill_panel;
 mod speak_monitor;
 mod synthetic_keys;
 
@@ -51,6 +53,10 @@ fn build_dictate_window(app: &tauri::AppHandle) -> tauri::Result<tauri::WebviewW
     .shadow(false)
     .visible(false)
     .build()?;
+
+    // Float above fullscreen apps too, without taking focus.
+    #[cfg(target_os = "macos")]
+    pill_panel::make_floating_panel(&window);
 
     if let Some(monitor) = window.current_monitor()? {
         let monitor_size = monitor.size();
