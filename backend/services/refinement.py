@@ -8,10 +8,13 @@ rather than a raw prompt editor. Adding a new refinement behaviour is a matter
 of appending one helper below and wiring one toggle on the frontend.
 """
 
+import logging
 import re
 from dataclasses import dataclass
 
 from . import llm as llm_service
+
+logger = logging.getLogger(__name__)
 
 
 # A run that repeats this many times gets collapsed before the LLM sees
@@ -301,6 +304,15 @@ async def refine_transcript(
     cleaned_input = collapse_repetitive_artifacts(transcript)
 
     system_prompt = build_refinement_prompt(flags)
+    language = transcript_language(cleaned_input)
+    if language:
+        # The rule against translating isn't enough for 4B: German and Arabic
+        # dictation still came back in English. Naming the language fixes it.
+        system_prompt += (
+            f"\n\nThe transcript is in {language}. Write the cleaned-up text in "
+            f"{language}; never translate it."
+        )
+
     text = await backend.generate(
         prompt=cleaned_input,
         system=system_prompt,
@@ -309,4 +321,70 @@ async def refine_transcript(
         model_size=resolved_size,
         examples=REFINEMENT_EXAMPLES,
     )
-    return text.strip(), resolved_size
+    text = text.strip()
+    if not is_faithful_refinement(cleaned_input, text):
+        # Better unpolished than translated or made up.
+        logger.warning("Refinement translated or answered the transcript; keeping it as spoken")
+        text = cleaned_input
+    return text, resolved_size
+
+
+_LETTERS = re.compile(r"[^\W\d_]", re.UNICODE)
+_ARABIC_LETTERS = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]")
+_WORDS = re.compile(r"[^\W\d_]+", re.UNICODE)
+# English function words that aren't also common German, Dutch or Romance
+# words ("in", "an", "was", "a" and "die" are left out on purpose).
+_ENGLISH_WORDS = frozenset(
+    "the and are were to of that this it its for with you your my we our they "
+    "not be have has do does what how why when there can would should could "
+    "about from just".split()
+)
+_GERMAN_WORDS = frozenset(
+    "der die das den dem des und ist sind nicht ich du er wir ihr ein eine einen "
+    "zu mit auf für dass sich auch noch wie kann können habe hat haben wird werden "
+    "mein meine dein bitte oder aber wenn weil".split()
+)
+
+
+def _arabic_share(text: str) -> float:
+    letters = _LETTERS.findall(text)
+    if not letters:
+        return 0.0
+    return sum(1 for ch in letters if _ARABIC_LETTERS.match(ch)) / len(letters)
+
+
+def _word_share(text: str, vocabulary: frozenset[str]) -> float:
+    words = _WORDS.findall(text.lower())
+    if not words:
+        return 0.0
+    return sum(1 for w in words if w in vocabulary) / len(words)
+
+
+def _english_share(text: str) -> float:
+    return _word_share(text, _ENGLISH_WORDS)
+
+
+def transcript_language(text: str) -> str | None:
+    """Arabic, German or English when the text clearly is one of them."""
+    if _arabic_share(text) >= 0.5:
+        return "Arabic"
+    german, english = _word_share(text, _GERMAN_WORDS), _english_share(text)
+    if german >= 0.15 and german > english:
+        return "German"
+    if english >= 0.15:
+        return "English"
+    return None
+
+
+def is_faithful_refinement(transcript: str, refined: str) -> bool:
+    """False when the output is not a cleaned-up copy of the transcript:
+    empty, in another language (Arabic ⇄ Latin script, or non-English turned
+    English), or much longer than the input (an answer, not a cleanup)."""
+    if not refined:
+        return False
+    if len(refined) > 1.5 * len(transcript) + 30:
+        return False
+    raw_ar, out_ar = _arabic_share(transcript), _arabic_share(refined)
+    if (raw_ar >= 0.5) != (out_ar >= 0.5):
+        return False
+    return not (_english_share(transcript) < 0.12 and _english_share(refined) >= 0.25)
