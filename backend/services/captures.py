@@ -23,6 +23,7 @@ from ..models import CaptureResponse, RefinementFlagsModel
 from ..utils.audio import load_audio
 from .refinement import RefinementFlags, refine_transcript
 from .translation import translate_transcript
+from .voice_commands import apply_voice_commands
 from .transcribe import get_whisper_model
 
 logger = logging.getLogger(__name__)
@@ -69,11 +70,13 @@ async def create_capture(
     stt_model: Optional[str],
     db: Session,
     allowed_languages: Optional[Sequence[str]] = None,
+    voice_commands: bool = False,
 ) -> CaptureResponse:
     """Persist raw audio, run STT, store the row.
 
     Without a ``language``, detection picks among ``allowed_languages``
-    (any language when empty).
+    (any language when empty). With ``voice_commands``, a dictation's spoken
+    "new line" / "question mark" … commands become layout and punctuation.
     """
     if source not in VALID_SOURCES:
         raise ValueError(f"Invalid source '{source}'. Must be one of {sorted(VALID_SOURCES)}")
@@ -130,6 +133,8 @@ async def create_capture(
         transcript = await whisper.transcribe(
             str(audio_path), language, resolved_stt, allowed_languages=allowed_languages
         )
+        if voice_commands and source == "dictation":
+            transcript = apply_voice_commands(transcript)
 
         row = DBCapture(
             id=capture_id,
@@ -245,6 +250,7 @@ async def retranscribe_capture(
     language: Optional[str],
     db: Session,
     allowed_languages: Optional[Sequence[str]] = None,
+    voice_commands: bool = False,
 ) -> Optional[CaptureResponse]:
     row = db.query(DBCapture).filter(DBCapture.id == capture_id).first()
     if not row:
@@ -259,6 +265,8 @@ async def retranscribe_capture(
     transcript = await whisper.transcribe(
         str(resolved), language, resolved_stt, allowed_languages=allowed_languages
     )
+    if voice_commands and row.source == "dictation":
+        transcript = apply_voice_commands(transcript)
 
     row.transcript_raw = transcript
     row.stt_model = resolved_stt

@@ -13,7 +13,8 @@ from ..database import Capture as DBCapture, get_db
 from ..services import captures as captures_service
 from ..services import settings as settings_service
 from ..services.refinement import RefinementFlags
-from ..services.translation import TranslationError
+from ..services.translation import TranslationError, spoken_target_language
+from ..services.voice_commands import command_table
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ async def create_capture_endpoint(
             language=resolved_language,
             stt_model=resolved_stt,
             allowed_languages=saved.auto_detect_languages,
+            voice_commands=bool(saved.voice_commands),
             db=db,
         )
     except ValueError as e:
@@ -62,11 +64,20 @@ async def create_capture_endpoint(
         logger.exception("Failed to create capture")
         raise HTTPException(status_code=500, detail=str(e))
 
+    spoken_target = spoken_target_language(capture.transcript_raw)
     return models.CaptureCreateResponse(
         **capture.model_dump(),
         auto_refine=bool(saved.auto_refine),
         allow_auto_paste=bool(saved.allow_auto_paste),
+        translation_target=spoken_target or saved.translation_language or "en",
+        translation_target_spoken=spoken_target is not None,
     )
+
+
+@router.get("/capture/voice-commands", response_model=list[models.VoiceCommandInfo])
+async def voice_commands_endpoint():
+    """The spoken dictation commands, for the settings page."""
+    return command_table()
 
 
 @router.get("/captures", response_model=models.CaptureListResponse)
@@ -268,6 +279,7 @@ async def retranscribe_capture_endpoint(
             stt_model=resolved_stt,
             language=resolved_language,
             allowed_languages=saved.auto_detect_languages,
+            voice_commands=bool(saved.voice_commands),
             db=db,
         )
     except FileNotFoundError as e:

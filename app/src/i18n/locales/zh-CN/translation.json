@@ -102,6 +102,8 @@
       "transcribing": "转录中",
       "refining": "精修中",
       "translating": "翻译中",
+      "translateTarget": "翻译为{{language}}",
+      "translateTargetSpoken": "翻译为{{language}}（听写中指定）",
       "speaking": "朗读中",
       "completed": "完成",
       "stopAria": "停止录制",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "翻译为",
           "description": "翻译快捷键输出的语言。听写时也可以用英语、德语或阿拉伯语说出来，例如“translate this into German: …”。"
+        },
+        "voiceCommands": {
+          "title": "语音命令",
+          "description": "听写时说出“new line”“new paragraph”“question mark”等（英语、德语或阿拉伯语），会转换为换行和标点。",
+          "show": "显示命令",
+          "hide": "隐藏命令",
+          "effect": "作用",
+          "note": "“Punkt”“Komma”“period”等词只在句末才算命令，所以“a long period”会保持原样。在冠词之后（“a new line”），命令按普通文字处理。",
+          "loadFailed": "无法加载命令列表。",
+          "actions": {
+            "paragraph": "新段落",
+            "newline": "换行",
+            "question": "问号 ?",
+            "exclamation": "感叹号 !",
+            "semicolon": "分号 ;",
+            "colon": "冒号 :",
+            "comma": "逗号 ,",
+            "period": "句号 ."
+          }
         },
         "chordPicker": {
           "pttTitle": "设置按住说话快捷键",

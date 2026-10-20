@@ -102,6 +102,8 @@
       "transcribing": "Transcribing",
       "refining": "Refining",
       "translating": "Translating",
+      "translateTarget": "Translating into {{language}}",
+      "translateTargetSpoken": "Translating into {{language}} (named in your dictation)",
       "speaking": "Speaking",
       "completed": "Done",
       "stopAria": "Stop recording",
@@ -1015,6 +1017,25 @@
         "translateTo": {
           "title": "Translate into",
           "description": "The language the translate shortcut writes in. You can also say it while dictating, in English, German or Arabic, e.g. “translate this into Arabic: …”."
+        },
+        "voiceCommands": {
+          "title": "Voice commands",
+          "description": "Say “new line”, “new paragraph”, “question mark” and more while dictating; they become line breaks and punctuation. Works in German, English and Arabic.",
+          "show": "Show commands",
+          "hide": "Hide commands",
+          "effect": "Effect",
+          "note": "“Punkt”, “Komma”, “period” and similar words only count at the end of a sentence, so “der springende Punkt” stays as it is. After an article (“eine neue Zeile”, “a new line”), a command is treated as normal text.",
+          "loadFailed": "Couldn't load the command list.",
+          "actions": {
+            "paragraph": "New paragraph",
+            "newline": "New line",
+            "question": "Question mark ?",
+            "exclamation": "Exclamation mark !",
+            "semicolon": "Semicolon ;",
+            "colon": "Colon :",
+            "comma": "Comma ,",
+            "period": "Period ."
+          }
         },
         "chordPicker": {
           "pttTitle": "Set push-to-talk shortcut",

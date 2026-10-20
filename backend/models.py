@@ -232,6 +232,11 @@ class CaptureCreateResponse(CaptureResponse):
 
     auto_refine: bool
     allow_auto_paste: bool
+    # What the translate shortcut will translate this capture into: the
+    # language named in the dictation ("… übersetze das auf Arabisch") or
+    # the saved one. Lets the pill show "→ AR" before the translation lands.
+    translation_target: str
+    translation_target_spoken: bool
 
 
 class CaptureRefineRequest(BaseModel):
@@ -239,6 +244,13 @@ class CaptureRefineRequest(BaseModel):
 
     flags: Optional[RefinementFlagsModel] = None
     model_size: Optional[str] = Field(default=None, pattern="^(0\\.6B|1\\.7B|4B)$")
+
+
+class VoiceCommandInfo(BaseModel):
+    """One spoken dictation command and its phrases per language."""
+
+    action: str
+    phrases: dict[str, List[str]]
 
 
 # Languages the translate shortcut can translate dictation into.
@@ -281,6 +293,7 @@ class CaptureSettingsResponse(BaseModel):
     )
     chord_translate_keys: List[str] = Field(default_factory=default_translate_chord)
     translation_language: str = Field(default="en", pattern=TRANSLATION_LANGUAGE_PATTERN)
+    voice_commands: bool = True
     custom_llm_endpoint: Optional[str] = None
     custom_llm_model: Optional[str] = None
     # Provider credential — write-only. The response reports whether one is
@@ -340,6 +353,7 @@ class CaptureSettingsUpdate(BaseModel):
     chord_toggle_to_talk_keys: Optional[List[str]] = Field(default=None, min_length=1, max_length=6)
     chord_translate_keys: Optional[List[str]] = Field(default=None, min_length=1, max_length=6)
     translation_language: Optional[str] = Field(default=None, pattern=TRANSLATION_LANGUAGE_PATTERN)
+    voice_commands: Optional[bool] = None
     custom_llm_endpoint: Optional[str] = None
     custom_llm_model: Optional[str] = None
     custom_llm_api_key: Optional[str] = None

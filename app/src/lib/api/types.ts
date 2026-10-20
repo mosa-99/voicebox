@@ -193,6 +193,33 @@ export interface CaptureListResponse {
 export interface CaptureCreateResponse extends CaptureResponse {
   auto_refine: boolean;
   allow_auto_paste: boolean;
+  /** What the translate shortcut translates this capture into: the language
+   *  named in the dictation, or the saved ``translation_language``. */
+  translation_target: TranslationLanguage;
+  /** Whether ``translation_target`` was spoken in the dictation. */
+  translation_target_spoken: boolean;
+}
+
+/** The target language shown on the pill during a translate dictation. */
+export interface TranslationTarget {
+  code: TranslationLanguage;
+  /** Named in the dictation ("… übersetze das auf Arabisch") rather than
+   *  taken from settings. */
+  spoken: boolean;
+}
+
+/** A spoken dictation command and its phrases per language (de/en/ar). */
+export interface VoiceCommandInfo {
+  action:
+    | 'paragraph'
+    | 'newline'
+    | 'question'
+    | 'exclamation'
+    | 'semicolon'
+    | 'colon'
+    | 'comma'
+    | 'period';
+  phrases: Record<string, string[]>;
 }
 
 export interface CaptureRefineRequest {
@@ -243,6 +270,8 @@ export interface CaptureSettings {
   chord_translate_keys: string[];
   /** Language the translate shortcut translates into. */
   translation_language: TranslationLanguage;
+  /** Spoken "new line" / "question mark" … commands in dictations. */
+  voice_commands: boolean;
   /**
    * Optional OpenAI-compatible endpoint that overrides the built-in Qwen3
    * LLM for refinement / personality rewriting. When set, backend calls hit

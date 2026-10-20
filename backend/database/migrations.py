@@ -274,6 +274,13 @@ def _migrate_capture_settings(engine, inspector, tables: set[str]) -> None:
             "translation_language VARCHAR NOT NULL DEFAULT 'en'",
             "translation_language",
         )
+    if "voice_commands" not in columns:
+        _add_column(
+            engine,
+            "capture_settings",
+            "voice_commands BOOLEAN NOT NULL DEFAULT 1",
+            "voice_commands",
+        )
     if "chord_translate_keys" not in columns:
         translate_default = json.dumps(default_translate_chord())
         _add_column(

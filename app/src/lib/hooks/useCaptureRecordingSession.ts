@@ -8,6 +8,7 @@ import type {
   CaptureListResponse,
   CaptureResponse,
   CaptureSource,
+  TranslationTarget,
 } from '@/lib/api/types';
 import { useAudioRecording } from '@/lib/hooks/useAudioRecording';
 
@@ -86,6 +87,10 @@ export interface UseCaptureRecordingSessionResult {
   isRefining: boolean;
   /** Whether the current (or last) dictation gets translated. */
   translateMode: boolean;
+  /** Where a translate dictation goes: the saved language while recording,
+   *  replaced by a spoken one ("… auf Arabisch") once the transcript is in.
+   *  Null outside translate mode or until known. */
+  translationTarget: TranslationTarget | null;
   startRecording: (options?: { translate?: boolean }) => void;
   /** Switch the running recording to translate mode (PTT + Shift pressed
    *  mid-hold). One-way: releasing Shift first doesn't switch back. */
@@ -134,6 +139,23 @@ export function useCaptureRecordingSession(
   // recorder callback, state for the pill.
   const translateRef = useRef(false);
   const [translateMode, setTranslateMode] = useState(false);
+  const [translationTarget, setTranslationTarget] = useState<TranslationTarget | null>(null);
+  // Bumped per recording so a slow settings fetch from an earlier dictation
+  // can't overwrite the target of the current one.
+  const recordingIdRef = useRef(0);
+
+  // Show the saved target while recording; the transcript may still name
+  // another one.
+  const loadDefaultTarget = useCallback(() => {
+    const recordingId = recordingIdRef.current;
+    apiClient
+      .getCaptureSettings()
+      .then((settings) => {
+        if (recordingIdRef.current !== recordingId) return;
+        setTranslationTarget((prev) => prev ?? { code: settings.translation_language, spoken: false });
+      })
+      .catch(() => {});
+  }, []);
 
   // Snapshot of ``allow_auto_paste`` from the capture-create response —
   // held so the refine onSuccess (which only sees the plain CaptureResponse)
@@ -220,6 +242,8 @@ export function useCaptureRecordingSession(
     onSuccess: (data, captureId) => {
       queryClient.invalidateQueries({ queryKey: ['captures'] });
       broadcastUpdated(captureId);
+      const used = data.translation_language;
+      if (used) setTranslationTarget((prev) => ({ code: used, spoken: prev?.spoken ?? false }));
       if (pillStateRef.current === 'translating') scheduleHidePill();
       if (data.transcript_translated) {
         onFinalTextRef.current?.(data.transcript_translated, data, allowAutoPasteRef.current);
@@ -253,6 +277,10 @@ export function useCaptureRecordingSession(
       allowAutoPasteRef.current = capture.allow_auto_paste;
       if (translate) {
         // Translation cleans up the transcript too, so it replaces refine.
+        setTranslationTarget({
+          code: capture.translation_target,
+          spoken: capture.translation_target_spoken,
+        });
         setPillState('translating');
         translateMutation.mutate(capture.id);
       } else if (capture.auto_refine) {
@@ -322,19 +350,24 @@ export function useCaptureRecordingSession(
     (options?: { translate?: boolean }) => {
       if (isRecording) return;
       clearRestTimer();
+      recordingIdRef.current += 1;
       translateRef.current = Boolean(options?.translate);
       setTranslateMode(translateRef.current);
+      setTranslationTarget(null);
+      if (translateRef.current) loadDefaultTarget();
       setFrozenElapsedMs(0);
       setPillState('recording');
       beginAudioRecording();
     },
-    [isRecording, beginAudioRecording, clearRestTimer],
+    [isRecording, beginAudioRecording, clearRestTimer, loadDefaultTarget],
   );
 
   const markTranslate = useCallback(() => {
+    if (translateRef.current) return;
     translateRef.current = true;
     setTranslateMode(true);
-  }, []);
+    loadDefaultTarget();
+  }, [loadDefaultTarget]);
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
@@ -369,6 +402,7 @@ export function useCaptureRecordingSession(
     isUploading: uploadMutation.isPending,
     isRefining: refineMutation.isPending || translateMutation.isPending,
     translateMode,
+    translationTarget,
     startRecording,
     markTranslate,
     stopRecording,

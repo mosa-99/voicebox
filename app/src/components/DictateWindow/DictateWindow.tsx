@@ -304,6 +304,7 @@ export function DictateWindow() {
           state={effectiveState}
           elapsedMs={effectiveElapsed}
           translate={!isSpeaking && session.translateMode}
+          translateTarget={isSpeaking ? null : session.translationTarget}
           errorMessage={session.errorMessage}
           onDismiss={session.dismissError}
           onStop={session.isRecording ? session.stopRecording : undefined}

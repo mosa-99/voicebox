@@ -102,6 +102,8 @@
       "transcribing": "文字起こし中",
       "refining": "整形中",
       "translating": "翻訳中",
+      "translateTarget": "翻訳先: {{language}}",
+      "translateTargetSpoken": "翻訳先: {{language}}（ディクテーションで指定）",
       "speaking": "発話中",
       "completed": "完了",
       "stopAria": "録音を停止",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "翻訳先の言語",
           "description": "翻訳ショートカットが出力する言語です。ディクテーション中に英語・ドイツ語・アラビア語で言うこともできます（例: “translate this into German: …”）。"
+        },
+        "voiceCommands": {
+          "title": "音声コマンド",
+          "description": "ディクテーション中に「new line」「new paragraph」「question mark」など（英語・ドイツ語・アラビア語）と言うと、改行や句読点になります。",
+          "show": "コマンドを表示",
+          "hide": "コマンドを隠す",
+          "effect": "動作",
+          "note": "「Punkt」「Komma」「period」などは文末でのみ有効なので、「a long period」はそのまま残ります。冠詞の後（「a new line」）では、コマンドは通常の文字として扱われます。",
+          "loadFailed": "コマンド一覧を読み込めませんでした。",
+          "actions": {
+            "paragraph": "新しい段落",
+            "newline": "改行",
+            "question": "疑問符 ?",
+            "exclamation": "感嘆符 !",
+            "semicolon": "セミコロン ;",
+            "colon": "コロン :",
+            "comma": "カンマ ,",
+            "period": "ピリオド ."
+          }
         },
         "chordPicker": {
           "pttTitle": "プッシュトゥトーク用ショートカットを設定",

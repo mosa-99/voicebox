@@ -102,6 +102,8 @@
       "transcribing": "Transcription",
       "refining": "Correction",
       "translating": "Traduction",
+      "translateTarget": "Traduction : {{language}}",
+      "translateTargetSpoken": "Traduction : {{language}} (indiquée dans la dictée)",
       "speaking": "Parole",
       "completed": "Terminé",
       "stopAria": "Arrêter l'enregistrement",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "Traduire en",
           "description": "La langue dans laquelle le raccourci de traduction écrit. Vous pouvez aussi la dire en dictant, en anglais, allemand ou arabe, p. ex. « translate this into German: … »."
+        },
+        "voiceCommands": {
+          "title": "Commandes vocales",
+          "description": "En dictant, dites « new line », « new paragraph », « question mark » et plus (en anglais, allemand ou arabe) ; ils deviennent des retours à la ligne et de la ponctuation.",
+          "show": "Afficher les commandes",
+          "hide": "Masquer les commandes",
+          "effect": "Effet",
+          "note": "« Punkt », « Komma », « period » et les mots semblables ne comptent qu'en fin de phrase : « a long period » reste tel quel. Après un article (« a new line »), la commande est traitée comme du texte normal.",
+          "loadFailed": "Impossible de charger la liste des commandes.",
+          "actions": {
+            "paragraph": "Nouveau paragraphe",
+            "newline": "Nouvelle ligne",
+            "question": "Point d'interrogation ?",
+            "exclamation": "Point d'exclamation !",
+            "semicolon": "Point-virgule ;",
+            "colon": "Deux-points :",
+            "comma": "Virgule ,",
+            "period": "Point ."
+          }
         },
         "chordPicker": {
           "pttTitle": "Définir le raccourci push-to-talk",
