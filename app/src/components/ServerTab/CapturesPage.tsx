@@ -1,4 +1,15 @@
-import { Check, ChevronDown, FolderOpen, Info, Keyboard, Laptop, Lock, Volume2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Check,
+  ChevronDown,
+  FolderOpen,
+  Info,
+  Keyboard,
+  Laptop,
+  ListChecks,
+  Lock,
+  Volume2,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessibilityNotice } from '@/components/AccessibilityGate/AccessibilityGate';
@@ -17,6 +28,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,6 +44,7 @@ import {
 } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { useToast } from '@/components/ui/use-toast';
+import { apiClient } from '@/lib/api/client';
 import { useDictationReadiness } from '@/lib/hooks/useDictationReadiness';
 import { useCaptureSettings } from '@/lib/hooks/useSettings';
 import { useProfiles } from '@/lib/hooks/useProfiles';
@@ -65,6 +85,78 @@ function ChordPreview({ keys }: { keys: string[] }) {
           </span>
         );
       })}
+    </div>
+  );
+}
+
+const VOICE_COMMAND_LANGUAGES = ['de', 'en', 'ar'] as const;
+
+/** Every spoken command with its phrases in German, English and Arabic,
+ *  straight from the backend so it always matches what is recognised. */
+function VoiceCommandsTable() {
+  const { t } = useTranslation();
+  const { data: commands, isError } = useQuery({
+    queryKey: ['voice-commands'],
+    queryFn: () => apiClient.getVoiceCommands(),
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  if (isError) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {t('settings.captures.dictation.voiceCommands.loadFailed')}
+      </p>
+    );
+  }
+  if (!commands) return null;
+  return (
+    <div className="space-y-2">
+      <div className="rounded-lg border border-border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="h-9 text-xs">
+                {t('settings.captures.dictation.voiceCommands.effect')}
+              </TableHead>
+              {VOICE_COMMAND_LANGUAGES.map((lang) => (
+                <TableHead key={lang} className="h-9 text-xs">
+                  {t(`settings.captures.transcription.language.${lang}`)}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {commands.map((command) => (
+              <TableRow key={command.action}>
+                <TableCell className="py-2 text-xs font-medium whitespace-nowrap">
+                  {t(`settings.captures.dictation.voiceCommands.actions.${command.action}`)}
+                </TableCell>
+                {VOICE_COMMAND_LANGUAGES.map((lang) => (
+                  <TableCell
+                    key={lang}
+                    dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                    lang={lang}
+                    className="py-2"
+                  >
+                    <div className="flex flex-wrap gap-1">
+                      {(command.phrases[lang] ?? []).map((phrase) => (
+                        <span
+                          key={phrase}
+                          className="rounded-md bg-muted/70 px-1.5 py-0.5 text-[11px] text-foreground/80 whitespace-nowrap"
+                        >
+                          {phrase}
+                        </span>
+                      ))}
+                    </div>
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {t('settings.captures.dictation.voiceCommands.note')}
+      </p>
     </div>
   );
 }
@@ -151,6 +243,8 @@ export function CapturesPage() {
   const toggleToTalkKeys = settings?.chord_toggle_to_talk_keys ?? defaultChordKeys('toggle');
   const translateKeys = settings?.chord_translate_keys ?? defaultChordKeys('translate');
   const translationLanguage = settings?.translation_language ?? 'en';
+  const voiceCommands = settings?.voice_commands ?? true;
+  const [showVoiceCommands, setShowVoiceCommands] = useState(false);
   const customLlmEndpointSaved = settings?.custom_llm_endpoint ?? '';
   const customLlmModelSaved = settings?.custom_llm_model ?? '';
   // The server no longer returns the API key value; it reports whether one
@@ -360,6 +454,40 @@ export function CapturesPage() {
             </Select>
           }
         />
+
+        <SettingRow
+          title={t('settings.captures.dictation.voiceCommands.title')}
+          description={t('settings.captures.dictation.voiceCommands.description')}
+          htmlFor="voiceCommands"
+          action={
+            <Toggle
+              id="voiceCommands"
+              checked={voiceCommands}
+              onCheckedChange={(v) => update({ voice_commands: v })}
+            />
+          }
+        >
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-expanded={showVoiceCommands}
+              onClick={() => setShowVoiceCommands((v) => !v)}
+            >
+              <ListChecks className="h-3.5 w-3.5 me-1.5" />
+              {showVoiceCommands
+                ? t('settings.captures.dictation.voiceCommands.hide')
+                : t('settings.captures.dictation.voiceCommands.show')}
+              <ChevronDown
+                className={cn(
+                  'h-3.5 w-3.5 ms-1.5 opacity-70 transition-transform',
+                  showVoiceCommands && 'rotate-180',
+                )}
+              />
+            </Button>
+            {showVoiceCommands ? <VoiceCommandsTable /> : null}
+          </div>
+        </SettingRow>
 
         <ChordPicker
           open={chordEditor === 'push'}

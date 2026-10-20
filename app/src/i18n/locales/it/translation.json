@@ -102,6 +102,8 @@
       "transcribing": "Trascrizione in corso",
       "refining": "Perfezionamento in corso",
       "translating": "Traduzione in corso",
+      "translateTarget": "Traduzione: {{language}}",
+      "translateTargetSpoken": "Traduzione: {{language}} (indicata nella dettatura)",
       "speaking": "Riproduzione voce in corso",
       "completed": "Fatto",
       "stopAria": "Interrompi registrazione",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "Traduci in",
           "description": "La lingua in cui traduce la scorciatoia di traduzione. Puoi anche dirla mentre detti, in inglese, tedesco o arabo, ad es. «translate this into German: …»."
+        },
+        "voiceCommands": {
+          "title": "Comandi vocali",
+          "description": "Durante la dettatura di' «new line», «new paragraph», «question mark» e altro (in inglese, tedesco o arabo): diventano a capo e punteggiatura.",
+          "show": "Mostra comandi",
+          "hide": "Nascondi comandi",
+          "effect": "Effetto",
+          "note": "«Punkt», «Komma», «period» e parole simili valgono solo a fine frase, quindi «a long period» resta invariato. Dopo un articolo («a new line») il comando è trattato come testo normale.",
+          "loadFailed": "Impossibile caricare l'elenco dei comandi.",
+          "actions": {
+            "paragraph": "Nuovo paragrafo",
+            "newline": "Nuova riga",
+            "question": "Punto interrogativo ?",
+            "exclamation": "Punto esclamativo !",
+            "semicolon": "Punto e virgola ;",
+            "colon": "Due punti :",
+            "comma": "Virgola ,",
+            "period": "Punto ."
+          }
         },
         "chordPicker": {
           "pttTitle": "Imposta la scorciatoia push-to-talk",

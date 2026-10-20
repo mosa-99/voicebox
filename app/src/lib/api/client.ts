@@ -47,6 +47,7 @@ import type {
   CaptureRetranscribeRequest,
   CaptureTranslateRequest,
   CaptureSettings,
+  VoiceCommandInfo,
   CaptureSettingsUpdate,
   CaptureSource,
   GenerationSettings,
@@ -510,6 +511,10 @@ class ApiClient {
   // Settings
   async getCaptureSettings(): Promise<CaptureSettings> {
     return this.request<CaptureSettings>('/settings/captures');
+  }
+
+  async getVoiceCommands(): Promise<VoiceCommandInfo[]> {
+    return this.request<VoiceCommandInfo[]>('/capture/voice-commands');
   }
 
   async getCaptureReadiness(): Promise<CaptureReadinessResponse> {

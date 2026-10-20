@@ -102,6 +102,8 @@
       "transcribing": "轉錄中",
       "refining": "精修中",
       "translating": "翻譯中",
+      "translateTarget": "翻譯為{{language}}",
+      "translateTargetSpoken": "翻譯為{{language}}（聽寫中指定）",
       "speaking": "發話中",
       "completed": "完成",
       "stopAria": "停止錄音",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "翻譯為",
           "description": "翻譯快捷鍵輸出的語言。聽寫時也可以用英語、德語或阿拉伯語說出來，例如「translate this into German: …」。"
+        },
+        "voiceCommands": {
+          "title": "語音指令",
+          "description": "聽寫時說出「new line」「new paragraph」「question mark」等（英語、德語或阿拉伯語），會轉換為換行和標點。",
+          "show": "顯示指令",
+          "hide": "隱藏指令",
+          "effect": "作用",
+          "note": "「Punkt」「Komma」「period」等詞只在句尾才算指令，所以「a long period」會保持原樣。在冠詞之後（「a new line」），指令會當作一般文字處理。",
+          "loadFailed": "無法載入指令清單。",
+          "actions": {
+            "paragraph": "新段落",
+            "newline": "換行",
+            "question": "問號 ?",
+            "exclamation": "驚嘆號 !",
+            "semicolon": "分號 ;",
+            "colon": "冒號 :",
+            "comma": "逗號 ,",
+            "period": "句號 ."
+          }
         },
         "chordPicker": {
           "pttTitle": "設定按住說話快捷鍵",

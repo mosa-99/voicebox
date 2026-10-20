@@ -102,6 +102,8 @@
       "transcribing": "변환 중",
       "refining": "정제 중",
       "translating": "번역 중",
+      "translateTarget": "번역 대상: {{language}}",
+      "translateTargetSpoken": "번역 대상: {{language}} (받아쓰기에서 지정)",
       "speaking": "말하는 중",
       "completed": "완료",
       "stopAria": "녹음 중지",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "번역할 언어",
           "description": "번역 단축키가 출력하는 언어입니다. 받아쓰는 중에 영어, 독일어 또는 아랍어로 말할 수도 있습니다(예: “translate this into German: …”)."
+        },
+        "voiceCommands": {
+          "title": "음성 명령",
+          "description": "받아쓰는 중에 “new line”, “new paragraph”, “question mark” 등(영어, 독일어, 아랍어)을 말하면 줄바꿈과 문장 부호가 됩니다.",
+          "show": "명령 보기",
+          "hide": "명령 숨기기",
+          "effect": "동작",
+          "note": "“Punkt”, “Komma”, “period” 같은 단어는 문장 끝에서만 명령으로 인식되므로 “a long period”는 그대로 남습니다. 관사 뒤(“a new line”)에서는 일반 텍스트로 처리됩니다.",
+          "loadFailed": "명령 목록을 불러오지 못했습니다.",
+          "actions": {
+            "paragraph": "새 단락",
+            "newline": "새 줄",
+            "question": "물음표 ?",
+            "exclamation": "느낌표 !",
+            "semicolon": "세미콜론 ;",
+            "colon": "콜론 :",
+            "comma": "쉼표 ,",
+            "period": "마침표 ."
+          }
         },
         "chordPicker": {
           "pttTitle": "푸시투톡 단축키 설정",

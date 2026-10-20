@@ -60,7 +60,12 @@ def collapse_repetitive_artifacts(text: str, min_run: int = _REPETITION_RUN_THRE
     Both passes preserve rhetorical repetition: "no, no, no, no, no"
     (5 repeats) and "yeah yeah yeah" (3 repeats) stay in the transcript
     because they don't cross the threshold.
+
+    Line breaks (from spoken "new line" commands) are kept: each line is
+    collapsed on its own.
     """
+    if "\n" in text:
+        return "\n".join(collapse_repetitive_artifacts(line, min_run) for line in text.split("\n"))
     collapsed = _collapse_word_runs(text, min_run)
     collapsed = _collapse_character_runs(collapsed, min_run)
     return collapsed
@@ -292,6 +297,10 @@ async def refine_transcript(
 ) -> tuple[str, str]:
     """Run the transcript through the LLM with the built system prompt.
 
+    Line breaks (spoken "new line" / "new paragraph" commands) survive: the
+    model is told to keep them, and if it merges lines anyway each line is
+    refined on its own.
+
     Returns:
         (refined_text, llm_model_size) — so callers can persist which model
         produced the refinement.
@@ -302,9 +311,34 @@ async def refine_transcript(
     # Pre-process before the LLM sees the text — the model shouldn't have
     # to reason about obvious STT garbage (see ``collapse_repetitive_artifacts``).
     cleaned_input = collapse_repetitive_artifacts(transcript)
+    lead, core, trail = split_outer_line_breaks(cleaned_input)
+    if "\n" not in core:
+        return lead + await _refine_text(backend, core, flags, resolved_size) + trail, resolved_size
 
+    text = tidy_lines(await _refine_text(backend, core, flags, resolved_size, keep_lines=True))
+    if line_shape(text) != line_shape(core):
+        logger.info("Refinement merged or split dictated lines; refining line by line")
+        lines = []
+        for line in core.split("\n"):
+            lines.append(await _refine_text(backend, line, flags, resolved_size) if line.strip() else "")
+        text = "\n".join(lines)
+    return lead + text + trail, resolved_size
+
+
+_KEEP_LINES = (
+    "\n\nThe transcript is split into lines because the speaker dictated line breaks. "
+    "Keep every line break and every empty line exactly where it is, clean up each line "
+    "on its own, and never merge or split lines."
+)
+
+
+async def _refine_text(
+    backend, text: str, flags: RefinementFlags, model_size: str, keep_lines: bool = False
+) -> str:
+    if not text.strip():
+        return text
     system_prompt = build_refinement_prompt(flags)
-    language = transcript_language(cleaned_input)
+    language = transcript_language(text)
     if language:
         # The rule against translating isn't enough for 4B: German and Arabic
         # dictation still came back in English. Naming the language fixes it.
@@ -312,21 +346,43 @@ async def refine_transcript(
             f"\n\nThe transcript is in {language}. Write the cleaned-up text in "
             f"{language}; never translate it."
         )
+    if keep_lines:
+        system_prompt += _KEEP_LINES
 
-    text = await backend.generate(
-        prompt=cleaned_input,
+    refined = await backend.generate(
+        prompt=text,
         system=system_prompt,
         max_tokens=2048,
         temperature=0.2,
-        model_size=resolved_size,
+        model_size=model_size,
         examples=REFINEMENT_EXAMPLES,
     )
-    text = text.strip()
-    if not is_faithful_refinement(cleaned_input, text):
+    refined = refined.strip()
+    if not is_faithful_refinement(text, refined):
         # Better unpolished than translated or made up.
         logger.warning("Refinement translated or answered the transcript; keeping it as spoken")
-        text = cleaned_input
-    return text, resolved_size
+        return text
+    return refined
+
+
+def split_outer_line_breaks(text: str) -> tuple[str, str, str]:
+    """(leading line breaks, text, trailing line breaks) — a dictation may
+    start or end with "new line", which the LLM would strip."""
+    core = text.strip("\n")
+    lead = text[: len(text) - len(text.lstrip("\n"))]
+    trail = text[len(text.rstrip("\n")) :] if core else ""
+    return lead, core, trail
+
+
+def tidy_lines(text: str) -> str:
+    """Drop trailing spaces before line breaks — the LLM likes Markdown's
+    two-space hard breaks ("Hallo Thomas,  \\n")."""
+    return "\n".join(line.rstrip() for line in text.split("\n"))
+
+
+def line_shape(text: str) -> list[bool]:
+    """Which lines are empty — equal shapes mean the same line layout."""
+    return [not line.strip() for line in text.strip("\n").split("\n")]
 
 
 _LETTERS = re.compile(r"[^\W\d_]", re.UNICODE)

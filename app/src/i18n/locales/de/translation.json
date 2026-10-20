@@ -102,6 +102,8 @@
       "transcribing": "Transkribiere",
       "refining": "Überarbeite",
       "translating": "Übersetze",
+      "translateTarget": "Übersetzung: {{language}}",
+      "translateTargetSpoken": "Übersetzung: {{language}} (aus deinem Diktat)",
       "speaking": "Spricht",
       "completed": "Fertig",
       "stopAria": "Aufnahme stoppen",
@@ -1015,6 +1017,25 @@
         "translateTo": {
           "title": "Übersetzen in",
           "description": "Die Sprache, in die das Übersetzungs-Kürzel übersetzt. Du kannst sie auch beim Diktieren sagen (auf Deutsch, Englisch oder Arabisch), z. B. „…, übersetze das auf Arabisch“."
+        },
+        "voiceCommands": {
+          "title": "Sprachbefehle",
+          "description": "Sag beim Diktieren „neue Zeile“, „neuer Absatz“, „Fragezeichen“ und mehr; daraus werden Zeilenumbrüche und Satzzeichen. Funktioniert auf Deutsch, Englisch und Arabisch.",
+          "show": "Befehle anzeigen",
+          "hide": "Befehle ausblenden",
+          "effect": "Wirkung",
+          "note": "„Punkt“, „Komma“, „period“ und ähnliche Wörter zählen nur am Satzende, „der springende Punkt“ bleibt also stehen. Nach einem Artikel („eine neue Zeile“, „a new line“) gilt ein Befehl als normaler Text.",
+          "loadFailed": "Die Befehlsliste konnte nicht geladen werden.",
+          "actions": {
+            "paragraph": "Neuer Absatz",
+            "newline": "Neue Zeile",
+            "question": "Fragezeichen ?",
+            "exclamation": "Ausrufezeichen !",
+            "semicolon": "Semikolon ;",
+            "colon": "Doppelpunkt :",
+            "comma": "Komma ,",
+            "period": "Punkt ."
+          }
         },
         "chordPicker": {
           "pttTitle": "Tastenkürzel zum Sprechen festlegen",

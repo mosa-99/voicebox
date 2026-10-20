@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { AlertCircle, Languages } from 'lucide-react';
+import { AlertCircle, ArrowRight, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { TranslationTarget } from '@/lib/api/types';
 import { cn } from '@/lib/utils/cn';
 
 /**
@@ -75,12 +76,14 @@ function formatElapsed(ms: number): string {
  * The ``error`` state renders a destructive variant — a clickable pill that
  * copies its message to the clipboard on press and calls ``onDismiss``.
  * ``translate`` adds a translate icon so a translate dictation is
- * recognisable while it records.
+ * recognisable while it records; ``translateTarget`` adds "→ DE" — outlined
+ * for the language from settings, filled once the dictation named one.
  */
 export function CapturePill({
   state,
   elapsedMs,
   translate = false,
+  translateTarget = null,
   onStop,
   errorMessage,
   onDismiss,
@@ -89,6 +92,7 @@ export function CapturePill({
   state: PillState;
   elapsedMs: number;
   translate?: boolean;
+  translateTarget?: TranslationTarget | null;
   onStop?: () => void;
   errorMessage?: string | null;
   onDismiss?: () => void;
@@ -160,11 +164,37 @@ export function CapturePill({
         ) : null}
         {labelText}
       </span>
+      {translate && translateTarget ? <TargetChip target={translateTarget} /> : null}
       <PillAudioBars mode={barMode} />
       <span className="text-xs tabular-nums text-accent/70 font-medium shrink-0 -ms-1">
         {formatElapsed(elapsedMs)}
       </span>
     </div>
+  );
+}
+
+function TargetChip({ target }: { target: TranslationTarget }) {
+  const { t } = useTranslation();
+  const language = t(`settings.captures.transcription.language.${target.code}`);
+  const label = target.spoken
+    ? t('captures.pill.translateTargetSpoken', { language })
+    : t('captures.pill.translateTarget', { language });
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      title={label}
+      className={cn(
+        '-ms-1 inline-flex items-center gap-0.5 h-5 px-1.5 rounded-full shrink-0',
+        'text-[11px] font-semibold tabular-nums tracking-wide transition-colors',
+        target.spoken
+          ? 'bg-accent text-accent-foreground'
+          : 'ring-1 ring-inset ring-accent/40 text-accent',
+      )}
+    >
+      <ArrowRight className="h-3 w-3 rtl:rotate-180" aria-hidden />
+      {target.code.toUpperCase()}
+    </span>
   );
 }
 

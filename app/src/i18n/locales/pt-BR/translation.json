@@ -102,6 +102,8 @@
       "transcribing": "Transcrevendo",
       "refining": "Refinando",
       "translating": "Traduzindo",
+      "translateTarget": "Tradução: {{language}}",
+      "translateTargetSpoken": "Tradução: {{language}} (indicado no ditado)",
       "speaking": "Falando",
       "completed": "Concluído",
       "stopAria": "Parar gravação",
@@ -927,6 +929,25 @@
         "translateTo": {
           "title": "Traduzir para",
           "description": "O idioma para o qual o atalho de tradução traduz. Você também pode dizê-lo ao ditar, em inglês, alemão ou árabe, por exemplo “translate this into German: …”."
+        },
+        "voiceCommands": {
+          "title": "Comandos de voz",
+          "description": "Ao ditar, diga “new line”, “new paragraph”, “question mark” e mais (em inglês, alemão ou árabe); eles viram quebras de linha e pontuação.",
+          "show": "Mostrar comandos",
+          "hide": "Ocultar comandos",
+          "effect": "Efeito",
+          "note": "“Punkt”, “Komma”, “period” e palavras parecidas só contam no fim da frase, então “a long period” fica como está. Depois de um artigo (“a new line”), o comando é tratado como texto normal.",
+          "loadFailed": "Não foi possível carregar a lista de comandos.",
+          "actions": {
+            "paragraph": "Novo parágrafo",
+            "newline": "Nova linha",
+            "question": "Ponto de interrogação ?",
+            "exclamation": "Ponto de exclamação !",
+            "semicolon": "Ponto e vírgula ;",
+            "colon": "Dois-pontos :",
+            "comma": "Vírgula ,",
+            "period": "Ponto final ."
+          }
         },
         "chordPicker": {
           "pttTitle": "Definir atalho de apertar para falar",

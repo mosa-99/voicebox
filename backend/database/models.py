@@ -225,6 +225,8 @@ class CaptureSettings(Base):
     # Hold to dictate, release to translate into ``translation_language``.
     # Defaults to the push-to-talk chord plus Shift.
     chord_translate_keys = Column(JSON, nullable=False, default=default_translate_chord)
+    # Spoken "new line" / "question mark" … commands in dictations.
+    voice_commands = Column(Boolean, nullable=False, default=True)
     translation_language = Column(String, nullable=False, default="en")
     # Optional OpenAI-compatible endpoint that overrides the built-in Qwen3
     # LLM for refinement / personality rewriting. When ``custom_llm_endpoint``

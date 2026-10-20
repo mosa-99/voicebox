@@ -19,6 +19,9 @@ from .refinement import (
     _english_share,
     _word_share,
     collapse_repetitive_artifacts,
+    line_shape,
+    split_outer_line_breaks,
+    tidy_lines,
     transcript_language,
 )
 from .translation_instruction import split_translation_instruction
@@ -186,6 +189,12 @@ def is_translation(transcript: str, translated: str, target_code: str) -> bool:
     return True
 
 
+def spoken_target_language(transcript: str) -> str | None:
+    """The target language the speaker named in the transcript, if any —
+    what ``translate_transcript`` will use instead of the setting."""
+    return split_translation_instruction(collapse_repetitive_artifacts(transcript).strip())[0]
+
+
 async def translate_transcript(
     transcript: str,
     target_code: str,
@@ -194,41 +203,70 @@ async def translate_transcript(
     """Translate the transcript into ``target_code`` (a TRANSLATION_LANGUAGES
     key), or into the language the speaker named in the transcript.
 
+    Dictated line breaks survive: the model is told to keep them, and if it
+    merges lines anyway each line is translated on its own.
+
     Returns:
         (translated_text, llm_model_size, target_code actually used)
 
     Raises:
-        TranslationError: if neither attempt produced a plausible translation.
+        TranslationError: if no attempt produced a plausible translation.
     """
     backend = llm_service.get_llm_model()
     resolved_size = llm_service.resolve_model_size(backend, model_size)
 
-    cleaned_input = collapse_repetitive_artifacts(transcript).strip()
-    spoken_target, cleaned_input = split_translation_instruction(cleaned_input)
+    lead, core, trail = split_outer_line_breaks(collapse_repetitive_artifacts(transcript))
+    spoken_target, core = split_translation_instruction(core.strip())
     if spoken_target:
         target_code = spoken_target
-    target = TRANSLATION_LANGUAGES[target_code]
-    if not cleaned_input:
+    if not core:
         return "", resolved_size, target_code
 
-    prompt = build_translation_request(cleaned_input, target, transcript_language(cleaned_input))
-    system = build_translation_prompt(target)
+    if "\n" not in core:
+        text = await _translate_text(backend, core, target_code, resolved_size)
+        return lead + text + trail, resolved_size, target_code
+
+    try:
+        text = tidy_lines(await _translate_text(backend, core, target_code, resolved_size, keep_lines=True))
+        if line_shape(text) != line_shape(core):
+            raise TranslationError("The translation merged or split the dictated lines")
+    except TranslationError:
+        logger.info("Translating line by line to keep the dictated line breaks")
+        lines = []
+        for line in core.split("\n"):
+            lines.append(await _translate_text(backend, line, target_code, resolved_size) if line.strip() else "")
+        text = "\n".join(lines)
+    return lead + text + trail, resolved_size, target_code
+
+
+_KEEP_LINES = (
+    "\n- The transcript is split into lines because the speaker dictated line breaks. "
+    "Keep every line break and every empty line exactly where it is; never merge or split lines."
+)
+
+
+async def _translate_text(
+    backend, text: str, target_code: str, model_size: str, keep_lines: bool = False
+) -> str:
+    target = TRANSLATION_LANGUAGES[target_code]
+    prompt = build_translation_request(text, target, transcript_language(text))
+    system = build_translation_prompt(target) + (_KEEP_LINES if keep_lines else "")
     examples = translation_examples(target_code)
 
     # A second, warmer attempt when the first one answered the transcript or
     # came back in the wrong language — at 0.1 a retry would just repeat it.
     for temperature in (0.1, 0.6):
-        text = await backend.generate(
+        translated = await backend.generate(
             prompt=prompt,
             system=system,
             max_tokens=2048,
             temperature=temperature,
-            model_size=resolved_size,
+            model_size=model_size,
             examples=examples,
         )
-        text = text.strip()
-        if is_translation(cleaned_input, text, target_code):
-            return text, resolved_size, target_code
-        logger.warning("Translation into %s failed the sanity check: %r", target, text[:200])
+        translated = translated.strip()
+        if is_translation(text, translated, target_code):
+            return translated
+        logger.warning("Translation into %s failed the sanity check: %r", target, translated[:200])
 
     raise TranslationError(f"Could not translate the dictation into {target}")
